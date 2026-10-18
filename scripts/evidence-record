@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# evidence-record (WO-012, founder-run; governed path: agents never run this).
+# Usage: scripts/evidence-record WO-NNN [gate-log] [--direct] [--date YYYY-MM-DD]
+#
+# Writes evidence/WO-NNN.json after the work order has merged:
+#   {wo, wo_sha256, merge_commit, branch_tip_tree, gate_log_sha256|null, pass, date}
+#   wo_sha256        sha256 of the committed work-orders/WO-NNN.md (ep-advance compares it, R-NO-EVIDENCE)
+#   merge_commit     HEAD, which must be the `git merge --no-ff` commit
+#   branch_tip_tree  tree of the merged branch tip (HEAD^2)
+#   gate_log_sha256  sha256 of [gate-log], else of wo-verify's gate-tail.log when present, else null
+#   pass             copied from wo-verify's evidence.json (jobs dir); the script refuses to record without it
+# --direct: manual mode with no worktree (the builder committed on main): HEAD need not be a merge commit and
+#   branch_tip_tree is HEAD's own tree. The record is still bound to the work-order hash.
+# FACTORY_JOBS_DIR overrides ~/.local/state/factory/jobs. Never pushes, never fetches. Run `just evidence-verify`
+# afterwards, then commit evidence/WO-NNN.json yourself.
+set -euo pipefail
+
+die() {
+  echo "evidence-record: $*" >&2
+  exit 1
+}
+
+usage() {
+  sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  exit 2
+}
+
+wo=""
+gate_log=""
+direct=0
+date_arg=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h | --help) usage ;;
+    --direct) direct=1 ;;
+    --date)
+      [ $# -ge 2 ] || usage
+      date_arg="$2"
+      shift
+      ;;
+    -*) usage ;;
+    *)
+      if [ -z "$wo" ]; then
+        wo="$1"
+      elif [ -z "$gate_log" ]; then
+        gate_log="$1"
+      else
+        usage
+      fi
+      ;;
+  esac
+  shift
+done
+[[ "$wo" =~ ^WO-[0-9]{3}$ ]] || usage
+date_val="${date_arg:-$(date +%F)}"
+[[ "$date_val" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || die "date must be YYYY-MM-DD"
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+wo_file="work-orders/$wo.md"
+out="evidence/$wo.json"
+[ -f "$wo_file" ] || die "$wo_file does not exist"
+[ ! -e "$out" ] || die "$out already exists; evidence is never overwritten (remove it by hand if you must re-record)"
+git ls-files --error-unmatch -- "$wo_file" >/dev/null 2>&1 || die "$wo_file is not committed"
+git diff --quiet HEAD -- "$wo_file" || die "$wo_file has uncommitted changes"
+
+wo_sha="$(sha256sum "$wo_file" | cut -d' ' -f1)"
+merge_commit="$(git rev-parse --verify HEAD)"
+if tip_tree="$(git rev-parse --verify -q 'HEAD^2^{tree}')"; then
+  :
+elif [ "$direct" -eq 1 ]; then
+  tip_tree="$(git rev-parse --verify 'HEAD^{tree}')"
+else
+  die "HEAD is not a merge commit (run git merge --no-ff first, or pass --direct for a no-worktree order)"
+fi
+
+jobs="${FACTORY_JOBS_DIR:-$HOME/.local/state/factory/jobs}/$wo"
+[ -f "$jobs/evidence.json" ] || die "no wo-verify evidence at $jobs/evidence.json (run wo-verify first)"
+verify_sha="$(python3 -I -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("wo_sha256",""))' "$jobs/evidence.json")"
+[ "$verify_sha" = "$wo_sha" ] || die "wo-verify evidence was recorded for a different version of $wo_file"
+pass="$(python3 -I -c 'import json,sys; d=json.load(open(sys.argv[1])); print("true" if d.get("pass") is True else "false")' "$jobs/evidence.json")"
+
+gate_sha=""
+if [ -z "$gate_log" ] && [ -f "$jobs/gate-tail.log" ]; then
+  gate_log="$jobs/gate-tail.log"
+fi
+if [ -n "$gate_log" ]; then
+  [ -f "$gate_log" ] || die "gate log $gate_log does not exist"
+  gate_sha="$(sha256sum "$gate_log" | cut -d' ' -f1)"
+fi
+
+mkdir -p evidence
+python3 -I -c '
+import json, sys
+wo, sha, merge, tree, gate, ok, date, out = sys.argv[1:9]
+rec = {"wo": wo, "wo_sha256": sha, "merge_commit": merge, "branch_tip_tree": tree,
+       "gate_log_sha256": gate or None, "pass": ok == "true", "date": date}
+with open(out, "w", encoding="utf-8") as fh:
+    json.dump(rec, fh, indent=2)
+    fh.write("\n")
+' "$wo" "$wo_sha" "$merge_commit" "$tip_tree" "$gate_sha" "$pass" "$date_val" "$out"
+echo "evidence-record: wrote $out (pass=$pass, merge_commit=${merge_commit:0:12})"
+echo "next: bash scripts/evidence-verify $wo, commit $out, then ep-advance"

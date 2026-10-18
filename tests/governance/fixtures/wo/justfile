@@ -1,0 +1,12 @@
+# fixture justfile for test_wo_check.py
+default:
+    @just --list
+
+test name='':
+    @echo test
+
+doc-check:
+    @echo doc-check
+
+deps-provider-test provider:
+    @echo provider

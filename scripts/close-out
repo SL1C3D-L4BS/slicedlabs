@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# close-out (WO-012, founder-run; manual mode of ADR-0007). Chains the founder steps for one work order, printing
+# each command and asking before it runs:
+#   1 wo-verify   2 approve.py   3 git merge --no-ff   4 scripts/evidence-record   5 ep-advance (per --advance)
+# Usage: scripts/close-out WO-NNN [--branch BRANCH --worktree DIR | --direct] [--base main]
+#                         [--advance SL-EP-nnn=State]... [--adr ADR-nnnn]
+#   --branch/--worktree  the builder's branch and worktree; step 3 merges BRANCH into the checkout you run this in
+#   --direct             the builder committed on the current branch (no worktree): step 3 is skipped and
+#                        evidence-record gets --direct
+#   --advance            one ep-advance run per flag, in order (for example SL-EP-012=Demonstrated)
+#   --adr                passed to every ep-advance (an R-DEP-ACCEPTED waiver, ADR-0003)
+# approve.py exit 1 means escalate: you are the approver, so it asks and then continues on yes. Exit 2 or 3 stops.
+# The script never pushes. Commit evidence/WO-NNN.json and the registry yourself afterwards.
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+factory="${FACTORY_TOOLS:-$HOME/.dotfiles/tools/factory}"
+
+usage() {
+  sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  exit 2
+}
+
+die() {
+  echo "close-out: $*" >&2
+  exit 1
+}
+
+# print the command, ask, run it; any answer but y/yes stops the whole close-out
+step() {
+  local title="$1"
+  shift
+  printf '\n== %s\n+ %s\n' "$title" "$*"
+  local answer=""
+  read -r -p "run this? [y/N] " answer || answer=""
+  case "$answer" in
+    y | Y | yes) ;;
+    *) die "stopped before: $title" ;;
+  esac
+  "$@"
+}
+
+wo=""
+branch=""
+worktree=""
+direct=0
+base="main"
+adr=""
+advances=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h | --help) usage ;;
+    --direct) direct=1 ;;
+    --branch | --worktree | --base | --advance | --adr)
+      [ $# -ge 2 ] || usage
+      case "$1" in
+        --branch) branch="$2" ;;
+        --worktree) worktree="$2" ;;
+        --base) base="$2" ;;
+        --adr) adr="$2" ;;
+        --advance) advances+=("$2") ;;
+      esac
+      shift
+      ;;
+    -*) usage ;;
+    *)
+      [ -z "$wo" ] || usage
+      wo="$1"
+      ;;
+  esac
+  shift
+done
+[[ "$wo" =~ ^WO-[0-9]{3}$ ]] || usage
+if [ "$direct" -eq 1 ]; then
+  [ -z "$branch" ] || die "--direct and --branch exclude each other"
+  [ -n "$worktree" ] || worktree="$root"
+else
+  [ -n "$branch" ] && [ -n "$worktree" ] || die "give --branch and --worktree, or --direct"
+fi
+[ -f "work-orders/$wo.md" ] || die "work-orders/$wo.md does not exist"
+[ -d "$worktree" ] || die "worktree $worktree does not exist"
+for spec in "${advances[@]}"; do
+  [[ "$spec" =~ ^SL-EP-[0-9]{3}=[A-Za-z]+$ ]] || die "--advance wants SL-EP-nnn=State, got '$spec'"
+done
+[ -z "$adr" ] || [[ "$adr" =~ ^ADR-[0-9]{4}$ ]] || die "--adr wants ADR-nnnn"
+
+wo_path="$root/work-orders/$wo.md"
+echo "close-out $wo  (branch: ${branch:-direct}, worktree: $worktree, base: $base). Nothing is pushed."
+traces="$(grep -E '^Traces:' "$wo_path" | head -n 1 || true)"
+echo "$traces"
+
+step "1/5 wo-verify (deterministic gate)" \
+  python3 -I "$factory/wo-verify" --wo "$wo_path" --worktree "$worktree" --base "$base" ||
+  die "wo-verify failed: the work order is not done (fix it, or send it back to the builder)"
+
+printf '\n== 2/5 approve.py\n+ python3 -I %s/approve.py --wo %s --worktree %s --base %s\n' "$factory" "$wo_path" "$worktree" "$base"
+read -r -p "run this? [y/N] " answer || answer=""
+case "$answer" in
+  y | Y | yes) ;;
+  *) die "stopped before: approve.py" ;;
+esac
+rc=0
+python3 -I "$factory/approve.py" --wo "$wo_path" --worktree "$worktree" --base "$base" || rc=$?
+case "$rc" in
+  0) echo "approve.py: auto-approved" ;;
+  1)
+    read -r -p "approve.py escalated to you (reasons above). Approve and continue? [y/N] " answer || answer=""
+    case "$answer" in
+      y | Y | yes) ;;
+      *) die "not approved" ;;
+    esac
+    ;;
+  *) die "approve.py exit $rc: stop (an error is never an approval)" ;;
+esac
+
+if [ "$direct" -eq 1 ]; then
+  echo
+  echo "== 3/5 merge skipped (--direct: the work is already on $(git rev-parse --abbrev-ref HEAD))"
+  record=(bash scripts/evidence-record "$wo" --direct)
+else
+  step "3/5 merge" git merge --no-ff "$branch" -m "Merge $wo"
+  record=(bash scripts/evidence-record "$wo")
+fi
+
+step "4/5 evidence-record" "${record[@]}"
+bash scripts/evidence-verify "$wo"
+
+for spec in "${advances[@]}"; do
+  ep="${spec%%=*}"
+  state="${spec#*=}"
+  cmd=(python3 -I tools/governance/cmd_ep_advance.py "$ep" "$state" "$wo")
+  [ -z "$adr" ] || cmd+=(--adr "$adr")
+  step "5/5 ep-advance $ep -> $state" "${cmd[@]}"
+done
+if [ "${#advances[@]}" -eq 0 ]; then
+  echo
+  echo "5/5 no --advance given. Episodes this order traces:"
+  echo "  $traces"
+  echo "  then, for each: python3 -I tools/governance/cmd_ep_advance.py <SL-EP-nnn> <State> $wo [--adr ADR-0003]"
+fi
+
+echo
+echo "close-out $wo done. Review and commit (explicit pathspecs): evidence/$wo.json and registry/SL-REG-002-episodes.json."
+echo "Nothing was pushed."

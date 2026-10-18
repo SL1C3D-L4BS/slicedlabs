@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# evidence-verify (WO-012; read-only, outside registry-check). Usage: scripts/evidence-verify [WO-NNN ...]
+# For each evidence/WO-NNN.json (all of them when no id is given) checks that
+#   - the record has wo, wo_sha256, merge_commit, branch_tip_tree, gate_log_sha256, pass, date and pass is true
+#   - wo_sha256 equals sha256(work-orders/WO-NNN.md)
+#   - `git cat-file -e` finds merge_commit (a commit) and branch_tip_tree (a tree)
+# Exit 0 all verified (or none recorded), 1 a record failed, 2 bad usage. Never fetches.
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+
+wos=()
+for arg in "$@"; do
+  case "$arg" in
+    -h | --help)
+      sed -n '2,8p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+      exit 2
+      ;;
+    WO-[0-9][0-9][0-9]) wos+=("$arg") ;;
+    *)
+      echo "evidence-verify: '$arg' is not a WO-NNN id" >&2
+      exit 2
+      ;;
+  esac
+done
+if [ "${#wos[@]}" -eq 0 ]; then
+  for f in evidence/WO-*.json; do
+    [ -e "$f" ] || continue
+    name="$(basename "$f" .json)"
+    wos+=("$name")
+  done
+fi
+if [ "${#wos[@]}" -eq 0 ]; then
+  echo "evidence-verify: no evidence records (ok)"
+  exit 0
+fi
+
+bad=0
+for wo in "${wos[@]}"; do
+  rec="evidence/$wo.json"
+  before=$bad
+  if [ ! -f "$rec" ]; then
+    echo "evidence-verify: $wo: $rec does not exist"
+    bad=1
+    continue
+  fi
+  if ! fields="$(python3 -I -c '
+import json, re, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+keys = ("wo", "wo_sha256", "merge_commit", "branch_tip_tree", "gate_log_sha256", "pass", "date")
+missing = [k for k in keys if k not in d]
+if missing:
+    sys.exit("missing keys: " + ", ".join(missing))
+if d["wo"] != sys.argv[2]:
+    sys.exit("wo is %r, expected %s" % (d["wo"], sys.argv[2]))
+if d["pass"] is not True:
+    sys.exit("pass is not true")
+g = d["gate_log_sha256"]
+if g is not None and not re.fullmatch(r"[0-9a-f]{64}", str(g)):
+    sys.exit("gate_log_sha256 is neither null nor a sha256")
+for k in ("wo_sha256", "merge_commit", "branch_tip_tree"):
+    if not re.fullmatch(r"[0-9a-f]{40,64}", str(d[k])):
+        sys.exit(k + " is not a hex object id")
+print(d["wo_sha256"], d["merge_commit"], d["branch_tip_tree"])
+' "$rec" "$wo" 2>&1)"; then
+    echo "evidence-verify: $wo: $fields"
+    bad=1
+    continue
+  fi
+  read -r want_sha merge tree <<<"$fields"
+  wo_file="work-orders/$wo.md"
+  if [ ! -f "$wo_file" ]; then
+    echo "evidence-verify: $wo: $wo_file does not exist"
+    bad=1
+    continue
+  fi
+  have_sha="$(sha256sum "$wo_file" | cut -d' ' -f1)"
+  if [ "$have_sha" != "$want_sha" ]; then
+    echo "evidence-verify: $wo: wo_sha256 differs from $wo_file (the work order changed after the record)"
+    bad=1
+  fi
+  if ! git cat-file -e "${merge}^{commit}" 2>/dev/null; then
+    echo "evidence-verify: $wo: merge_commit $merge is not a commit in this repository"
+    bad=1
+  fi
+  if ! git cat-file -e "${tree}^{tree}" 2>/dev/null; then
+    echo "evidence-verify: $wo: branch_tip_tree $tree is not a tree in this repository"
+    bad=1
+  fi
+  if [ "$bad" -eq "$before" ]; then
+    echo "evidence-verify: $wo ok"
+  fi
+done
+if [ "$bad" -ne 0 ]; then
+  exit 1
+fi
+echo "evidence-verify: ok (${#wos[@]} record(s))"
