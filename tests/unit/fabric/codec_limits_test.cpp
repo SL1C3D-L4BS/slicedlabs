@@ -26,7 +26,7 @@ bool armed = false;
 std::size_t largest = 0;
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
-void *allocate(std::size_t n) {
+[[maybe_unused]] void *allocate(std::size_t n) {
   if (armed) {
     largest = std::max(largest, n);
   }
@@ -39,16 +39,32 @@ void *allocate(std::size_t n) {
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): the matching release of allocate()
-void release(void *p) noexcept { std::free(p); }
+[[maybe_unused]] void release(void *p) noexcept { std::free(p); }
 
 } // namespace
 
+// ThreadSanitizer ships its own global allocator and refuses a second definition at link time
+// (duplicate symbol under mold), so the probe is compiled out there: the peak stays 0 and the limit
+// checks still run.
+#if defined(__SANITIZE_THREAD__)
+#define SL_ALLOC_PROBE 0
+#elif defined(__has_feature)
+#if __has_feature(thread_sanitizer)
+#define SL_ALLOC_PROBE 0
+#else
+#define SL_ALLOC_PROBE 1
+#endif
+#else
+#define SL_ALLOC_PROBE 1
+#endif
+#if SL_ALLOC_PROBE
 void *operator new(std::size_t n) { return allocate(n); }
 void *operator new[](std::size_t n) { return allocate(n); }
 void operator delete(void *p) noexcept { release(p); }
 void operator delete[](void *p) noexcept { release(p); }
 void operator delete(void *p, std::size_t /*n*/) noexcept { release(p); }
 void operator delete[](void *p, std::size_t /*n*/) noexcept { release(p); }
+#endif // SL_ALLOC_PROBE
 
 namespace {
 
