@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# doctor (WO-013): check the installed tools against toolchain/environments.json. No network.
+# Usage: scripts/doctor [--json]
+#   table columns: tool, tier, installed version, minimum, verdict (ok | drift | missing)
+#   exit 1 when a required tool is missing, with one `sudo pacman -S <pkg>` line per missing package
+#   drift (below minimum, wrong pinned major, unreadable version) only warns
+#   SL_DOCTOR_PATH overrides PATH for the tool lookup (tests); the doctor itself keeps the real PATH.
+# Run via `just doctor`.
+set -u
+
+json=0
+case "${1:-}" in
+  "") ;;
+  --json) json=1 ;;
+  *)
+    echo "usage: scripts/doctor [--json]" >&2
+    exit 2
+    ;;
+esac
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+data="$here/../toolchain/environments.json"
+if [ ! -f "$data" ]; then
+  echo "doctor: cannot find $data" >&2
+  exit 2
+fi
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "doctor: python3 is missing and doctor needs it to read $data"
+  echo "sudo pacman -S python"
+  exit 1
+fi
+
+SL_DOCTOR_JSON="$json" python3 -I - "$data" <<'PY'
+import json
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as fh:
+    env = json.load(fh)
+if env.get("schema") != "sl-environments/1":
+    print("doctor: toolchain/environments.json: unexpected schema", file=sys.stderr)
+    sys.exit(2)
+
+search = os.environ.get("SL_DOCTOR_PATH") or os.environ.get("PATH", "")
+child_env = dict(os.environ, PATH=search, LC_ALL="C")
+
+
+def vtuple(text):
+    return tuple(int(p) for p in re.findall(r"\d+", text))
+
+
+def installed_version(tool, exe):
+    argv = shlex.split(tool["version_cmd"])
+    argv[0] = exe
+    try:
+        proc = subprocess.run(argv, capture_output=True, text=True, timeout=20,
+                              env=child_env, check=False)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    m = re.search(tool["version_regex"], proc.stdout + "\n" + proc.stderr, re.M)
+    return m.group(1) if m else None
+
+
+rows = []
+for tool in env["tools"]:
+    exe = shutil.which(tool.get("binary", tool["name"]), path=search)
+    row = {"tool": tool["name"], "tier": tool["tier"], "installed": None,
+           "min": tool["min"], "tested": tool["tested"], "verdict": "missing",
+           "arch_package": tool["arch_package"]}
+    if exe:
+        ver = installed_version(tool, exe)
+        row["installed"] = ver
+        if ver is None:
+            row["verdict"] = "drift"
+        elif vtuple(ver) < vtuple(tool["min"]):
+            row["verdict"] = "drift"
+        elif tool.get("pin_major") and vtuple(ver)[0] != vtuple(tool["min"])[0]:
+            row["verdict"] = "drift"
+        else:
+            row["verdict"] = "ok"
+    rows.append(row)
+
+missing_req = [r for r in rows if r["tier"] == "required" and r["verdict"] == "missing"]
+packages = []
+for r in missing_req:
+    if r["arch_package"] not in packages:
+        packages.append(r["arch_package"])
+drift = [r for r in rows if r["verdict"] == "drift"]
+
+if os.environ.get("SL_DOCTOR_JSON") == "1":
+    print(json.dumps({"schema": "sl-doctor/1", "ok": not missing_req, "tools": rows,
+                      "missing_required": [r["tool"] for r in missing_req],
+                      "install": ["sudo pacman -S " + p for p in packages]}, indent=2))
+else:
+    fmt = "{:<14} {:<9} {:<12} {:<9} {}"
+    print(fmt.format("TOOL", "TIER", "INSTALLED", "MIN", "VERDICT"))
+    for r in rows:
+        print(fmt.format(r["tool"], r["tier"], r["installed"] or "-", r["min"], r["verdict"]))
+    for r in drift:
+        why = "version unreadable" if r["installed"] is None else (
+            "installed %s, wanted %s" % (r["installed"], r["min"]))
+        print("doctor: warn: %s drift (%s)" % (r["tool"], why))
+    if missing_req:
+        print("doctor: FAIL: missing required: " + ", ".join(r["tool"] for r in missing_req))
+        for p in packages:
+            print("sudo pacman -S " + p)
+    else:
+        print("doctor: ok")
+sys.exit(1 if missing_req else 0)
+PY

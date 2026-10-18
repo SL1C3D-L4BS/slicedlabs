@@ -1,0 +1,37 @@
+{
+  "schema": "sl-environments/1",
+  "note": "Supported development environments and the C++ toolchain, as data. scripts/doctor (WO-013) checks the installed tools against it. Traces: SL-EP-041 SL-EP-042.",
+  "environments": {
+    "arch-linux": {
+      "role": "primary",
+      "compilers": ["clang", "gcc"],
+      "notes": "Rolling Arch, clang 23 and gcc 16 from the official repositories; every gate runs here first."
+    },
+    "windows": {
+      "role": "secondary",
+      "compilers": [
+        {"name": "msvc", "min": "17.10"},
+        {"name": "clang-cl"}
+      ],
+      "status": "unverified on this machine (ADR-0006)",
+      "notes": "Supported on paper only until a Windows machine verifies it."
+    }
+  },
+  "tools": [
+    {"name": "clang", "tier": "required", "min": "23", "tested": "23.1.3", "version_cmd": "clang --version", "version_regex": "clang version (\\d+(?:\\.\\d+)*)", "arch_package": "clang", "used_for": "primary C++ compiler, sanitizers"},
+    {"name": "gcc", "tier": "required", "min": "16", "tested": "16.2.1", "version_cmd": "gcc --version", "version_regex": "gcc \\([^)]*\\) (\\d+(?:\\.\\d+)+)", "arch_package": "gcc", "used_for": "second C++ compiler, cross-checks warnings"},
+    {"name": "cmake", "tier": "required", "min": "3.28", "tested": "4.4.4", "version_cmd": "cmake --version", "version_regex": "cmake version (\\d+(?:\\.\\d+)+)", "arch_package": "cmake", "used_for": "build system generator, presets"},
+    {"name": "ninja", "tier": "required", "min": "1.11", "tested": "1.13.2", "version_cmd": "ninja --version", "version_regex": "^(\\d+(?:\\.\\d+)+)", "arch_package": "ninja", "used_for": "build backend"},
+    {"name": "just", "tier": "required", "min": "1.40", "tested": "1.59.0", "version_cmd": "just --version", "version_regex": "just (\\d+(?:\\.\\d+)+)", "arch_package": "just", "used_for": "gate recipe runner"},
+    {"name": "python3", "tier": "required", "min": "3.11", "tested": "3.14.8", "version_cmd": "python3 --version", "version_regex": "Python (\\d+(?:\\.\\d+)+)", "arch_package": "python", "used_for": "governance tools (stdlib only)"},
+    {"name": "clang-format", "tier": "required", "min": "23", "pin_major": true, "tested": "23.1.3", "version_cmd": "clang-format --version", "version_regex": "version (\\d+(?:\\.\\d+)+)", "arch_package": "clang", "used_for": "fmt-check; the major version is pinned"},
+    {"name": "clang-tidy", "tier": "required", "min": "23", "tested": "23.1.3", "version_cmd": "clang-tidy --version", "version_regex": "LLVM version (\\d+(?:\\.\\d+)+)", "arch_package": "clang", "used_for": "static analysis"},
+    {"name": "mold", "tier": "optional", "min": "2.0", "tested": "3.0.0", "version_cmd": "mold --version", "version_regex": "mold (\\d+(?:\\.\\d+)+)", "arch_package": "mold", "used_for": "fast linker"},
+    {"name": "lld", "binary": "ld.lld", "tier": "optional", "min": "23", "tested": "23.1.3", "version_cmd": "ld.lld --version", "version_regex": "LLD (\\d+(?:\\.\\d+)+)", "arch_package": "lld", "used_for": "linker for clang and clang-cl builds"},
+    {"name": "ccache", "tier": "optional", "min": "4.0", "tested": "4.14.1", "version_cmd": "ccache --version", "version_regex": "ccache version (\\d+(?:\\.\\d+)+)", "arch_package": "ccache", "used_for": "compiler cache"},
+    {"name": "slangc", "tier": "optional", "min": "2026.18", "tested": "2026.18.2", "version_cmd": "slangc -v", "version_regex": "v?(\\d{4}\\.\\d+(?:\\.\\d+)*)", "arch_package": "shader-slang", "used_for": "shader compiler (Slang to SPIR-V)"},
+    {"name": "spirv-val", "tier": "optional", "min": "2024.1", "tested": "2026.4", "version_cmd": "spirv-val --version", "version_regex": "SPIRV-Tools v(\\d+(?:\\.\\d+)+)", "arch_package": "spirv-tools", "used_for": "SPIR-V validation"},
+    {"name": "renderdoccmd", "tier": "optional", "min": "1.30", "tested": "1.46", "version_cmd": "renderdoccmd version", "version_regex": "renderdoccmd \\S+ v(\\d+(?:\\.\\d+)+)", "arch_package": "renderdoc", "used_for": "GPU frame capture"},
+    {"name": "shellcheck", "tier": "optional", "min": "0.9", "tested": "0.11.0", "version_cmd": "shellcheck --version", "version_regex": "version: (\\d+(?:\\.\\d+)+)", "arch_package": "shellcheck", "used_for": "lint of repository shell scripts"}
+  ]
+}
