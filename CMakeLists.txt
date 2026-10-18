@@ -25,6 +25,8 @@ include(CTest)
 include(SlTesting)
 
 add_subdirectory(engine/core)
+# Volume 04 Fabric (WO-037): sl_fabric, sl_fabric_testing and the fabric tools.
+add_subdirectory(engine/fabric)
 add_subdirectory(examples/sandbox)
 # WO-025: planted-defect proofs (SL_PROOFS) and the bounds-trap tests (SL_HARDEN). Before tests/, whose last line
 # (sl_testing_finalize) writes the test registry.
