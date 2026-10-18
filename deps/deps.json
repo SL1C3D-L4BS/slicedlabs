@@ -1,0 +1,87 @@
+{
+  "schema": "sl-deps/1",
+  "policy": {
+    "providers": ["vendored", "system", "cpm", "vcpkg"],
+    "provider_order": {
+      "ci": ["vendored", "cpm", "system", "vcpkg"],
+      "dev": ["system", "vendored", "cpm", "vcpkg"]
+    },
+    "tiers": {
+      "A": "content-addressed: vendored sha256, cpm url_hash or git_commit, vcpkg baseline plus override, system header accept_sha256",
+      "B": "range-pinned: minimum and tested version (Vulkan, slangc, SDL3, compilers)"
+    },
+    "licenses_allowed": ["MIT", "BSD-2-Clause", "BSD-3-Clause", "Zlib", "BSL-1.0", "Apache-2.0", "MPL-2.0", "ISC", "Unlicense"],
+    "network": "never at configure",
+    "agents_never_fetch": true,
+    "update_cadence": "monthly or on CVE"
+  },
+  "packages": {
+    "doctest": {
+      "version": "2.5.3",
+      "license": "MIT",
+      "role": "test",
+      "tier": "A",
+      "used_by": ["sl_tests"],
+      "target": "sl::doctest",
+      "providers": {
+        "system": {"header": "doctest/doctest.h", "pacman": "doctest", "min": "2.5.3"},
+        "vendored": {
+          "dir": "third_party/doctest",
+          "upstream": "https://raw.githubusercontent.com/doctest/doctest/v2.5.3/doctest/doctest.h",
+          "provenance": "arch-repackage"
+        },
+        "cpm": {"git": "https://github.com/doctest/doctest.git", "tag": "v2.5.3"},
+        "vcpkg": {"port": "doctest"}
+      }
+    },
+    "vulkan": {
+      "version": null,
+      "license": "Apache-2.0",
+      "role": "sdk",
+      "tier": "B",
+      "used_by": ["sl_core"],
+      "target": "sl::vulkan",
+      "providers": {
+        "system": {"find_package": "Vulkan", "min": "1.4.350", "pacman": ["vulkan-headers", "vulkan-icd-loader", "vulkan-validation-layers"]}
+      }
+    },
+    "slang": {
+      "version": null,
+      "license": "Apache-2.0",
+      "role": "tool",
+      "tier": "B",
+      "used_by": ["sl_shaders"],
+      "target": null,
+      "providers": {
+        "system": {"program": "slangc", "min": "2026.18", "pacman": "shader-slang"}
+      }
+    },
+    "spirv-val": {
+      "version": null,
+      "license": "Apache-2.0",
+      "role": "tool",
+      "tier": "B",
+      "used_by": ["sl_shaders"],
+      "target": null,
+      "providers": {
+        "system": {"program": "spirv-val", "min": "2024.1", "pacman": "spirv-tools"}
+      }
+    },
+    "cpm": {
+      "version": "0.43.2",
+      "license": "MIT",
+      "role": "tool",
+      "tier": "A",
+      "used_by": ["sl_deps"],
+      "target": null,
+      "providers": {
+        "vendored": {
+          "dir": "third_party/cpm",
+          "file": "CPM.cmake",
+          "upstream": "https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.43.2/CPM.cmake",
+          "provenance": "local-cache"
+        }
+      }
+    }
+  }
+}

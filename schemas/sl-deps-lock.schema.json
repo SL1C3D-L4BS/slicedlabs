@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/sl-deps-lock.schema.json",
+  "title": "deps/deps.lock.json dependency lock (ADR-0002); pending and unpinned are derived, never stored",
+  "type": "object",
+  "properties": {
+    "schema": { "const": "sl-deps-lock/1" },
+    "manifest_sha256": { "$ref": "#/$defs/sha256" },
+    "policy": { "$ref": "#/$defs/policy" },
+    "packages": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/package" }
+    }
+  },
+  "required": ["schema", "manifest_sha256", "policy", "packages"],
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "sha256_or_null": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "provider_name": { "enum": ["vendored", "system", "cpm", "vcpkg"] },
+    "provider_list": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/provider_name" },
+      "uniqueItems": true,
+      "minItems": 4
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "providers": { "$ref": "#/$defs/provider_list" },
+        "provider_order": {
+          "type": "object",
+          "properties": {
+            "ci": { "$ref": "#/$defs/provider_list" },
+            "dev": { "$ref": "#/$defs/provider_list" }
+          },
+          "required": ["ci", "dev"],
+          "additionalProperties": false
+        },
+        "tiers": {
+          "type": "object",
+          "properties": {
+            "A": { "type": "string", "minLength": 1 },
+            "B": { "type": "string", "minLength": 1 }
+          },
+          "required": ["A", "B"],
+          "additionalProperties": false
+        },
+        "licenses_allowed": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "network": { "const": "never at configure" },
+        "agents_never_fetch": { "const": true },
+        "update_cadence": { "const": "monthly or on CVE" }
+      },
+      "required": ["providers", "provider_order", "tiers", "licenses_allowed", "network", "agents_never_fetch", "update_cadence"],
+      "additionalProperties": false
+    },
+    "pacman": {
+      "type": ["string", "array"],
+      "items": { "type": "string", "minLength": 1 },
+      "minLength": 1
+    },
+    "package": {
+      "type": "object",
+      "properties": {
+        "version": { "type": ["string", "null"], "pattern": "^[0-9]+(\\.[0-9]+)*$" },
+        "license": { "type": "string", "minLength": 1 },
+        "role": { "enum": ["test", "sdk", "tool", "library"] },
+        "tier": { "enum": ["A", "B"] },
+        "used_by": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]+$" },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "target": { "type": ["string", "null"], "pattern": "^sl::[a-z0-9_]+$" },
+        "providers": {
+          "type": "object",
+          "properties": {
+            "system": { "$ref": "#/$defs/system" },
+            "vendored": { "$ref": "#/$defs/vendored" },
+            "cpm": { "$ref": "#/$defs/cpm" },
+            "vcpkg": { "$ref": "#/$defs/vcpkg" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["version", "license", "role", "tier", "used_by", "target", "providers"],
+      "additionalProperties": false
+    },
+    "system": {
+      "type": "object",
+      "properties": {
+        "header": { "type": "string", "minLength": 1 },
+        "find_package": { "type": "string", "minLength": 1 },
+        "program": { "type": "string", "minLength": 1 },
+        "pacman": { "$ref": "#/$defs/pacman" },
+        "min": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)*$" },
+        "tested": { "type": ["string", "null"], "pattern": "^[0-9]+(\\.[0-9]+)*$" },
+        "accept_sha256": { "$ref": "#/$defs/sha256_or_null" }
+      },
+      "required": ["pacman", "min", "tested", "accept_sha256"],
+      "additionalProperties": false
+    },
+    "vendored": {
+      "type": "object",
+      "properties": {
+        "dir": { "type": "string", "pattern": "^third_party/[a-z0-9_-]+$" },
+        "file": { "type": "string", "minLength": 1 },
+        "upstream": { "type": "string", "pattern": "^https://" },
+        "provenance": { "enum": ["arch-repackage", "upstream-release", "local-cache"] },
+        "verified_upstream": { "type": "boolean" },
+        "files": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/sha256" }
+        },
+        "tree_sha256": { "$ref": "#/$defs/sha256_or_null" }
+      },
+      "required": ["dir", "upstream", "provenance", "verified_upstream", "files", "tree_sha256"],
+      "additionalProperties": false
+    },
+    "cpm": {
+      "type": "object",
+      "properties": {
+        "git": { "type": "string", "pattern": "^https://" },
+        "tag": { "type": "string", "minLength": 1 },
+        "url_hash": { "$ref": "#/$defs/sha256_or_null" },
+        "git_commit": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" }
+      },
+      "required": ["git", "tag", "url_hash", "git_commit"],
+      "additionalProperties": false
+    },
+    "vcpkg": {
+      "type": "object",
+      "properties": {
+        "port": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "version": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)*$" },
+        "baseline": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" }
+      },
+      "required": ["port", "version", "baseline"],
+      "additionalProperties": false
+    }
+  }
+}
