@@ -1,854 +1,854 @@
 {
- "schema": "sl-reg-003/1",
- "requirements": [
-  {
-   "id": "REQ-DOCTRINE-001",
-   "text": "Every asset, entity, system, dependency, build configuration, test result and runtime observation MUST have one authoritative identity and a traceable history.",
-   "src": "master plan section 1.2, principle 1",
-   "evidence_type": "architecture conformance suite",
-   "architecture": [
-    "SL-ARCH-001"
-   ],
-   "episodes": [
-    "SL-EP-066",
-    "SL-EP-079"
-   ],
-   "tests": [
-    "deferred:SL-EP-079"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-DOCTRINE-002",
-   "text": "Authoring, simulation, debugging, profiling, collaboration, testing, packaging and release MUST share one interaction model, one command system, one transaction protocol and one dependency graph.",
-   "src": "master plan section 1.2, principle 2",
-   "evidence_type": "architecture conformance suite",
-   "architecture": [
-    "SL-ARCH-002",
-    "SL-ARCH-004",
-    "SL-ARCH-008"
-   ],
-   "episodes": [
-    "SL-EP-070",
-    "SL-EP-072",
-    "SL-EP-079"
-   ],
-   "tests": [
-    "deferred:SL-EP-079"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-DOCTRINE-003",
-   "text": "Editor, runtime, headless test runner, dedicated server, build worker and collaboration service MAY run in separate processes or machines but MUST share schemas, execution semantics, artifact identities and evidence contracts.",
-   "src": "master plan section 1.2, principle 3",
-   "evidence_type": "cross-process contract tests",
-   "architecture": [
-    "SL-ARCH-003"
-   ],
-   "episodes": [
-    "SL-EP-063",
-    "SL-EP-069",
-    "SL-EP-407"
-   ],
-   "tests": [
-    "deferred:SL-EP-407"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-DOCTRINE-004",
-   "text": "Native-owned workflows MUST have zero manual export/import steps.",
-   "src": "master plan section 1.3, first zero",
-   "evidence_type": "measured by REQ-FRAG-001",
-   "architecture": [
-    "SL-GOV-006"
-   ],
-   "episodes": [
-    "SL-EP-003",
-    "SL-EP-408"
-   ],
-   "tests": [
-    "deferred:SL-EP-408"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-DOCTRINE-005",
-   "text": "No fact MUST have competing authoritative representations.",
-   "src": "master plan section 1.3, second zero",
-   "evidence_type": "measured by REQ-FRAG-002",
-   "architecture": [
-    "SL-GOV-006"
-   ],
-   "episodes": [
-    "SL-EP-003",
-    "SL-EP-066"
-   ],
-   "tests": [
-    "deferred:SL-EP-066"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-DOCTRINE-006",
-   "text": "Every source-to-derived transformation MUST be tracked.",
-   "src": "master plan section 1.3, third zero",
-   "evidence_type": "measured by REQ-FRAG-003",
-   "architecture": [
-    "SL-GOV-006"
-   ],
-   "episodes": [
-    "SL-EP-003",
-    "SL-EP-055"
-   ],
-   "tests": [
-    "deferred:SL-EP-055"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-DOCTRINE-007",
-   "text": "No stale artifact MUST be presented as current.",
-   "src": "master plan section 1.3, fourth zero",
-   "evidence_type": "measured by REQ-FRAG-004",
-   "architecture": [
-    "SL-GOV-006"
-   ],
-   "episodes": [
-    "SL-EP-003",
-    "SL-EP-187"
-   ],
-   "tests": [
-    "deferred:SL-EP-187"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-DOCTRINE-008",
-   "text": "External programs (compilers, debuggers, GPU drivers, platform SDKs, signing tools, middleware behind adapters, remote workers, interchange formats) MAY run; one counts as fragmentation only when it creates a second source of truth, an untracked transformation or a manual reconciliation step.",
-   "src": "master plan section 1.3, closing paragraph",
-   "evidence_type": "constitution text equals the plan",
-   "architecture": [
-    "SL-GOV-001",
-    "SL-GOV-006"
-   ],
-   "episodes": [
-    "SL-EP-003"
-   ],
-   "tests": [
-    "just constitution-check"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-001",
-   "text": "No manual export/import in native workflows (F1); enforced by the workflow acceptance suite and a build graph that rejects undeclared inputs.",
-   "src": "master plan section 3, F1",
-   "measure": {
-    "num": "Workflow-test steps requiring an external app",
-    "den": "Total steps, per discipline acceptance workflow",
-    "threshold": "0"
-   },
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-008"
-   ],
-   "episodes": [
-    "SL-EP-003",
-    "SL-EP-200",
-    "SL-EP-220",
-    "SL-EP-408"
-   ],
-   "tests": [
-    "deferred:SL-EP-408"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-002",
-   "text": "No duplicate authoritative representations (F2); the identity registry rejects a second ownership claim.",
-   "src": "master plan section 3, F2",
-   "measure": {
-    "num": "Data domains with more than one registered owner",
-    "den": "All domains",
-    "threshold": "0"
-   },
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-001"
-   ],
-   "episodes": [
-    "SL-EP-066",
-    "SL-EP-079"
-   ],
-   "tests": [
-    "deferred:SL-EP-066"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-003",
-   "text": "Complete provenance (F3); the artifact store refuses writes without the provenance record.",
-   "src": "master plan section 3, F3",
-   "measure": {
-    "num": "Derived artifacts missing any of input IDs, input revisions, toolchain ID, parameters, environment hash",
-    "den": "All derived artifacts",
-    "threshold": "0"
-   },
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-008"
-   ],
-   "episodes": [
-    "SL-EP-055",
-    "SL-EP-182",
-    "SL-EP-434"
-   ],
-   "tests": [
-    "deferred:SL-EP-055"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-004",
-   "text": "No stale artifact shown as current (F4); a currency check runs on every artifact read.",
-   "src": "master plan section 3, F4",
-   "measure": {
-    "num": "Artifacts served while an input revision changed or is unverifiable",
-    "den": "Artifacts served",
-    "threshold": "0"
-   },
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-008"
-   ],
-   "episodes": [
-    "SL-EP-187",
-    "SL-EP-200"
-   ],
-   "tests": [
-    "deferred:SL-EP-187"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-005",
-   "text": "Every edit is transactional (F5); mutation APIs are reachable only through the transaction manager.",
-   "src": "master plan section 3, F5",
-   "measure": {
-    "num": "Mutations bypassing the transaction manager (instrumented in debug builds)",
-    "den": "All mutations",
-    "threshold": "0"
-   },
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-002"
-   ],
-   "episodes": [
-    "SL-EP-070",
-    "SL-EP-116",
-    "SL-EP-390"
-   ],
-   "tests": [
-    "deferred:SL-EP-070"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-006",
-   "text": "Observations are traceable (F6); process-wide events carry a scope tag instead of an entity.",
-   "src": "master plan section 3, F6",
-   "measure": {
-    "num": "Trace events missing correlation fields",
-    "den": "All events",
-    "threshold": "0 missing required fields"
-   },
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-011"
-   ],
-   "episodes": [
-    "SL-EP-301",
-    "SL-EP-319"
-   ],
-   "tests": [
-    "deferred:SL-EP-301"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-007",
-   "text": "Minimal rebuild scope (F7), reported by the build graph report.",
-   "src": "master plan section 3, F7",
-   "measure": {
-    "num": "Rebuilt nodes",
-    "den": "Dependency-closure nodes on the reference workload set",
-    "threshold": "<= 1.05 (baseline set in episode 198)"
-   },
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-008"
-   ],
-   "episodes": [
-    "SL-EP-186",
-    "SL-EP-198"
-   ],
-   "tests": [
-    "deferred:SL-EP-186"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-008",
-   "text": "No external tool needed for final content in core disciplines (F8), at 1.0 for every core discipline.",
-   "src": "master plan section 3, F8",
-   "measure": {
-    "num": "Core disciplines whose acceptance workflow needs an external app",
-    "den": "Core disciplines",
-    "threshold": "0 at 1.0 for every core discipline"
-   },
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-009"
-   ],
-   "episodes": [
-    "SL-EP-220",
-    "SL-EP-240",
-    "SL-EP-260",
-    "SL-EP-280"
-   ],
-   "tests": [
-    "deferred:SL-EP-220",
-    "deferred:SL-EP-240",
-    "deferred:SL-EP-260",
-    "deferred:SL-EP-280"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-009",
-   "text": "Each exemption MUST be registered in SL-REG-006, shown in the editor and reviewed every release; the allowed classes are console certification, platform signing, specialist simulation solvers, legal or regulatory validation, interchange import/export and AI model training.",
-   "src": "master plan section 3.1",
-   "evidence_type": "exception register entries",
-   "architecture": [
-    "SL-GOV-006"
-   ],
-   "episodes": [
-    "SL-EP-003",
-    "SL-EP-816"
-   ],
-   "tests": [
-    "just exception-check"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-010",
-   "text": "A metric over its threshold with no registered exemption MUST give an editor warning and diagnostic record while authoring, a configurable failure in local validation, and a blocked release.",
-   "src": "master plan section 3.2",
-   "evidence_type": "scorecard behaviour tests",
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-004"
-   ],
-   "episodes": [
-    "SL-EP-003",
-    "SL-EP-816"
-   ],
-   "tests": [
-    "deferred:SL-EP-816"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-011",
-   "text": "A release MUST pass only when every applicable invariant F1-F8 meets its threshold.",
-   "src": "master plan section 3, introduction",
-   "evidence_type": "fragmentation scorecard",
-   "architecture": [
-    "SL-GOV-006",
-    "SL-GOV-007"
-   ],
-   "episodes": [
-    "SL-EP-003",
-    "SL-EP-816"
-   ],
-   "tests": [
-    "deferred:SL-EP-816"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-FRAG-012",
-   "text": "The editor MUST surface a scorecard of native-authored content coverage per discipline, provenance completeness (F3), over-invalidation ratio (F7), stale-artifact incidents (F4), transaction coverage (F5), cross-process boundary count and latency cost, and external-tool dependency surface with each exemption listed.",
-   "src": "master plan section 3.3",
-   "evidence_type": "editor scorecard acceptance test",
-   "architecture": [
-    "SL-GOV-006",
-    "SL-ARCH-004"
-   ],
-   "episodes": [
-    "SL-EP-816"
-   ],
-   "tests": [
-    "deferred:SL-EP-816"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-EXEC-001",
-   "text": "Local authoring, preview and core builds MUST work with no remote service running.",
-   "src": "master plan section 2.3",
-   "evidence_type": "offline workflow test",
-   "architecture": [
-    "SL-ARCH-003"
-   ],
-   "episodes": [
-    "SL-EP-354",
-    "SL-EP-407"
-   ],
-   "tests": [
-    "deferred:SL-EP-407"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-EXEC-002",
-   "text": "Remote pieces (build workers, collaboration service, AI inference) MUST add scale and never authority.",
-   "src": "master plan section 2.3",
-   "evidence_type": "architecture review and remote-worker tests",
-   "architecture": [
-    "SL-ARCH-013",
-    "SL-ARCH-016"
-   ],
-   "episodes": [
-    "SL-EP-424",
-    "SL-EP-451"
-   ],
-   "tests": [
-    "deferred:SL-EP-451"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-EXEC-003",
-   "text": "The editor, runtime preview, headless test runner, build workers, collaboration service and shipped runtime MUST share contracts: IDs, schemas, event envelopes and evidence records.",
-   "src": "master plan section 2.3",
-   "evidence_type": "cross-process contract tests",
-   "architecture": [
-    "SL-ARCH-003"
-   ],
-   "episodes": [
-    "SL-EP-063",
-    "SL-EP-069",
-    "SL-EP-415"
-   ],
-   "tests": [
-    "deferred:SL-EP-415"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-GOV-001",
-   "text": "The JSON episode registry SL-REG-002 MUST be authoritative; the master plan and any CSV are views of it.",
-   "src": "master plan section 6.3, rule 1",
-   "evidence_type": "registry checks",
-   "architecture": [
-    "SL-GOV-001"
-   ],
-   "episodes": [
-    "SL-EP-012",
-    "SL-EP-020"
-   ],
-   "tests": [
-    "just registry-check",
-    "just registry-gen-check"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-GOV-002",
-   "text": "Episode IDs MUST never change meaning; a changed scope amends the record and a new capability gets a new ID.",
-   "src": "master plan section 6.3, rule 2",
-   "evidence_type": "meaning hash comparison",
-   "architecture": [
-    "SL-GOV-004"
-   ],
-   "episodes": [
-    "SL-EP-012"
-   ],
-   "tests": [
-    "just registry-gen-check"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-GOV-003",
-   "text": "No scope change MUST be silent: every change carries an impact note, a traceability update and an ADR when it alters a locked decision.",
-   "src": "master plan section 6.3, rule 3",
-   "evidence_type": "registry rule R-SILENT-SCOPE",
-   "architecture": [
-    "SL-GOV-004"
-   ],
-   "episodes": [
-    "SL-EP-012"
-   ],
-   "tests": [
-    "just registry-check"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-GOV-004",
-   "text": "Claude Code MUST work through bounded work orders (one episode, declared files, declared tests); its report of done is not evidence, the test run is.",
-   "src": "master plan section 6.3, rule 4",
-   "evidence_type": "work-order check",
-   "architecture": [
-    "SL-PLAN-003"
-   ],
-   "episodes": [
-    "SL-EP-012",
-    "SL-EP-401"
-   ],
-   "tests": [
-    "just wo-check"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-GOV-005",
-   "text": "No parity claim (rivals Unreal or similar) MUST ship without benchmark evidence from Volume 41.",
-   "src": "master plan section 6.3, rule 5",
-   "evidence_type": "audited benchmark register",
-   "architecture": [
-    "SL-GOV-010"
-   ],
-   "episodes": [
-    "SL-EP-640",
-    "SL-EP-812",
-    "SL-EP-814"
-   ],
-   "tests": [
-    "deferred:SL-EP-814"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-GOV-006",
-   "text": "An episode MUST be accepted only on evidence: passing acceptance tests, an integrated demo in the running product and a completion record.",
-   "src": "master plan section 6, introduction",
-   "evidence_type": "evidence verification",
-   "architecture": [
-    "SL-PLAN-003"
-   ],
-   "episodes": [
-    "SL-EP-012"
-   ],
-   "tests": [
-    "just evidence-verify"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-QUALITY-001",
-   "text": "Product promises MUST be converted to measurable acceptance criteria, each with a measure or evidence type and at least one test.",
-   "src": "master plan episode 011",
-   "evidence_type": "register completeness check",
-   "architecture": [
-    "SL-GOV-009",
-    "SL-GOV-002"
-   ],
-   "episodes": [
-    "SL-EP-007",
-    "SL-EP-011"
-   ],
-   "tests": [
-    "just rtm-check"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-QUALITY-002",
-   "text": "Every requirement MUST trace from requirement to architecture to implementation to test in the master traceability matrix.",
-   "src": "master plan episode 019",
-   "evidence_type": "traceability check",
-   "architecture": [
-    "SL-GOV-002"
-   ],
-   "episodes": [
-    "SL-EP-019"
-   ],
-   "tests": [
-    "just rtm-check",
-    "just neg-rtm"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-QUALITY-003",
-   "text": "Every episode record MUST hold an acceptance suite of positive, negative, boundary, recovery and performance cases.",
-   "src": "master plan section 6.1, Acceptance suite",
-   "evidence_type": "episode record review",
-   "architecture": [
-    "SL-PLAN-003"
-   ],
-   "episodes": [
-    "SL-EP-011",
-    "SL-EP-401"
-   ],
-   "tests": [
-    "deferred:SL-EP-401"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-QUALITY-004",
-   "text": "Every episode record MUST end in a completion record of revision, test evidence, benchmarks, open defects and approved exceptions.",
-   "src": "master plan section 6.1, Completion record",
-   "evidence_type": "evidence verification",
-   "architecture": [
-    "SL-PLAN-003"
-   ],
-   "episodes": [
-    "SL-EP-011"
-   ],
-   "tests": [
-    "just evidence-verify"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-RELEASE-001",
-   "text": "Release gate 1 MUST pass when: every authoritative record has owner, stable ID and revisions, and F1-F8 are at threshold.",
-   "src": "master plan Release gates table, gate 1",
-   "evidence_type": "conformance suite, fragmentation scorecard",
-   "architecture": [
-    "SL-GOV-007",
-    "SL-ARCH-001"
-   ],
-   "episodes": [
-    "SL-EP-079",
-    "SL-EP-816"
-   ],
-   "tests": [
-    "deferred:SL-EP-079",
-    "deferred:SL-EP-816"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-RELEASE-002",
-   "text": "Release gate 2 MUST pass when: reference games (2D, 3D multiplayer, mobile, XR, console, web) and a digital human are made entirely in Sliced Labs.",
-   "src": "master plan Release gates table, gate 2",
-   "evidence_type": "reference projects and F8 workflow tests",
-   "architecture": [
-    "SL-GOV-007",
-    "SL-ARCH-009"
-   ],
-   "episodes": [
-    "SL-EP-496",
-    "SL-EP-497",
-    "SL-EP-659",
-    "SL-EP-679",
-    "SL-EP-698",
-    "SL-EP-719",
-    "SL-EP-600"
-   ],
-   "tests": [
-    "deferred:SL-EP-838"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-RELEASE-003",
-   "text": "Release gate 3 MUST pass when: reproducible builds, migrations, crash recovery, soak and security tests pass.",
-   "src": "master plan Release gates table, gate 3",
-   "evidence_type": "qualification report",
-   "architecture": [
-    "SL-GOV-007",
-    "SL-GOV-009"
-   ],
-   "episodes": [
-    "SL-EP-419",
-    "SL-EP-420"
-   ],
-   "tests": [
-    "deferred:SL-EP-420"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-RELEASE-004",
-   "text": "Release gate 4 MUST pass when: every target passes conformance, store and certification pre-checks.",
-   "src": "master plan Release gates table, gate 4",
-   "evidence_type": "platform reports",
-   "architecture": [
-    "SL-GOV-007",
-    "SL-ARCH-005",
-    "SL-ARCH-024"
-   ],
-   "episodes": [
-    "SL-EP-508",
-    "SL-EP-692",
-    "SL-EP-833"
-   ],
-   "tests": [
-    "deferred:SL-EP-692"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-RELEASE-005",
-   "text": "Release gate 5 MUST pass when: Hub, Web Studio, Stream, marketplace and online services meet their SLOs.",
-   "src": "master plan Release gates table, gate 5",
-   "evidence_type": "SLO dashboards, pen test",
-   "architecture": [
-    "SL-GOV-007",
-    "SL-ARCH-025",
-    "SL-ARCH-026"
-   ],
-   "episodes": [
-    "SL-EP-739",
-    "SL-EP-740"
-   ],
-   "tests": [
-    "deferred:SL-EP-739"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-RELEASE-006",
-   "text": "Release gate 6 MUST pass when: install, update, support, incident and rollback procedures are drilled.",
-   "src": "master plan Release gates table, gate 6",
-   "evidence_type": "drill records",
-   "architecture": [
-    "SL-GOV-007",
-    "SL-OPS-006"
-   ],
-   "episodes": [
-    "SL-EP-439",
-    "SL-EP-440"
-   ],
-   "tests": [
-    "deferred:SL-EP-440"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-RELEASE-007",
-   "text": "Release gate 7 MUST pass when: every parity-matrix row matches or beats Unreal Engine 5 on SL-BENCH.",
-   "src": "master plan Release gates table, gate 7",
-   "evidence_type": "audited benchmark register",
-   "architecture": [
-    "SL-GOV-007",
-    "SL-GOV-010"
-   ],
-   "episodes": [
-    "SL-EP-640",
-    "SL-EP-814"
-   ],
-   "tests": [
-    "deferred:SL-EP-814"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-RELEASE-008",
-   "text": "Sliced Labs 1.0 MUST ship only when all seven gates pass with recorded evidence on every platform in section 2.6.",
-   "src": "master plan Release gates, introduction",
-   "evidence_type": "recorded evidence for all seven gates",
-   "architecture": [
-    "SL-GOV-007"
-   ],
-   "episodes": [
-    "SL-EP-833",
-    "SL-EP-838"
-   ],
-   "tests": [
-    "deferred:SL-EP-838"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-USERS-001",
-   "text": "Solo developers MUST be a defined user class with documented production scenarios.",
-   "src": "master plan episode 004",
-   "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
-   "architecture": [
-    "SL-VOL-01-SPEC"
-   ],
-   "episodes": [
-    "SL-EP-004"
-   ],
-   "tests": [
-    "just vol01-coverage"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-USERS-002",
-   "text": "Studios MUST be a defined user class with documented production scenarios.",
-   "src": "master plan episode 004",
-   "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
-   "architecture": [
-    "SL-VOL-01-SPEC"
-   ],
-   "episodes": [
-    "SL-EP-004"
-   ],
-   "tests": [
-    "just vol01-coverage"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-USERS-003",
-   "text": "Technical artists MUST be a defined user class with documented production scenarios.",
-   "src": "master plan episode 004",
-   "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
-   "architecture": [
-    "SL-VOL-01-SPEC"
-   ],
-   "episodes": [
-    "SL-EP-004"
-   ],
-   "tests": [
-    "just vol01-coverage"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-USERS-004",
-   "text": "Simulation engineers MUST be a defined user class with documented production scenarios.",
-   "src": "master plan episode 004",
-   "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
-   "architecture": [
-    "SL-VOL-01-SPEC"
-   ],
-   "episodes": [
-    "SL-EP-004"
-   ],
-   "tests": [
-    "just vol01-coverage"
-   ],
-   "status": "planned"
-  },
-  {
-   "id": "REQ-USERS-005",
-   "text": "Platform developers MUST be a defined user class with documented production scenarios.",
-   "src": "master plan episode 004",
-   "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
-   "architecture": [
-    "SL-VOL-01-SPEC"
-   ],
-   "episodes": [
-    "SL-EP-004"
-   ],
-   "tests": [
-    "just vol01-coverage"
-   ],
-   "status": "planned"
-  }
- ]
+  "schema": "sl-reg-003/1",
+  "requirements": [
+    {
+      "id": "REQ-DOCTRINE-001",
+      "text": "Every asset, entity, system, dependency, build configuration, test result and runtime observation MUST have one authoritative identity and a traceable history.",
+      "src": "master plan section 1.2, principle 1",
+      "evidence_type": "architecture conformance suite",
+      "architecture": [
+        "SL-ARCH-001"
+      ],
+      "episodes": [
+        "SL-EP-066",
+        "SL-EP-079"
+      ],
+      "tests": [
+        "deferred:SL-EP-079"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-DOCTRINE-002",
+      "text": "Authoring, simulation, debugging, profiling, collaboration, testing, packaging and release MUST share one interaction model, one command system, one transaction protocol and one dependency graph.",
+      "src": "master plan section 1.2, principle 2",
+      "evidence_type": "architecture conformance suite",
+      "architecture": [
+        "SL-ARCH-002",
+        "SL-ARCH-004",
+        "SL-ARCH-008"
+      ],
+      "episodes": [
+        "SL-EP-070",
+        "SL-EP-072",
+        "SL-EP-079"
+      ],
+      "tests": [
+        "deferred:SL-EP-079"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-DOCTRINE-003",
+      "text": "Editor, runtime, headless test runner, dedicated server, build worker and collaboration service MAY run in separate processes or machines but MUST share schemas, execution semantics, artifact identities and evidence contracts.",
+      "src": "master plan section 1.2, principle 3",
+      "evidence_type": "cross-process contract tests",
+      "architecture": [
+        "SL-ARCH-003"
+      ],
+      "episodes": [
+        "SL-EP-063",
+        "SL-EP-069",
+        "SL-EP-407"
+      ],
+      "tests": [
+        "deferred:SL-EP-407"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-DOCTRINE-004",
+      "text": "Native-owned workflows MUST have zero manual export/import steps.",
+      "src": "master plan section 1.3, first zero",
+      "evidence_type": "measured by REQ-FRAG-001",
+      "architecture": [
+        "SL-GOV-006"
+      ],
+      "episodes": [
+        "SL-EP-003",
+        "SL-EP-408"
+      ],
+      "tests": [
+        "deferred:SL-EP-408"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-DOCTRINE-005",
+      "text": "No fact MUST have competing authoritative representations.",
+      "src": "master plan section 1.3, second zero",
+      "evidence_type": "measured by REQ-FRAG-002",
+      "architecture": [
+        "SL-GOV-006"
+      ],
+      "episodes": [
+        "SL-EP-003",
+        "SL-EP-066"
+      ],
+      "tests": [
+        "deferred:SL-EP-066"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-DOCTRINE-006",
+      "text": "Every source-to-derived transformation MUST be tracked.",
+      "src": "master plan section 1.3, third zero",
+      "evidence_type": "measured by REQ-FRAG-003",
+      "architecture": [
+        "SL-GOV-006"
+      ],
+      "episodes": [
+        "SL-EP-003",
+        "SL-EP-055"
+      ],
+      "tests": [
+        "deferred:SL-EP-055"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-DOCTRINE-007",
+      "text": "No stale artifact MUST be presented as current.",
+      "src": "master plan section 1.3, fourth zero",
+      "evidence_type": "measured by REQ-FRAG-004",
+      "architecture": [
+        "SL-GOV-006"
+      ],
+      "episodes": [
+        "SL-EP-003",
+        "SL-EP-187"
+      ],
+      "tests": [
+        "deferred:SL-EP-187"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-DOCTRINE-008",
+      "text": "External programs (compilers, debuggers, GPU drivers, platform SDKs, signing tools, middleware behind adapters, remote workers, interchange formats) MAY run; one counts as fragmentation only when it creates a second source of truth, an untracked transformation or a manual reconciliation step.",
+      "src": "master plan section 1.3, closing paragraph",
+      "evidence_type": "constitution text equals the plan",
+      "architecture": [
+        "SL-GOV-001",
+        "SL-GOV-006"
+      ],
+      "episodes": [
+        "SL-EP-003"
+      ],
+      "tests": [
+        "just constitution-check"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-001",
+      "text": "No manual export/import in native workflows (F1); enforced by the workflow acceptance suite and a build graph that rejects undeclared inputs.",
+      "src": "master plan section 3, F1",
+      "measure": {
+        "num": "Workflow-test steps requiring an external app",
+        "den": "Total steps, per discipline acceptance workflow",
+        "threshold": "0"
+      },
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-008"
+      ],
+      "episodes": [
+        "SL-EP-003",
+        "SL-EP-200",
+        "SL-EP-220",
+        "SL-EP-408"
+      ],
+      "tests": [
+        "deferred:SL-EP-408"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-002",
+      "text": "No duplicate authoritative representations (F2); the identity registry rejects a second ownership claim.",
+      "src": "master plan section 3, F2",
+      "measure": {
+        "num": "Data domains with more than one registered owner",
+        "den": "All domains",
+        "threshold": "0"
+      },
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-001"
+      ],
+      "episodes": [
+        "SL-EP-066",
+        "SL-EP-079"
+      ],
+      "tests": [
+        "deferred:SL-EP-066"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-003",
+      "text": "Complete provenance (F3); the artifact store refuses writes without the provenance record.",
+      "src": "master plan section 3, F3",
+      "measure": {
+        "num": "Derived artifacts missing any of input IDs, input revisions, toolchain ID, parameters, environment hash",
+        "den": "All derived artifacts",
+        "threshold": "0"
+      },
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-008"
+      ],
+      "episodes": [
+        "SL-EP-055",
+        "SL-EP-182",
+        "SL-EP-434"
+      ],
+      "tests": [
+        "deferred:SL-EP-055"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-004",
+      "text": "No stale artifact shown as current (F4); a currency check runs on every artifact read.",
+      "src": "master plan section 3, F4",
+      "measure": {
+        "num": "Artifacts served while an input revision changed or is unverifiable",
+        "den": "Artifacts served",
+        "threshold": "0"
+      },
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-008"
+      ],
+      "episodes": [
+        "SL-EP-187",
+        "SL-EP-200"
+      ],
+      "tests": [
+        "deferred:SL-EP-187"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-005",
+      "text": "Every edit is transactional (F5); mutation APIs are reachable only through the transaction manager.",
+      "src": "master plan section 3, F5",
+      "measure": {
+        "num": "Mutations bypassing the transaction manager (instrumented in debug builds)",
+        "den": "All mutations",
+        "threshold": "0"
+      },
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-002"
+      ],
+      "episodes": [
+        "SL-EP-070",
+        "SL-EP-116",
+        "SL-EP-390"
+      ],
+      "tests": [
+        "deferred:SL-EP-070"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-006",
+      "text": "Observations are traceable (F6); process-wide events carry a scope tag instead of an entity.",
+      "src": "master plan section 3, F6",
+      "measure": {
+        "num": "Trace events missing correlation fields",
+        "den": "All events",
+        "threshold": "0 missing required fields"
+      },
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-011"
+      ],
+      "episodes": [
+        "SL-EP-301",
+        "SL-EP-319"
+      ],
+      "tests": [
+        "deferred:SL-EP-301"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-007",
+      "text": "Minimal rebuild scope (F7), reported by the build graph report.",
+      "src": "master plan section 3, F7",
+      "measure": {
+        "num": "Rebuilt nodes",
+        "den": "Dependency-closure nodes on the reference workload set",
+        "threshold": "<= 1.05 (baseline set in episode 198)"
+      },
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-008"
+      ],
+      "episodes": [
+        "SL-EP-186",
+        "SL-EP-198"
+      ],
+      "tests": [
+        "deferred:SL-EP-186"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-008",
+      "text": "No external tool needed for final content in core disciplines (F8), at 1.0 for every core discipline.",
+      "src": "master plan section 3, F8",
+      "measure": {
+        "num": "Core disciplines whose acceptance workflow needs an external app",
+        "den": "Core disciplines",
+        "threshold": "0 at 1.0 for every core discipline"
+      },
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-009"
+      ],
+      "episodes": [
+        "SL-EP-220",
+        "SL-EP-240",
+        "SL-EP-260",
+        "SL-EP-280"
+      ],
+      "tests": [
+        "deferred:SL-EP-220",
+        "deferred:SL-EP-240",
+        "deferred:SL-EP-260",
+        "deferred:SL-EP-280"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-009",
+      "text": "Each exemption MUST be registered in SL-REG-006, shown in the editor and reviewed every release; the allowed classes are console certification, platform signing, specialist simulation solvers, legal or regulatory validation, interchange import/export and AI model training.",
+      "src": "master plan section 3.1",
+      "evidence_type": "exception register entries",
+      "architecture": [
+        "SL-GOV-006"
+      ],
+      "episodes": [
+        "SL-EP-003",
+        "SL-EP-816"
+      ],
+      "tests": [
+        "just exception-check"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-010",
+      "text": "A metric over its threshold with no registered exemption MUST give an editor warning and diagnostic record while authoring, a configurable failure in local validation, and a blocked release.",
+      "src": "master plan section 3.2",
+      "evidence_type": "scorecard behaviour tests",
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-004"
+      ],
+      "episodes": [
+        "SL-EP-003",
+        "SL-EP-816"
+      ],
+      "tests": [
+        "deferred:SL-EP-816"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-011",
+      "text": "A release MUST pass only when every applicable invariant F1-F8 meets its threshold.",
+      "src": "master plan section 3, introduction",
+      "evidence_type": "fragmentation scorecard",
+      "architecture": [
+        "SL-GOV-006",
+        "SL-GOV-007"
+      ],
+      "episodes": [
+        "SL-EP-003",
+        "SL-EP-816"
+      ],
+      "tests": [
+        "deferred:SL-EP-816"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-FRAG-012",
+      "text": "The editor MUST surface a scorecard of native-authored content coverage per discipline, provenance completeness (F3), over-invalidation ratio (F7), stale-artifact incidents (F4), transaction coverage (F5), cross-process boundary count and latency cost, and external-tool dependency surface with each exemption listed.",
+      "src": "master plan section 3.3",
+      "evidence_type": "editor scorecard acceptance test",
+      "architecture": [
+        "SL-GOV-006",
+        "SL-ARCH-004"
+      ],
+      "episodes": [
+        "SL-EP-816"
+      ],
+      "tests": [
+        "deferred:SL-EP-816"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-EXEC-001",
+      "text": "Local authoring, preview and core builds MUST work with no remote service running.",
+      "src": "master plan section 2.3",
+      "evidence_type": "offline workflow test",
+      "architecture": [
+        "SL-ARCH-003"
+      ],
+      "episodes": [
+        "SL-EP-354",
+        "SL-EP-407"
+      ],
+      "tests": [
+        "deferred:SL-EP-407"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-EXEC-002",
+      "text": "Remote pieces (build workers, collaboration service, AI inference) MUST add scale and never authority.",
+      "src": "master plan section 2.3",
+      "evidence_type": "architecture review and remote-worker tests",
+      "architecture": [
+        "SL-ARCH-013",
+        "SL-ARCH-016"
+      ],
+      "episodes": [
+        "SL-EP-424",
+        "SL-EP-451"
+      ],
+      "tests": [
+        "deferred:SL-EP-451"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-EXEC-003",
+      "text": "The editor, runtime preview, headless test runner, build workers, collaboration service and shipped runtime MUST share contracts: IDs, schemas, event envelopes and evidence records.",
+      "src": "master plan section 2.3",
+      "evidence_type": "cross-process contract tests",
+      "architecture": [
+        "SL-ARCH-003"
+      ],
+      "episodes": [
+        "SL-EP-063",
+        "SL-EP-069",
+        "SL-EP-415"
+      ],
+      "tests": [
+        "deferred:SL-EP-415"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-GOV-001",
+      "text": "The JSON episode registry SL-REG-002 MUST be authoritative; the master plan and any CSV are views of it.",
+      "src": "master plan section 6.3, rule 1",
+      "evidence_type": "registry checks",
+      "architecture": [
+        "SL-GOV-001"
+      ],
+      "episodes": [
+        "SL-EP-012",
+        "SL-EP-020"
+      ],
+      "tests": [
+        "just registry-check",
+        "just registry-gen-check"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-GOV-002",
+      "text": "Episode IDs MUST never change meaning; a changed scope amends the record and a new capability gets a new ID.",
+      "src": "master plan section 6.3, rule 2",
+      "evidence_type": "meaning hash comparison",
+      "architecture": [
+        "SL-GOV-004"
+      ],
+      "episodes": [
+        "SL-EP-012"
+      ],
+      "tests": [
+        "just registry-gen-check"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-GOV-003",
+      "text": "No scope change MUST be silent: every change carries an impact note, a traceability update and an ADR when it alters a locked decision.",
+      "src": "master plan section 6.3, rule 3",
+      "evidence_type": "registry rule R-SILENT-SCOPE",
+      "architecture": [
+        "SL-GOV-004"
+      ],
+      "episodes": [
+        "SL-EP-012"
+      ],
+      "tests": [
+        "just registry-check"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-GOV-004",
+      "text": "Claude Code MUST work through bounded work orders (one episode, declared files, declared tests); its report of done is not evidence, the test run is.",
+      "src": "master plan section 6.3, rule 4",
+      "evidence_type": "work-order check",
+      "architecture": [
+        "SL-PLAN-003"
+      ],
+      "episodes": [
+        "SL-EP-012",
+        "SL-EP-401"
+      ],
+      "tests": [
+        "just wo-check"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-GOV-005",
+      "text": "No parity claim (rivals Unreal or similar) MUST ship without benchmark evidence from Volume 41.",
+      "src": "master plan section 6.3, rule 5",
+      "evidence_type": "audited benchmark register",
+      "architecture": [
+        "SL-GOV-010"
+      ],
+      "episodes": [
+        "SL-EP-640",
+        "SL-EP-812",
+        "SL-EP-814"
+      ],
+      "tests": [
+        "deferred:SL-EP-814"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-GOV-006",
+      "text": "An episode MUST be accepted only on evidence: passing acceptance tests, an integrated demo in the running product and a completion record.",
+      "src": "master plan section 6, introduction",
+      "evidence_type": "evidence verification",
+      "architecture": [
+        "SL-PLAN-003"
+      ],
+      "episodes": [
+        "SL-EP-012"
+      ],
+      "tests": [
+        "just evidence-verify"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-QUALITY-001",
+      "text": "Product promises MUST be converted to measurable acceptance criteria, each with a measure or evidence type and at least one test.",
+      "src": "master plan episode 011",
+      "evidence_type": "register completeness check",
+      "architecture": [
+        "SL-GOV-009",
+        "SL-GOV-002"
+      ],
+      "episodes": [
+        "SL-EP-007",
+        "SL-EP-011"
+      ],
+      "tests": [
+        "just rtm-check"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-QUALITY-002",
+      "text": "Every requirement MUST trace from requirement to architecture to implementation to test in the master traceability matrix.",
+      "src": "master plan episode 019",
+      "evidence_type": "traceability check",
+      "architecture": [
+        "SL-GOV-002"
+      ],
+      "episodes": [
+        "SL-EP-019"
+      ],
+      "tests": [
+        "just rtm-check",
+        "just neg-rtm"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-QUALITY-003",
+      "text": "Every episode record MUST hold an acceptance suite of positive, negative, boundary, recovery and performance cases.",
+      "src": "master plan section 6.1, Acceptance suite",
+      "evidence_type": "episode record review",
+      "architecture": [
+        "SL-PLAN-003"
+      ],
+      "episodes": [
+        "SL-EP-011",
+        "SL-EP-401"
+      ],
+      "tests": [
+        "deferred:SL-EP-401"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-QUALITY-004",
+      "text": "Every episode record MUST end in a completion record of revision, test evidence, benchmarks, open defects and approved exceptions.",
+      "src": "master plan section 6.1, Completion record",
+      "evidence_type": "evidence verification",
+      "architecture": [
+        "SL-PLAN-003"
+      ],
+      "episodes": [
+        "SL-EP-011"
+      ],
+      "tests": [
+        "just evidence-verify"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-RELEASE-001",
+      "text": "Release gate 1 MUST pass when: every authoritative record has owner, stable ID and revisions, and F1-F8 are at threshold.",
+      "src": "master plan Release gates table, gate 1",
+      "evidence_type": "conformance suite, fragmentation scorecard",
+      "architecture": [
+        "SL-GOV-007",
+        "SL-ARCH-001"
+      ],
+      "episodes": [
+        "SL-EP-079",
+        "SL-EP-816"
+      ],
+      "tests": [
+        "deferred:SL-EP-079",
+        "deferred:SL-EP-816"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-RELEASE-002",
+      "text": "Release gate 2 MUST pass when: reference games (2D, 3D multiplayer, mobile, XR, console, web) and a digital human are made entirely in Sliced Labs.",
+      "src": "master plan Release gates table, gate 2",
+      "evidence_type": "reference projects and F8 workflow tests",
+      "architecture": [
+        "SL-GOV-007",
+        "SL-ARCH-009"
+      ],
+      "episodes": [
+        "SL-EP-496",
+        "SL-EP-497",
+        "SL-EP-659",
+        "SL-EP-679",
+        "SL-EP-698",
+        "SL-EP-719",
+        "SL-EP-600"
+      ],
+      "tests": [
+        "deferred:SL-EP-838"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-RELEASE-003",
+      "text": "Release gate 3 MUST pass when: reproducible builds, migrations, crash recovery, soak and security tests pass.",
+      "src": "master plan Release gates table, gate 3",
+      "evidence_type": "qualification report",
+      "architecture": [
+        "SL-GOV-007",
+        "SL-GOV-009"
+      ],
+      "episodes": [
+        "SL-EP-419",
+        "SL-EP-420"
+      ],
+      "tests": [
+        "deferred:SL-EP-420"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-RELEASE-004",
+      "text": "Release gate 4 MUST pass when: every target passes conformance, store and certification pre-checks.",
+      "src": "master plan Release gates table, gate 4",
+      "evidence_type": "platform reports",
+      "architecture": [
+        "SL-GOV-007",
+        "SL-ARCH-005",
+        "SL-ARCH-024"
+      ],
+      "episodes": [
+        "SL-EP-508",
+        "SL-EP-692",
+        "SL-EP-833"
+      ],
+      "tests": [
+        "deferred:SL-EP-692"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-RELEASE-005",
+      "text": "Release gate 5 MUST pass when: Hub, Web Studio, Stream, marketplace and online services meet their SLOs.",
+      "src": "master plan Release gates table, gate 5",
+      "evidence_type": "SLO dashboards, pen test",
+      "architecture": [
+        "SL-GOV-007",
+        "SL-ARCH-025",
+        "SL-ARCH-026"
+      ],
+      "episodes": [
+        "SL-EP-739",
+        "SL-EP-740"
+      ],
+      "tests": [
+        "deferred:SL-EP-739"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-RELEASE-006",
+      "text": "Release gate 6 MUST pass when: install, update, support, incident and rollback procedures are drilled.",
+      "src": "master plan Release gates table, gate 6",
+      "evidence_type": "drill records",
+      "architecture": [
+        "SL-GOV-007",
+        "SL-OPS-006"
+      ],
+      "episodes": [
+        "SL-EP-439",
+        "SL-EP-440"
+      ],
+      "tests": [
+        "deferred:SL-EP-440"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-RELEASE-007",
+      "text": "Release gate 7 MUST pass when: every parity-matrix row matches or beats Unreal Engine 5 on SL-BENCH.",
+      "src": "master plan Release gates table, gate 7",
+      "evidence_type": "audited benchmark register",
+      "architecture": [
+        "SL-GOV-007",
+        "SL-GOV-010"
+      ],
+      "episodes": [
+        "SL-EP-640",
+        "SL-EP-814"
+      ],
+      "tests": [
+        "deferred:SL-EP-814"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-RELEASE-008",
+      "text": "Sliced Labs 1.0 MUST ship only when all seven gates pass with recorded evidence on every platform in section 2.6.",
+      "src": "master plan Release gates, introduction",
+      "evidence_type": "recorded evidence for all seven gates",
+      "architecture": [
+        "SL-GOV-007"
+      ],
+      "episodes": [
+        "SL-EP-833",
+        "SL-EP-838"
+      ],
+      "tests": [
+        "deferred:SL-EP-838"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-USERS-001",
+      "text": "Solo developers MUST be a defined user class with documented production scenarios.",
+      "src": "master plan episode 004",
+      "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
+      "architecture": [
+        "SL-VOL-01-SPEC"
+      ],
+      "episodes": [
+        "SL-EP-004"
+      ],
+      "tests": [
+        "just vol01-coverage"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-USERS-002",
+      "text": "Studios MUST be a defined user class with documented production scenarios.",
+      "src": "master plan episode 004",
+      "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
+      "architecture": [
+        "SL-VOL-01-SPEC"
+      ],
+      "episodes": [
+        "SL-EP-004"
+      ],
+      "tests": [
+        "just vol01-coverage"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-USERS-003",
+      "text": "Technical artists MUST be a defined user class with documented production scenarios.",
+      "src": "master plan episode 004",
+      "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
+      "architecture": [
+        "SL-VOL-01-SPEC"
+      ],
+      "episodes": [
+        "SL-EP-004"
+      ],
+      "tests": [
+        "just vol01-coverage"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-USERS-004",
+      "text": "Simulation engineers MUST be a defined user class with documented production scenarios.",
+      "src": "master plan episode 004",
+      "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
+      "architecture": [
+        "SL-VOL-01-SPEC"
+      ],
+      "episodes": [
+        "SL-EP-004"
+      ],
+      "tests": [
+        "just vol01-coverage"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "REQ-USERS-005",
+      "text": "Platform developers MUST be a defined user class with documented production scenarios.",
+      "src": "master plan episode 004",
+      "evidence_type": "production-scenario definition in SL-VOL-01-SPEC",
+      "architecture": [
+        "SL-VOL-01-SPEC"
+      ],
+      "episodes": [
+        "SL-EP-004"
+      ],
+      "tests": [
+        "just vol01-coverage"
+      ],
+      "status": "planned"
+    }
+  ]
 }

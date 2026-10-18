@@ -127,7 +127,9 @@ def row_errors(row, where):
     if errors:
         return errors
     if not isinstance(row["id"], str) or not ID_RE.match(row["id"]):
-        errors.append("%s: R-RTM-ID: id %r must look like REQ-<AREA>-nnn, AREA in %s" % (where, row["id"], "|".join(AREAS)))
+        errors.append(
+            "%s: R-RTM-ID: id %r must look like REQ-<AREA>-nnn, AREA in %s" % (where, row["id"], "|".join(AREAS))
+        )
     for key in ("text", "src"):
         if not _nonempty_str(row[key]):
             errors.append("%s: R-RTM-SHAPE: %s must be a non-empty string" % (where, key))
@@ -174,7 +176,11 @@ def link_errors(row, where, doc_ids, episode_ids, recipes):
 def rtm_errors(catalogue, register, doc_ids, episode_ids, recipes, doc_label="SL-GOV-002", reg_label="SL-REG-003"):
     """All errors for parsed inputs. catalogue: list of dicts; register: the SL-REG-003 value."""
     errors = []
-    if not isinstance(register, dict) or register.get("schema") != "sl-reg-003/1" or not isinstance(register.get("requirements"), list):
+    if (
+        not isinstance(register, dict)
+        or register.get("schema") != "sl-reg-003/1"
+        or not isinstance(register.get("requirements"), list)
+    ):
         return ["%s: R-RTM-SHAPE: register must be {schema: 'sl-reg-003/1', requirements: [...]}" % reg_label]
     rows = register["requirements"]
     by_id, seen = {}, set()
@@ -218,7 +224,11 @@ def _load(root, rel):
 
 def find_catalogue(root):
     path = os.path.join(root, *DOC_DIR.split("/"))
-    names = sorted(n for n in os.listdir(path) if n.startswith(DOC_PREFIX) and n.endswith(".md")) if os.path.isdir(path) else []
+    names = (
+        sorted(n for n in os.listdir(path) if n.startswith(DOC_PREFIX) and n.endswith(".md"))
+        if os.path.isdir(path)
+        else []
+    )
     return names[0] if names else None
 
 
