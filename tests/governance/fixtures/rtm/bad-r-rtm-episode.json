@@ -1,0 +1,44 @@
+{
+ "schema": "sl-reg-003/1",
+ "requirements": [
+  {
+   "id": "REQ-FRAG-001",
+   "text": "Example measured requirement.",
+   "src": "master plan section 3, F1",
+   "measure": {
+    "num": "n",
+    "den": "d",
+    "threshold": "0"
+   },
+   "architecture": [
+    "SL-GOV-006"
+   ],
+   "episodes": [
+    "SL-EP-999"
+   ],
+   "tests": [
+    "deferred:SL-EP-002"
+   ],
+   "status": "planned"
+  },
+  {
+   "id": "REQ-GOV-001",
+   "text": "Example evidence requirement.",
+   "src": "master plan section 6.3, rule 1",
+   "evidence_type": "registry checks",
+   "architecture": [
+    "SL-ARCH-001",
+    "SL-GOV-006"
+   ],
+   "episodes": [
+    "SL-EP-001",
+    "SL-EP-002"
+   ],
+   "tests": [
+    "just doc-check",
+    "deferred:SL-EP-001"
+   ],
+   "status": "planned"
+  }
+ ]
+}

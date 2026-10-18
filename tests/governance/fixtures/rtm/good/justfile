@@ -1,0 +1,8 @@
+# fixture justfile for rtm-check
+default:
+    @just --list
+
+fast: doc-check
+
+doc-check:
+    @echo ok
