@@ -57,11 +57,15 @@ def frozen_errors(root):
         errors.append("%s:1: R-FROZEN-STATUS: %s" % (cc.CONSTITUTION_REL, exc))
     if meta is not None:
         if meta.get("status") != "Approved":
-            errors.append("%s:1: R-FROZEN-STATUS: front matter status is %r, must be Approved" % (cc.CONSTITUTION_REL, meta.get("status")))
+            errors.append(
+                "%s:1: R-FROZEN-STATUS: front matter status is %r, must be Approved"
+                % (cc.CONSTITUTION_REL, meta.get("status"))
+            )
         recorded = entry.get("version")
         if isinstance(recorded, str) and recorded and meta.get("version") != recorded:
             errors.append(
-                "%s:1: R-FROZEN-STATUS: front matter version is %r, %s records %r" % (cc.CONSTITUTION_REL, meta.get("version"), where, recorded)
+                "%s:1: R-FROZEN-STATUS: front matter version is %r, %s records %r"
+                % (cc.CONSTITUTION_REL, meta.get("version"), where, recorded)
             )
     plan, perr = cc._read(root, cc.PLAN_REL)
     if perr:
