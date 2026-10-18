@@ -89,7 +89,12 @@ class AdrCheckTests(TreeCase):
 
     def test_section_order(self):
         self.good_tree()
-        text = adr_text("ADR-0002").replace("## Context", "## TMP").replace("## Decision", "## Context").replace("## TMP", "## Decision")
+        text = (
+            adr_text("ADR-0002")
+            .replace("## Context", "## TMP")
+            .replace("## Decision", "## Context")
+            .replace("## TMP", "## Decision")
+        )
         self.adr("ADR-0002-x.md", text)
         self.assertIn("R-ADR-SECTION", rules(self.errors()))
 
@@ -140,7 +145,9 @@ class AdrCheckTests(TreeCase):
         self.assertEqual(by_id["ADR-0001"]["decision_refs"], ["D-126", "D-135", "D-141", "D-144"])
         for meta in by_id.values():
             self.assertEqual(meta["status"], "Proposed")
-        with open(os.path.join(slgov.ROOT, "docs", "adr", "ADR-0003-authoring-order-waivers.md"), encoding="utf-8") as fh:
+        with open(
+            os.path.join(slgov.ROOT, "docs", "adr", "ADR-0003-authoring-order-waivers.md"), encoding="utf-8"
+        ) as fh:
             text = fh.read()
         self.assertIn("authoring-order waiver", text)
         self.assertIn("R-DEP-ACCEPTED", text)

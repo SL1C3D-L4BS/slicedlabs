@@ -7,9 +7,16 @@
   sync-vcpkg                  write deps/vcpkg/vcpkg.json and vcpkg-configuration.json from the lock
   cpm-url PKG                 print the archive URL the cpm provider fetches for PKG (no network)
   lock-refresh PKG --file F   founder only: set PKG's cpm url_hash to the sha256 of the already downloaded file F
-                              (the recipe `deps-lock-refresh` downloads with curl; this command never touches the network)
+                              (the recipe `deps-lock-refresh` downloads with curl; this command never fetches)
   vendor --from-system PKG    copy PKG's system header into its vendored dir, then recompute the lock
   register [--write]          print the dependency table, or write registry/views/SL-REG-005-dependencies.md
+  licenses                    every licence is on the allowlist; every vendored dir has a manifested LICENSE (WO-032)
+  attest --from-archive PKG ARCHIVE
+                              founder only: compare PKG's vendored files byte for byte with the upstream ARCHIVE
+                              (tar, zip or a bare release file); on a match set verified_upstream and record the
+                              archive sha256 in deps/attestations.json (never touches the network)
+  attest-check                a vendored package is verified_upstream or has an unexpired waiver (WO-032)
+  vuln-check                  no open finding in deps/vulnerabilities.json names a locked version (`check` runs it too)
 
 Common option: --root DIR (default: the repository). `check --ci-order a,b,c,d` is a test hook that
 replaces the ci provider order used by --strict. Stdlib only; nothing is fetched or installed.
@@ -29,7 +36,17 @@ def parse(argv):
     if not argv:
         raise ValueError("a command is required")
     cmd, rest = argv[0], argv[1:]
-    opts = {"root": lib.ROOT, "strict": False, "write": False, "tested": {}, "from_system": None, "ci_order": None, "file": None}
+    opts = {
+        "root": lib.ROOT,
+        "strict": False,
+        "write": False,
+        "tested": {},
+        "from_system": None,
+        "ci_order": None,
+        "file": None,
+        "today": None,
+        "from_archive": False,
+    }
     pos = []
     i = 0
     while i < len(rest):
@@ -38,7 +55,9 @@ def parse(argv):
             opts["strict"] = True
         elif arg == "--write":
             opts["write"] = True
-        elif arg in ("--root", "--ci-order", "--tested", "--from-system", "--file"):
+        elif arg in ("--from-archive", "--from-file"):
+            opts["from_archive"] = True
+        elif arg in ("--root", "--ci-order", "--tested", "--from-system", "--file", "--today"):
             i += 1
             if i >= len(rest):
                 raise ValueError("%s needs a value" % arg)
@@ -51,6 +70,8 @@ def parse(argv):
                 opts["from_system"] = value
             elif arg == "--file":
                 opts["file"] = value
+            elif arg == "--today":
+                opts["today"] = value
             else:
                 key, sep, ver = value.partition("=")
                 if not sep or not key or not ver:
@@ -62,6 +83,23 @@ def parse(argv):
             pos.append(arg)
         i += 1
     return cmd, opts, pos
+
+
+def run_rule(cmd, root, opts):
+    """licenses, attest-check, vuln-check: print every finding, exit 1 on any (R-DEPS-* ids, WO-032)."""
+    lock = lib.load(root, lib.LOCK_REL)
+    if cmd == "licenses":
+        errors = lib.supply.licenses(root, lock)
+    elif cmd == "vuln-check":
+        errors = lib.supply.vuln_check(root, lock)
+    else:
+        errors = lib.supply.attest_check(root, lock, opts["today"])
+    for err in errors:
+        print("sldeps %s: FAIL: %s" % (cmd, err))
+    if errors:
+        return 1
+    print("sldeps %s: ok" % cmd)
+    return 0
 
 
 def main(argv):
@@ -101,6 +139,12 @@ def main(argv):
             for rel in lib.cmd_vendor_from_system(root, opts["from_system"]):
                 print("sldeps vendor: wrote %s" % rel)
             return 0
+        if cmd == "attest" and opts["from_archive"] and len(pos) == 2:
+            for rel in lib.cmd_attest(root, pos[0], pos[1]):
+                print("sldeps attest: wrote %s" % rel)
+            return 0
+        if cmd in ("licenses", "attest-check", "vuln-check") and not pos:
+            return run_rule(cmd, root, opts)
         if cmd == "register" and not pos:
             table = lib.register_table(lib.load(root, lib.LOCK_REL))
             if opts["write"]:

@@ -316,6 +316,10 @@ neg-ci-local-red:
 acceptance-041-048:
     @bash scripts/acceptance-041-048
 
+# the five infrastructure-release checks of episodes 049-060 (fresh clone, provenance, test report, ci yaml, episodes doc), logs 5-9 in build/acceptance/ (WO-034)
+acceptance-049-060:
+    @bash scripts/acceptance-049-060
+
 # every negative test and selftest (WO-020)
 negatives: neg-format neg-doc neg-registry neg-rtm neg-deps neg-deps-missing neg-deps-unpinned-provider neg-vcpkg-absent neg-feature-removed neg-feature-unlisted neg-probe-never-fails neg-vk-layer-missing neg-ci-local-red doctor-selftest
     @echo "negatives: ok"
@@ -324,8 +328,8 @@ negatives: neg-format neg-doc neg-registry neg-rtm neg-deps neg-deps-missing neg
 check-ratchet: fast gate-build deps-check features-check vk-check test negatives ci-local
     @echo "check-ratchet: ok"
 
-# release gate: check-ratchet plus the ubsan, tsan, release and gcc workflows (WO-020)
-check-full: check-ratchet (workflow "ci-ubsan") (workflow "ci-tsan") (workflow "ci-release") (workflow "ci-gcc")
+# release gate: check-ratchet plus the ubsan, tsan, hardened release (clang and gcc) and gcc workflows (WO-020), then the static-analysis and hardening gates tidy analyze sanitize-proof hardening neg-tidy (WO-025)
+check-full: check-ratchet (workflow "ci-ubsan") (workflow "ci-tsan") (workflow "ci-release") (workflow "ci-gcc") (workflow "ci-gcc-release") tidy analyze sanitize-proof hardening neg-tidy
     @echo "check-full: ok"
 
 # episodes-doc-check <range>: docs/episodes/<range>.md has a section per episode (registry title, five sub-headings, a just recipe, an ADR or none); e.g. 041-048 (WO-021)
@@ -346,3 +350,172 @@ gov-check: registry-check registry-docs-check doc-check adr-check wo-check rtm-c
 # before SL-GOV-001 is approved: "not yet approved", exit 0; after: sha256, Approved status and locked rows frozen (WO-023)
 constitution-frozen:
     @python3 -I tools/governance/cmd_constitution_frozen.py
+
+# ---- stubs declared for episodes 049-060 (WO-024..WO-034); each owner replaces its body ----
+
+# fmt-check, then tools/format/check.py --check (CMake, Python, shell, JSON, doc front matter) and shfmt -d when installed (WO-024)
+fmt-check-all *args:
+    @{{just_executable()}} fmt-check
+    @git ls-files -z --cached --others --exclude-standard | python3 -I tools/format/check.py --check --files-from-stdin {{args}}
+    @if command -v shfmt >/dev/null 2>&1; then git ls-files -z --cached --others --exclude-standard | python3 -I tools/format/check.py --list shell --files-from-stdin | xargs -0 -r shfmt -d -i 2 -ci; echo "fmt-check-all: shfmt ok"; else echo "fmt-check-all: note: shfmt is not installed, shfmt -d skipped"; fi
+    @echo "fmt-check-all: ok"
+
+# fmt, then tools/format/check.py --fix and shfmt -w when installed: rewrites what can be fixed mechanically (WO-024)
+fmt-all:
+    @{{just_executable()}} fmt
+    @git ls-files -z --cached --others --exclude-standard | python3 -I tools/format/check.py --fix --files-from-stdin
+    @if command -v shfmt >/dev/null 2>&1; then git ls-files -z --cached --others --exclude-standard | python3 -I tools/format/check.py --list shell --files-from-stdin | xargs -0 -r shfmt -w -i 2 -ci; fi
+
+# negative test: one planted defect per kind (cmake, python, shell, json, frontmatter) fails fmt-check-all and names its kind; the control run exits 0 (WO-024)
+neg-format-all *args:
+    @bash tests/gates/neg_format_all.sh {{args}}
+
+# run-clang-tidy (.clang-tidy, WarningsAsErrors '*') over the first-party sources of build/debug: engine/ examples/ tests/, minus tests/proofs and the debt listed with reasons in tests/proofs/tidy-allow.txt; extra args go to run-clang-tidy (WO-025)
+tidy *args:
+    @cmake --preset debug
+    @cmake --build --preset debug
+    @python3 -I tests/proofs/tidy_files.py build/debug/compile_commands.json tests/proofs/tidy-allow.txt >build/debug/tidy-files.txt
+    @xargs -d '\n' -a build/debug/tidy-files.txt run-clang-tidy -p build/debug -quiet -j "$(nproc)" {{args}}
+    @echo "tidy: ok ($(wc -l <build/debug/tidy-files.txt) files)"
+
+# clang static analyzer (analyze-build --ctu --status-bugs, else clang-tidy clang-analyzer-*), cppcheck, and gcc -fanalyzer (gcc-debug with SL_ANALYZER=ON in build/gcc-analyzer); a finding fails it (WO-025)
+analyze *args:
+    @cmake --preset debug
+    @cmake --build --preset debug
+    @rm -rf build/analyze
+    @# analyze-build is a Python script; 3.14 defaults multiprocessing to forkserver, which needs a unix socket a jail may deny: force fork
+    @if command -v analyze-build >/dev/null 2>&1; then \
+      lib="$(dirname "$(readlink -f "$(command -v analyze-build)")")/../lib"; \
+      python3 -I -c 'import multiprocessing, sys; multiprocessing.set_start_method("fork"); sys.path.append(sys.argv.pop(1)); from libscanbuild.analyze import analyze_build; sys.exit(analyze_build())' "$lib" --cdb build/debug/compile_commands.json --ctu --status-bugs -o build/analyze {{args}}; \
+    else \
+      echo "analyze: analyze-build not found, falling back to clang-tidy clang-analyzer-*"; \
+      python3 -I tests/proofs/tidy_files.py build/debug/compile_commands.json tests/proofs/tidy-allow.txt | xargs -d '\n' run-clang-tidy -p build/debug -quiet -j "$(nproc)" '-checks=-*,clang-analyzer-*' '-warnings-as-errors=*'; \
+    fi
+    @echo "analyze: clang analyzer ok"
+    @cppcheck --project=build/debug/compile_commands.json --enable=warning,performance,portability --std=c++23 --error-exitcode=1 --inline-suppr --suppressions-list=.cppcheck-suppressions --quiet
+    @echo "analyze: cppcheck ok"
+    @cmake --preset gcc-debug -B build/gcc-analyzer -DSL_ANALYZER=ON -DSL_WARNINGS_AS_ERRORS=ON
+    @cmake --build build/gcc-analyzer
+    @echo "analyze: ok (clang analyzer, cppcheck, gcc -fanalyzer)"
+
+# each sanitizer must catch its planted defect: tests/proofs asan_overflow, ubsan_shift, tsan_race built with SL_PROOFS=ON under the asan, ubsan and tsan presets (build/neg/proof-<san>) must exit non-zero and print the sanitizer's report; tsan that cannot run in a jail is marked unproven (WO-025)
+sanitize-proof *args:
+    @bash tests/gates/sanitize_proof.sh {{args}}
+
+# ci-release (clang) and ci-gcc-release (gcc) with SL_HARDEN=ON: build, run the bounds-trap tests, then scripts/check-hardening reads sl_sandbox and sl_tests of each (PIE, RELRO, BIND_NOW, NX stack, CET, canary, fortify) and must reject a non-hardened debug binary (WO-025)
+hardening *args:
+    @cmake --preset ci-release
+    @cmake --build --preset ci-release
+    @ctest --preset ci-release -R 'trap_bounds|sandbox_self_check'
+    @cmake --preset ci-gcc-release
+    @cmake --build --preset ci-gcc-release
+    @ctest --preset ci-gcc-release -R 'trap_bounds|sandbox_self_check'
+    @bash scripts/check-hardening build/ci-release/examples/sandbox/sl_sandbox build/ci-release/tests/unit/sl_tests
+    @bash scripts/check-hardening build/ci-gcc-release/examples/sandbox/sl_sandbox build/ci-gcc-release/tests/unit/sl_tests
+    @cmake --preset debug
+    @cmake --build --preset debug --target sl_sandbox
+    @if bash scripts/check-hardening build/debug/examples/sandbox/sl_sandbox >build/debug/hardening-negative.log 2>&1; then echo "hardening: FAIL: a non-hardened debug binary passed check-hardening"; exit 1; fi; grep -q '^FAIL' build/debug/hardening-negative.log && echo "hardening: negative control ok ($(grep -c '^FAIL' build/debug/hardening-negative.log) properties named missing on the debug binary)"
+    @echo "hardening: ok"
+
+# negative test: a bugprone defect planted in a copy of the tree makes tidy fail and name the check; the control run exits 0 (WO-025)
+neg-tidy:
+    @bash tests/gates/neg_tidy.sh
+
+# test-tiers [tier...]: configure and build debug once, then `ctest -L <tier>` per tier (default: unit integration system e2e); prints a count per tier and fails when a tier has no tests (WO-026)
+test-tiers *tiers='':
+    @cmake --preset debug
+    @cmake --build --preset debug
+    @tiers={{quote(tiers)}}; tiers="${tiers:-unit integration system e2e}"; bad=0; \
+    for tier in $tiers; do \
+      n=$(ctest --test-dir build/debug -N -L "^${tier}\$" | sed -n 's/^Total Tests: //p'); \
+      if [ "${n:-0}" -eq 0 ]; then echo "test-tiers: FAIL: tier '$tier' has no tests"; bad=1; continue; fi; \
+      echo "test-tiers: $tier: $n test(s)"; \
+      ctest --test-dir build/debug -L "^${tier}\$" --no-tests=error --output-on-failure || { echo "test-tiers: FAIL: tier '$tier'"; bad=1; }; \
+    done; \
+    if [ "$bad" -ne 0 ]; then exit 1; fi; \
+    echo "test-tiers: ok ($tiers)"
+
+# test-report: all tests on debug; build/debug/test-report.xml (ctest JUnit) and build/debug/test-report.md (tier counts and durations) (WO-026)
+test-report:
+    @cmake --preset debug
+    @cmake --build --preset debug
+    @rc=0; ctest --test-dir build/debug --output-junit test-report.xml --output-on-failure || rc=$?; \
+    python3 -I docs/testing/test_report.py build/debug; \
+    exit $rc
+
+# negative test: a unit test that sleeps 3 s with TIMEOUT 1 fails ctest and is reported as Timeout; the control run passes (WO-026)
+neg-test-timeout:
+    @bash tests/gates/neg_test_timeout.sh
+
+# fixtures-check: every file under tests/fixtures matches tests/fixtures/MANIFEST.json; fails on drift or an unmanifested file (R-FIX-*) (WO-027); `python3 -I tools/testing/fixtures.py lock` rewrites the manifest
+fixtures-check *args:
+    @python3 -I tools/testing/fixtures.py check {{args}}
+
+# golden-check: configure and build debug, then run the golden tests (`ctest -R golden`); SL_UPDATE_GOLDEN=1 rewrites golden files (WO-027)
+golden-check *args:
+    @cmake --preset debug
+    @cmake --build --preset debug
+    @ctest --test-dir build/debug -R golden --no-tests=error --output-on-failure {{args}}
+
+# negative test: editing a golden file in a copy of the tree fails its test with a diff; the control run passes (WO-027)
+neg-golden *args:
+    @bash tests/gates/neg_golden.sh
+
+# structural check of .github/workflows/*.yml and dependabot.yml: every `uses:` pinned to a 40-hex sha, read-only permissions, no pull_request_target, builds only via scripts/ci-local.sh or an existing preset; rules R-CI-*; placeholder shas warn (R-CI-UNVERIFIED-SHA), `--strict` fails them (WO-028)
+ci-yaml-check *args:
+    @python3 -I tools/ci/check_workflows.py {{args}}
+
+# ci-local --full: the default path plus ci-ubsan, ci-tsan, ci-release, ci-gcc-release; a workflow preset missing from CMakePresets.json prints "skipped: no workflow preset" and the run still exits 0 (WO-028)
+ci-local-full *args:
+    @bash scripts/ci-local.sh --full {{args}}
+
+# configure + build debug, then every artifact (sl_core, sl_sandbox, sl_tests) has a schema-valid provenance record whose artifact and input hashes and environment_hash still hold; rules R-PROV-* (WO-029, SL-GOV-006 F3)
+provenance-check *args:
+    @cmake --preset debug
+    @cmake --build --preset debug
+    @python3 -I tools/provenance/check.py {{args}}
+
+# negative test: a source edited after the build makes provenance-check fail with R-PROV-INPUT-STALE naming it; the control run exits 0 (WO-029)
+neg-provenance:
+    @bash tests/gates/neg_provenance.sh
+
+# configure + build debug, run sl_tests with SL_LOG_JSON_PATH=build/debug/log-events.jsonl, then every line validates against schemas/sl-log-event.schema.json and all six levels appear; rules R-LOG-* (WO-030, SL-GOV-006 F6)
+log-schema-check *args:
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug --target sl_tests
+    @rm -f build/debug/log-events.jsonl
+    @SL_LOG_JSON_PATH=build/debug/log-events.jsonl build/debug/tests/unit/sl_tests --minimal
+    @python3 -I tools/diagnostics/log_schema_check.py --file build/debug/log-events.jsonl --require-levels {{args}}
+
+# negative test: a planted event whose `system` is a number makes log-schema-check fail naming /system; the control run exits 0 (WO-030)
+neg-log-schema *args:
+    @bash tests/gates/neg_log_schema.sh
+
+# owner WO-031
+docs *args:
+    @mkdir -p build/docs
+    @if command -v doxygen >/dev/null 2>&1; then doxygen docs/Doxyfile && python3 -I tools/docs/build.py --api doxygen {{args}}; else python3 -I tools/docs/build.py --api stub {{args}}; fi
+
+# owner WO-031
+docs-check *args:
+    @python3 -I tools/docs/check.py {{args}}
+
+# every lock licence is on the SL-GOV-008 allowlist and every vendored dir has a manifested LICENSE (WO-032, C08)
+deps-licenses *args:
+    @python3 -I tools/deps/sldeps licenses {{args}}
+
+# a vendored package is verified_upstream (deps/attestations.json) or has an unexpired waiver in deps/attestation-waivers.json (WO-032)
+deps-attest-check *args:
+    @python3 -I tools/deps/sldeps attest-check {{args}}
+
+# negative test: a planted GPL licence, an unattested package, a missing LICENSE file and an open finding each fail and name the culprit (WO-032)
+neg-deps-license *args:
+    @bash tests/gates/neg_deps_license.sh
+
+# dev image data: toolchain/packages.txt equals the set derived from environments.json, lock.json covers every tool, the Containerfile uses packages.txt; exit 1 on drift (WO-033)
+devimage-check *args:
+    @bash scripts/doctor --devimage-check {{args}}
+
+# installed tools vs toolchain/lock.json: required drift is an error unless toolchain/drift-allow.json lists it with a reason and an until-date; optional drift warns (WO-033)
+doctor-strict *args:
+    @bash scripts/doctor --strict {{args}}

@@ -18,3 +18,5 @@ CMakeUserPresets.json
 !/.claude/agents/
 !/.claude/skills/
 /.claude/.cc-writes
+__pycache__/
+*.pyc

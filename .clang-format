@@ -4,3 +4,19 @@ Language: Cpp
 Standard: Latest
 IndentWidth: 2
 ColumnLimit: 100
+InsertNewlineAtEOF: true
+# Include order (WO-024): categories sl/ (1), third-party (2), standard library (3), sorted inside each block.
+# IncludeBlocks: Regroup would also enforce the block order; it needs 4 C++ files outside WO-024 reordered first.
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
+IncludeCategories:
+  - Regex: '^[<"]sl/'
+    Priority: 1
+  - Regex: '^"'
+    Priority: 1
+  - Regex: '^<[A-Za-z0-9_]+\.h>$'
+    Priority: 3
+  - Regex: '^<[^>]*[./][^>]*>$'
+    Priority: 2
+  - Regex: '^<'
+    Priority: 3

@@ -373,11 +373,19 @@ def rule_dup_id(reg, ctx):
     ids = [e["id"] for e in reg["episodes"]]
     for d in _dupes(ids):
         idx = [i for i, v in enumerate(ids) if v == d]
-        out.append(_f("R-DUP-ID", "/episodes/%d" % idx[1], "episode id %s is repeated (also at /episodes/%d)" % (d, idx[0])))
+        out.append(
+            _f("R-DUP-ID", "/episodes/%d" % idx[1], "episode id %s is repeated (also at /episodes/%d)" % (d, idx[0]))
+        )
     nums = [e["number"] for e in reg["episodes"]]
     for d in _dupes(nums):
         idx = [i for i, v in enumerate(nums) if v == d]
-        out.append(_f("R-DUP-ID", "/episodes/%d" % idx[1], "episode number %d is repeated (also at /episodes/%d)" % (d, idx[0])))
+        out.append(
+            _f(
+                "R-DUP-ID",
+                "/episodes/%d" % idx[1],
+                "episode number %d is repeated (also at /episodes/%d)" % (d, idx[0]),
+            )
+        )
     vids = [v["id"] for v in reg["volumes"]]
     for d in _dupes(vids):
         idx = [i for i, v in enumerate(vids) if v == d]
@@ -452,7 +460,9 @@ def rule_volgraph(reg, ctx):
     for i, v in enumerate(reg["volumes"]):
         part = parts.get(v["part"])
         if part is None:
-            out.append(_f("R-VOLGRAPH", "/volumes/%d/part" % i, "volume %s names unknown part %d" % (v["id"], v["part"])))
+            out.append(
+                _f("R-VOLGRAPH", "/volumes/%d/part" % i, "volume %s names unknown part %d" % (v["id"], v["part"]))
+            )
         elif v["first"] < part["first"] or v["last"] > part["last"]:
             out.append(
                 _f("R-VOLGRAPH", "/volumes/%d" % i, "volume %s (%d-%d) lies outside part %d (%d-%d)"
@@ -460,7 +470,9 @@ def rule_volgraph(reg, ctx):
             )
         for j, dep in enumerate(v["depends_on_volumes"]):
             if dep == v["id"]:
-                out.append(_f("R-VOLGRAPH", "/volumes/%d/depends_on_volumes/%d" % (i, j), "volume %s depends on itself" % dep))
+                out.append(
+                    _f("R-VOLGRAPH", "/volumes/%d/depends_on_volumes/%d" % (i, j), "volume %s depends on itself" % dep)
+                )
             elif dep not in vols:
                 out.append(_f("R-VOLGRAPH", "/volumes/%d/depends_on_volumes/%d" % (i, j), "unknown volume %s" % dep))
     # cycles: iterative depth-first search over the declared edges
@@ -481,7 +493,9 @@ def rule_volgraph(reg, ctx):
                 trail.pop()
             elif state.get(nxt) == 1:
                 cycle = trail[trail.index(nxt):] + [nxt]
-                out.append(_f("R-VOLGRAPH", "/volumes/%d" % vols[nxt][0], "volume dependency cycle: %s" % " -> ".join(cycle)))
+                out.append(
+                    _f("R-VOLGRAPH", "/volumes/%d" % vols[nxt][0], "volume dependency cycle: %s" % " -> ".join(cycle))
+                )
             elif nxt not in state:
                 state[nxt] = 1
                 trail.append(nxt)
@@ -489,7 +503,13 @@ def rule_volgraph(reg, ctx):
     for i, ep in enumerate(reg["episodes"]):
         entry = vols.get(ep["volume"])
         if entry is None:
-            out.append(_f("R-VOLGRAPH", "/episodes/%d/volume" % i, "episode %s names unknown volume %s" % (ep["id"], ep["volume"])))
+            out.append(
+                _f(
+                    "R-VOLGRAPH",
+                    "/episodes/%d/volume" % i,
+                    "episode %s names unknown volume %s" % (ep["id"], ep["volume"]),
+                )
+            )
         elif not entry[1]["first"] <= ep["number"] <= entry[1]["last"]:
             out.append(
                 _f("R-VOLGRAPH", "/episodes/%d/volume" % i, "episode %s is outside volume %s (%d-%d)"
@@ -516,7 +536,13 @@ def rule_dep_order(reg, ctx):
             elif dep not in index:
                 out.append(_f("R-DEP-ORDER", path, "%s depends on unknown episode %s" % (ep["id"], dep)))
             elif index[dep][1]["number"] >= ep["number"]:
-                out.append(_f("R-DEP-ORDER", path, "%s depends on later episode %s (dependencies must come first)" % (ep["id"], dep)))
+                out.append(
+                    _f(
+                        "R-DEP-ORDER",
+                        path,
+                        "%s depends on later episode %s (dependencies must come first)" % (ep["id"], dep),
+                    )
+                )
     return out
 
 
@@ -524,29 +550,53 @@ def rule_lifecycle(reg, ctx):
     out = []
     life = reg["lifecycle"]
     if list(life["states"]) != list(STATES):
-        out.append(_f("R-LIFECYCLE", "/lifecycle/states", "states differ from master plan 6.2: expected %s" % ", ".join(STATES)))
+        out.append(
+            _f(
+                "R-LIFECYCLE",
+                "/lifecycle/states",
+                "states differ from master plan 6.2: expected %s" % ", ".join(STATES),
+            )
+        )
     declared = sorted(tuple(t) for t in life["transitions"])
     if declared != sorted(fsm_edges()):
-        out.append(_f("R-LIFECYCLE", "/lifecycle/transitions", "transitions differ from master plan 6.2 (expected %d edges)" % len(fsm_edges())))
+        out.append(
+            _f(
+                "R-LIFECYCLE",
+                "/lifecycle/transitions",
+                "transitions differ from master plan 6.2 (expected %d edges)" % len(fsm_edges()),
+            )
+        )
     for i, ep in enumerate(reg["episodes"]):
         hist = ep["history"]
         base = "/episodes/%d" % i
         if not hist:
             if ep["status"] != "Planned":
-                out.append(_f("R-LIFECYCLE", base + "/status", "%s is %s but has no history" % (ep["id"], ep["status"])))
+                out.append(
+                    _f("R-LIFECYCLE", base + "/status", "%s is %s but has no history" % (ep["id"], ep["status"]))
+                )
             continue
         prev_to, prev_date = "Planned", ""
         for j, h in enumerate(hist):
             p = "%s/history/%d" % (base, j)
             if h["from"] != prev_to:
-                out.append(_f("R-LIFECYCLE", p, "history does not chain: expected from %s, found %s" % (prev_to, h["from"])))
+                out.append(
+                    _f("R-LIFECYCLE", p, "history does not chain: expected from %s, found %s" % (prev_to, h["from"]))
+                )
             if not can_transition(h["from"], h["to"]):
-                out.append(_f("R-LIFECYCLE", p, "%s > %s is not a legal transition (master plan 6.2)" % (h["from"], h["to"])))
+                out.append(
+                    _f("R-LIFECYCLE", p, "%s > %s is not a legal transition (master plan 6.2)" % (h["from"], h["to"]))
+                )
             if h["date"] < prev_date:
                 out.append(_f("R-LIFECYCLE", p, "history date %s is earlier than the previous entry" % h["date"]))
             prev_to, prev_date = h["to"], h["date"]
         if prev_to != ep["status"]:
-            out.append(_f("R-LIFECYCLE", base + "/status", "%s status is %s but history ends at %s" % (ep["id"], ep["status"], prev_to)))
+            out.append(
+                _f(
+                    "R-LIFECYCLE",
+                    base + "/status",
+                    "%s status is %s but history ends at %s" % (ep["id"], ep["status"], prev_to),
+                )
+            )
     return out
 
 
@@ -556,9 +606,21 @@ def rule_no_evidence(reg, ctx):
         if ep["status"] in EVIDENCE_STATES:
             comp = ep["completion"]
             if comp is None:
-                out.append(_f("R-NO-EVIDENCE", "/episodes/%d/completion" % i, "%s is %s but has no completion record" % (ep["id"], ep["status"])))
+                out.append(
+                    _f(
+                        "R-NO-EVIDENCE",
+                        "/episodes/%d/completion" % i,
+                        "%s is %s but has no completion record" % (ep["id"], ep["status"]),
+                    )
+                )
             elif not comp["evidence"]:
-                out.append(_f("R-NO-EVIDENCE", "/episodes/%d/completion/evidence" % i, "%s is %s but lists no evidence" % (ep["id"], ep["status"])))
+                out.append(
+                    _f(
+                        "R-NO-EVIDENCE",
+                        "/episodes/%d/completion/evidence" % i,
+                        "%s is %s but lists no evidence" % (ep["id"], ep["status"]),
+                    )
+                )
     return out
 
 
@@ -568,7 +630,13 @@ def rule_silent_scope(reg, ctx):
         base = "/episodes/%d" % i
         actual = meaning_sha256(ep["title"], ep["summary"])
         if actual != ep["meaning_sha256"]:
-            out.append(_f("R-SILENT-SCOPE", base + "/meaning_sha256", "%s title/summary no longer match meaning_sha256; amend the record instead" % ep["id"]))
+            out.append(
+                _f(
+                    "R-SILENT-SCOPE",
+                    base + "/meaning_sha256",
+                    "%s title/summary no longer match meaning_sha256; amend the record instead" % ep["id"],
+                )
+            )
         prev = None
         for j, am in enumerate(ep["amendments"]):
             p = "%s/amendments/%d" % (base, j)
@@ -582,7 +650,9 @@ def rule_silent_scope(reg, ctx):
                 out.append(_f("R-SILENT-SCOPE", p, "amending a Locked decision requires an ADR"))
             prev = am["to_sha256"]
         if ep["amendments"] and prev != ep["meaning_sha256"]:
-            out.append(_f("R-SILENT-SCOPE", base + "/amendments", "last amendment to_sha256 does not equal meaning_sha256"))
+            out.append(
+                _f("R-SILENT-SCOPE", base + "/amendments", "last amendment to_sha256 does not equal meaning_sha256")
+            )
     return out
 
 
@@ -595,7 +665,13 @@ def rule_doc_missing(reg, ctx):
     for i, ep in enumerate(reg["episodes"]):
         for j, doc in enumerate(ep["documents"]):
             if doc not in known:
-                out.append(_f("R-DOC-MISSING", "/episodes/%d/documents/%d" % (i, j), "%s names %s which SL-REG-001 does not list" % (ep["id"], doc)))
+                out.append(
+                    _f(
+                        "R-DOC-MISSING",
+                        "/episodes/%d/documents/%d" % (i, j),
+                        "%s names %s which SL-REG-001 does not list" % (ep["id"], doc),
+                    )
+                )
     return out
 
 
@@ -609,7 +685,13 @@ def rule_wo_trace(reg, ctx):
     for i, wo in enumerate(wos):
         for j, tr in enumerate(wo["traces"]):
             if tr not in ids:
-                out.append(_f("R-WO-TRACE", "/work_orders/%d/traces/%d" % (i, j), "%s traces unknown episode %s" % (wo["id"], tr)))
+                out.append(
+                    _f(
+                        "R-WO-TRACE",
+                        "/work_orders/%d/traces/%d" % (i, j),
+                        "%s traces unknown episode %s" % (wo["id"], tr),
+                    )
+                )
         traced.setdefault(wo["id"], set()).update(wo["traces"])
     for i, ep in enumerate(reg["episodes"]):
         for j, wid in enumerate(ep["work_orders"]):
@@ -629,7 +711,13 @@ def rule_view_drift(reg, ctx):
     for name in sorted(views):
         v = views[name]
         if v["expected_sha256"] != v["actual_sha256"]:
-            out.append(_f("R-VIEW-DRIFT", "/views/%s" % name, "view differs from the registry-generated content; regenerate it"))
+            out.append(
+                _f(
+                    "R-VIEW-DRIFT",
+                    "/views/%s" % name,
+                    "view differs from the registry-generated content; regenerate it",
+                )
+            )
     return out
 
 
@@ -638,7 +726,14 @@ def rule_plan_sha(reg, ctx):
     if pinned is None:
         return []
     if reg["source"]["sha256"] != pinned:
-        return [_f("R-PLAN-SHA", "/source/sha256", "registry source sha256 %s does not equal the pinned plan sha256 %s" % (reg["source"]["sha256"][:12], pinned[:12]))]
+        return [
+            _f(
+                "R-PLAN-SHA",
+                "/source/sha256",
+                "registry source sha256 %s does not equal the pinned plan sha256 %s"
+                % (reg["source"]["sha256"][:12], pinned[:12]),
+            )
+        ]
     return []
 
 
@@ -662,8 +757,12 @@ def rule_dep_accepted(reg, ctx):
             target = index.get(dep)
             if target is not None and target[1]["status"] != "Accepted":
                 out.append(
-                    _f("R-DEP-ACCEPTED", "/episodes/%d/depends_on/%d" % (i, j),
-                       "%s is %s but dependency %s is %s, not Accepted" % (ep["id"], ep["status"], dep, target[1]["status"]))
+                    _f(
+                        "R-DEP-ACCEPTED",
+                        "/episodes/%d/depends_on/%d" % (i, j),
+                        "%s is %s but dependency %s is %s, not Accepted"
+                        % (ep["id"], ep["status"], dep, target[1]["status"]),
+                    )
                 )
     return out
 

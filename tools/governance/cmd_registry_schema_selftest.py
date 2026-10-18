@@ -96,7 +96,7 @@ def main():
         for p in glob.glob(os.path.join(slib.SCHEMA_DIR, "sl-*.schema.json"))
     )
     for name in extra:
-        if name not in SCHEMAS and name not in ("sl-deps", "sl-deps-lock"):
+        if name not in SCHEMAS and name not in ("sl-deps", "sl-deps-lock", "sl-provenance", "sl-log-event"):
             errors.append("schemas/%s.schema.json: not covered by the selftest" % name)
 
     cases = slib.load_json(os.path.join(FIXTURES, "validator-cases.json"))["cases"]
@@ -117,7 +117,9 @@ def main():
         if rule not in slib.RULES:
             errors.append("%s: names an unknown rule" % os.path.basename(path))
         elif found != {rule}:
-            errors.append("%s: expected exactly %s, found %s" % (os.path.basename(path), rule, sorted(found) or "nothing"))
+            errors.append(
+                "%s: expected exactly %s, found %s" % (os.path.basename(path), rule, sorted(found) or "nothing")
+            )
         seen.add(rule)
     for rule in slib.RULES:
         if rule not in seen:

@@ -27,7 +27,7 @@ step "3. deliver the .claude pieces agents cannot write"
 mkdir -p .claude/agents .claude/rules
 cp -v "$dot/templates/factory/monorepo/.claude/agents/cpp-reviewer.md" .claude/agents/cpp-reviewer.md
 if [ ! -s .claude/settings.json ]; then
-  cat > .claude/settings.json <<'JSON'
+  cat >.claude/settings.json <<'JSON'
 {
   "permissions": {
     "allow": [
@@ -48,15 +48,16 @@ fi
 
 step "4. job.json for the work orders that touch gate files (config-protect and wo-verify read it)"
 for wo in WO-001 WO-014 WO-020; do
-  d="$HOME/.local/state/factory/jobs/$wo"; mkdir -p "$d"
-  [ -f "$d/job.json" ] || printf '{"id":"%s","state":"building","touches_gates":true,"worktree":"%s"}\n' "$wo" "$repo" > "$d/job.json"
+  d="$HOME/.local/state/factory/jobs/$wo"
+  mkdir -p "$d"
+  [ -f "$d/job.json" ] || printf '{"id":"%s","state":"building","touches_gates":true,"worktree":"%s"}\n' "$wo" "$repo" >"$d/job.json"
   echo "$d/job.json"
 done
 
 step "5. dotfiles: D-144 and the CLAUDE.md layout line (review the diff, then commit in ~/.dotfiles yourself)"
 if ! grep -q '^| D-144 ' "$dot/docs/decisions.md"; then
   # shellcheck disable=SC2016  # the backticks are literal Markdown
-  printf '| D-144 | 2026-10-17 | The Sliced Labs master plan (SL-PLAN-001, 840 episodes, engine + editor + web platform) supersedes D-126 (engine scope) and D-135 (monorepo layout). The monorepo `~/Projects/slicedlabs` is recreated fresh with the layout engine/ editor/ sdk/ tools/ tests/ docs/ third_party/ examples/ (repo ADR-0001); repo decisions live in its docs/adr/ from here on. | Founder, 2026-10-17: "here is what i want to build ... state of the art"; the plan at ~/.claude/plans/here-is-what-i-melodic-owl.md. |\n' >> "$dot/docs/decisions.md"
+  printf '| D-144 | 2026-10-17 | The Sliced Labs master plan (SL-PLAN-001, 840 episodes, engine + editor + web platform) supersedes D-126 (engine scope) and D-135 (monorepo layout). The monorepo `~/Projects/slicedlabs` is recreated fresh with the layout engine/ editor/ sdk/ tools/ tests/ docs/ third_party/ examples/ (repo ADR-0001); repo decisions live in its docs/adr/ from here on. | Founder, 2026-10-17: "here is what i want to build ... state of the art"; the plan at ~/.claude/plans/here-is-what-i-melodic-owl.md. |\n' >>"$dot/docs/decisions.md"
   echo "appended D-144 to $dot/docs/decisions.md"
 fi
 grep -n 'sliced-engine/' "$dot/dot_claude/CLAUDE.md" || true

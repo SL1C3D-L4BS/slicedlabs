@@ -18,6 +18,8 @@ Rules (each failure line contains the rule id):
   R-DEPS-TIER       tier A without a version or tier B without min and tested (C03, C04)
   R-DEPS-USED       a package no target consumes (C10)
   R-DEPS-UNPINNED   --strict: a provider that is first in ci order is unpinned (C03, C12)
+  R-DEPS-VULN       an open finding in deps/vulnerabilities.json names a locked version (WO-032, sldeps_supply.py)
+The licence, attestation and vulnerability rules live in sldeps_supply.py (`licenses`, `attest-check`, `vuln-check`).
 
 Stdlib only, no subprocess, no network (ADR-0004).
 """
@@ -30,6 +32,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "governance"))
 import slib  # noqa: E402
+import sldeps_supply as supply  # noqa: E402
 
 ROOT = slib.ROOT
 MANIFEST_REL = "deps/deps.json"
@@ -167,7 +170,9 @@ def build_lock(root, manifest, manifest_bytes, old_lock, tested=None):
             if name == "system":
                 desc["tested"] = tested.get(pname, prev.get("tested"))
                 desc["accept_sha256"] = prev.get("accept_sha256")
-                header = os.path.join(SYSTEM_INCLUDE, *desc.get("header", "").split("/")) if desc.get("header") else None
+                header = None
+                if desc.get("header"):
+                    header = os.path.join(SYSTEM_INCLUDE, *desc["header"].split("/"))
                 if header and os.path.isfile(header):
                     desc["accept_sha256"] = sha256_file(header)
             elif name == "vendored":
@@ -315,10 +320,35 @@ def cmd_lock_refresh(root, pkg, archive):
     if prov is None:
         raise DepsError("lock-refresh: '%s' has no cpm provider in %s" % (pkg, LOCK_REL))
     if not os.path.isfile(archive):
-        raise DepsError("lock-refresh: %s is not a file (download it first: `SL_DEPS_ALLOW_NETWORK=1 just deps-lock-refresh %s`)" % (archive, pkg))
+        hint = "SL_DEPS_ALLOW_NETWORK=1 just deps-lock-refresh %s" % pkg
+        raise DepsError("lock-refresh: %s is not a file (download it first: `%s`)" % (archive, hint))
     prov["url_hash"] = sha256_file(archive)
     write_text(root, LOCK_REL, dump_json(lock))
     return [LOCK_REL]
+
+
+def cmd_attest(root, pkg, archive):
+    """Compare PKG's vendored files with the upstream ARCHIVE (already downloaded by the founder); on a match set
+    verified_upstream true in the lock and record the archive sha256 in deps/attestations.json. Offline.
+    Returns the relative paths written."""
+    lock = load(root, LOCK_REL)
+    entry = lock["packages"].get(pkg)
+    prov = entry["providers"].get("vendored") if entry else None
+    if prov is None or not prov["files"]:
+        raise DepsError("attest: '%s' has no vendored files in %s" % (pkg, LOCK_REL))
+    if not os.path.isfile(archive):
+        raise DepsError("attest: %s is not a file (download it first with tools/deps/fetch_archive.sh)" % archive)
+    record, problems = supply.attest_record(pkg, prov, archive)
+    if problems:
+        raise DepsError("attest: not verified: " + "; ".join(problems))
+    prov["verified_upstream"] = True
+    write_text(root, LOCK_REL, dump_json(lock))
+    write_text(root, supply.ATTEST_REL, dump_json(supply.attestations_doc(root, pkg, record)))
+    written = [LOCK_REL, supply.ATTEST_REL]
+    for rel, text in sorted(part_manifests(lock).items()):
+        write_text(root, rel, text)
+        written.append(rel)
+    return written
 
 
 def cmd_vendor_from_system(root, pkg, include_dir=SYSTEM_INCLUDE):
@@ -342,6 +372,11 @@ def cmd_vendor_from_system(root, pkg, include_dir=SYSTEM_INCLUDE):
 
 
 # --- check ------------------------------------------------------------------------------------
+
+
+def _regen_command(rel):
+    """The sldeps command that rewrites a generated file."""
+    return "sync-vcpkg" if rel.startswith("deps/") else "lock"
 
 
 def _find(msg, rule, rel, extra=""):
@@ -369,10 +404,19 @@ def check(root, strict=False, ci_order=None):
 
     # the lock belongs to this manifest
     if lock["manifest_sha256"] != sha256_bytes(manifest_bytes):
-        errors.append(_find("manifest_sha256 differs from sha256(%s); run `sldeps lock`" % MANIFEST_REL, "R-DEPS-MANIFEST", LOCK_REL))
+        errors.append(
+            _find(
+                "manifest_sha256 differs from sha256(%s); run `sldeps lock`" % MANIFEST_REL,
+                "R-DEPS-MANIFEST",
+                LOCK_REL,
+            )
+        )
     if lock["policy"] != manifest["policy"]:
-        keys = sorted(k for k in set(lock["policy"]) | set(manifest["policy"]) if lock["policy"].get(k) != manifest["policy"].get(k))
-        errors.append(_find("lock policy differs from the manifest policy in %s" % ", ".join(keys), "R-DEPS-POLICY", LOCK_REL))
+        lp, mp = lock["policy"], manifest["policy"]
+        keys = sorted(k for k in set(lp) | set(mp) if lp.get(k) != mp.get(k))
+        errors.append(
+            _find("lock policy differs from the manifest policy in %s" % ", ".join(keys), "R-DEPS-POLICY", LOCK_REL)
+        )
     if sorted(lock["packages"]) != sorted(manifest["packages"]):
         errors.append(_find("package set differs from the manifest; run `sldeps lock`", "R-DEPS-MANIFEST", LOCK_REL))
     allowed = set(manifest["policy"]["licenses_allowed"])
@@ -385,14 +429,26 @@ def check(root, strict=False, ci_order=None):
             continue
         where = "%s (package %s)" % (LOCK_REL, pname)
         if mpkg["license"] not in allowed:
-            errors.append(_find("%s: licence %r is not on the allowlist" % (pname, mpkg["license"]), "R-DEPS-LICENSE", MANIFEST_REL))
+            errors.append(
+                _find(
+                    "%s: licence %r is not on the allowlist" % (pname, mpkg["license"]),
+                    "R-DEPS-LICENSE",
+                    MANIFEST_REL,
+                )
+            )
         if not mpkg["used_by"]:
             errors.append(_find("%s: no target consumes it" % pname, "R-DEPS-USED", MANIFEST_REL))
         if mpkg["tier"] == "A" and mpkg["version"] is None:
             errors.append(_find("%s: tier A needs a version" % pname, "R-DEPS-TIER", MANIFEST_REL))
         for k in ("version", "license", "role", "tier", "used_by", "target"):
             if lpkg[k] != mpkg[k]:
-                errors.append(_find("%s.%s differs from the manifest; run `sldeps lock`" % (pname, k), "R-DEPS-MANIFEST", LOCK_REL))
+                errors.append(
+                    _find(
+                        "%s.%s differs from the manifest; run `sldeps lock`" % (pname, k),
+                        "R-DEPS-MANIFEST",
+                        LOCK_REL,
+                    )
+                )
         if sorted(lpkg["providers"]) != sorted(mpkg["providers"]):
             errors.append(_find("%s: provider set differs from the manifest" % pname, "R-DEPS-MANIFEST", LOCK_REL))
         for name, lprov in lpkg["providers"].items():
@@ -402,16 +458,27 @@ def check(root, strict=False, ci_order=None):
             desc = {k: v for k, v in lprov.items() if k not in PIN_KEYS[name]}
             if name == "vcpkg":
                 if lprov["version"] != (mpkg["version"] or ""):
-                    errors.append(_find("%s.vcpkg.version differs from the manifest version" % pname, "R-DEPS-MANIFEST", LOCK_REL))
+                    errors.append(
+                        _find("%s.vcpkg.version differs from the manifest version" % pname, "R-DEPS-MANIFEST", LOCK_REL)
+                    )
             if desc != mprov:
-                errors.append(_find("%s.%s descriptor differs from the manifest; run `sldeps lock`" % (pname, name), "R-DEPS-MANIFEST", LOCK_REL))
+                errors.append(
+                    _find(
+                        "%s.%s descriptor differs from the manifest; run `sldeps lock`" % (pname, name),
+                        "R-DEPS-MANIFEST",
+                        LOCK_REL,
+                    )
+                )
             if name == "system" and mpkg["tier"] == "B" and not lprov["tested"]:
                 errors.append(_find("%s: tier B needs a tested version beside min" % pname, "R-DEPS-TIER", LOCK_REL))
             if name == "vendored":
                 covered.update(_check_vendored(root, pname, lprov, errors))
+    errors.extend(supply.vuln_check(root, lock))
     # C09: every third_party file is covered
     vendored_dirs = {
-        p["providers"]["vendored"]["dir"] for p in lock["packages"].values() if p["providers"].get("vendored", {}).get("files")
+        p["providers"]["vendored"]["dir"]
+        for p in lock["packages"].values()
+        if p["providers"].get("vendored", {}).get("files")
     }
     errors.extend(_uncovered(root, covered, vendored_dirs))
     # generated files equal what sync would write
@@ -424,10 +491,11 @@ def check(root, strict=False, ci_order=None):
         try:
             have = read_text(root, rel)
         except OSError:
-            errors.append(_find("missing; run `sldeps %s`" % ("sync-vcpkg" if rel.startswith("deps/") else "lock"), "R-DEPS-GEN", rel))
+            errors.append(_find("missing; run `sldeps %s`" % _regen_command(rel), "R-DEPS-GEN", rel))
             continue
         if have != expected[rel]:
-            errors.append(_find("differs from what the lock generates; run `sldeps %s`" % ("sync-vcpkg" if rel.startswith("deps/") else "lock"), "R-DEPS-GEN", rel))
+            msg = "differs from what the lock generates; run `sldeps %s`" % _regen_command(rel)
+            errors.append(_find(msg, "R-DEPS-GEN", rel))
 
     # derived state: unpinned providers, honestly reported
     order = ci_order or manifest["policy"]["provider_order"]["ci"]
@@ -440,7 +508,13 @@ def check(root, strict=False, ci_order=None):
                 continue
             note = "%s via %s is unpinned" % (pname, name)
             if strict and name == first:
-                errors.append(_find("%s, and %s is first in ci order (%s)" % (note, name, ",".join(order)), "R-DEPS-UNPINNED", LOCK_REL))
+                errors.append(
+                    _find(
+                        "%s, and %s is first in ci order (%s)" % (note, name, ",".join(order)),
+                        "R-DEPS-UNPINNED",
+                        LOCK_REL,
+                    )
+                )
             else:
                 notes.append(note)
     # system header drift is a note only: the installed header depends on the machine
@@ -458,7 +532,9 @@ def _check_vendored(root, pname, prov, errors):
     covered = set()
     base = prov["dir"]
     if prov["tree_sha256"] != tree_sha256(prov["files"]):
-        errors.append(_find("%s: tree_sha256 does not match its files; run `sldeps lock`" % pname, "R-DEPS-HASH", LOCK_REL))
+        errors.append(
+            _find("%s: tree_sha256 does not match its files; run `sldeps lock`" % pname, "R-DEPS-HASH", LOCK_REL)
+        )
     if "file" in prov and prov["file"] not in prov["files"] and os.path.isdir(_path(root, base)):
         errors.append(_find("%s: declared file %s is not in the lock" % (pname, prov["file"]), "R-DEPS-HASH", LOCK_REL))
     for rel, want in sorted(prov["files"].items()):
@@ -502,9 +578,19 @@ def register_table(lock):
     ]
     for pname in sorted(lock["packages"]):
         pkg = lock["packages"][pname]
-        provs = ", ".join("%s (%s)" % (n, provider_state(pkg, n, pkg["providers"][n])) for n in PROVIDERS if n in pkg["providers"])
+        provs = ", ".join(
+            "%s (%s)" % (n, provider_state(pkg, n, pkg["providers"][n])) for n in PROVIDERS if n in pkg["providers"]
+        )
         lines.append(
             "| %s | %s | %s | %s | %s | %s | %s |"
-            % (pname, pkg["version"] or "range", pkg["license"], pkg["role"], pkg["tier"], ", ".join(pkg["used_by"]), provs)
+            % (
+                pname,
+                pkg["version"] or "range",
+                pkg["license"],
+                pkg["role"],
+                pkg["tier"],
+                ", ".join(pkg["used_by"]),
+                provs,
+            )
         )
     return "\n".join(lines) + "\n"

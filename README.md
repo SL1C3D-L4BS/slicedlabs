@@ -4,16 +4,19 @@ Unified engine and production platform: a C++23/Vulkan 2D/3D engine and editor, 
 
 ## What exists now
 
-The Foundation slice (episodes 041-048, work orders WO-013 to WO-021) is built and gated; the engine itself is still an empty `sl_core` and a `sl_sandbox` executable.
+The Foundation slice (episodes 041-048, WO-013 to WO-021) and the infrastructure slice (episodes 049-060, WO-020 and WO-024 to WO-034) are built and gated on this machine; the engine itself is still `sl_core` (logging, errors, assertions) and a `sl_sandbox` executable. Every episode is still `Planned` in the registry: the founder records evidence and advances status after the merge.
 
-- Governance: 840-episode registry, controlled documents, ADR-0001 to ADR-0008, work-order checks, the factory contract (`FACTORY.md`).
+- Governance: 840-episode registry, controlled documents, ADR-0001 to ADR-0009 (all Proposed), work-order checks, the factory contract (`FACTORY.md`).
 - Build: CMake 3.28+ and Ninja with presets (schema 8) for clang and gcc, sanitizers (asan, ubsan, tsan), C++23 with a feature battery and C++26 probes (`cmake/`, `docs/build/README.md`).
 - Vulkan: header, loader and validation-layer detection, slangc and spirv-val (no device is opened).
 - Dependencies: one policy and one lock (`deps/`, `tools/deps/sldeps`), providers vendored, system, cpm and vcpkg through `sl_require()`; doctest and cpm are vendored under `third_party/`.
-- Local CI: `scripts/ci-local.sh` and the acceptance run for episodes 041-048.
-- Records: `docs/episodes/041-048.md` (done, decisions, acceptance, evidence, open issues per episode).
+- Local CI: `scripts/ci-local.sh` (quick and `--full`), `fresh-clone-check`, and the acceptance runs for episodes 041-048 and 049-060.
+- Quality gates: format for six source kinds (`fmt-check-all`), clang-tidy, static analysis, sanitizer proofs and hardened-binary checks (`check-full`), test tiers with a JUnit report, fixtures and golden data.
+- Traceability: artifact provenance records (`build/<preset>/provenance/`), structured logs with a schema check, generated docs, license and attestation checks for dependencies, a toolchain lock and a strict doctor.
+- Hosted CI: `.github/workflows/ci.yml` and `windows.yml`, validated offline by `just ci-yaml-check`; they have not run on GitHub.
+- Records: `docs/episodes/041-048.md` and `docs/episodes/049-060.md` (done, decisions, acceptance, evidence, open issues per episode).
 
-Unverified, by design of this slice (details in `docs/episodes/041-048.md`): Windows MSVC and clang-cl configure (ADR-0006), the CMake 3.28 floor (only 4.4.4 is tested, ADR-0005), `import std` beyond this machine, doctest upstream attestation, the cpm `url_hash` and the vcpkg baseline (ADR-0002).
+Unverified (details in `docs/episodes/041-048.md` and `docs/episodes/049-060.md`): the GitHub workflows (never executed), Doxygen output (not installed here, the API page is a stub), the development image (`Containerfile` never built), 37 allow-listed long Python lines and 8 allow-listed tidy files, the empty and manual vulnerability register, the ADR acceptances,  Windows MSVC and clang-cl configure (ADR-0006), the CMake 3.28 floor (only 4.4.4 is tested, ADR-0005), `import std` beyond this machine, doctest upstream attestation, the cpm `url_hash` and the vcpkg baseline (ADR-0002).
 
 ## Gate commands
 
@@ -21,10 +24,12 @@ Unverified, by design of this slice (details in `docs/episodes/041-048.md`): Win
 |---|---|
 | `just fast` | Stop-gate, under 60 s: layout, gates, tool tests, format, ADRs, work orders |
 | `just check` | Full gate (`gate.full`): `fast` plus C++ build gates, dependency, feature and Vulkan checks, tests, every negative test and `ci-local` |
-| `just check-full` | Release gate: `check` plus the ubsan, tsan, release and gcc workflows |
+| `just check-full` | Release gate: `check` plus the ubsan, tsan, release and gcc workflows, then `tidy`, `analyze`, `sanitize-proof`, `hardening` and `neg-tidy` (WO-025) |
 | `just ci-local` | The whole local CI from the repository root (`scripts/ci-local.sh`: doctor, format, governance checks, clang, gcc and asan workflows); no network |
+| `just ci-local-full` | `ci-local --full`: adds the ubsan, tsan, release and gcc-release workflows (about 93 s) |
 | `just acceptance-041-048` | The four starter-prompt checks of episodes 041-048, logs in `build/acceptance/` |
-| `just episodes-doc-check 041-048` | The episode record has a section per episode with its five sub-headings, a `just` recipe and an ADR or "none" |
+| `just acceptance-049-060` | Fresh clone, provenance, test report, ci yaml and episodes doc checks of episodes 049-060, logs 5-9 in `build/acceptance/` |
+| `just episodes-doc-check 041-048` | The episode record has a section per episode with its five sub-headings, a `just` recipe and an ADR or "none" (also `049-060`) |
 | `just doctor` | Installed tools against `toolchain/environments.json` |
 
 `just --list` shows every recipe. A recipe not implemented yet is a stub: `just stub <name>` prints `stub: owner WO-0xx` and exits 3; owners and status are in `tools/governance/recipes.json`.

@@ -6,7 +6,9 @@ paths_allowed (first match wins, so earlier work orders take shared files such a
 the `git add` / `git commit` commands. With --apply it runs them (your git config signs the commits).
 Paths that match no work order are listed at the end for you to decide (they are not committed).
 
-Usage: scripts/founder/commit-wos [--apply] [--only WO-NNN]
+Usage: scripts/founder/commit-wos [--apply] [--only WO-NNN] [--unsigned]
+  --unsigned: pass -c commit.gpgsign=false (agent run ordered by the founder; re-sign later with
+  git rebase --exec "git commit --amend --no-edit -S")
 """
 import fnmatch
 import os
@@ -40,8 +42,13 @@ def glob_match(pat, rel):
 
 def main(argv):
     apply = "--apply" in argv
+    gitc = ["git", "-c", "commit.gpgsign=false"] if "--unsigned" in argv else ["git"]
     only = argv[argv.index("--only") + 1] if "--only" in argv else None
-    changed = [ln[3:] for ln in sh("git", "status", "--porcelain", "-uall").splitlines() if ln and not ln[3:].startswith("build/")]
+    changed = [
+        ln[3:]
+        for ln in sh("git", "status", "--porcelain", "-uall").splitlines()
+        if ln and not ln[3:].startswith("build/") and not ln.startswith("D ")  # staged deletions are already indexed
+    ]
     changed = [c.split(" -> ")[-1] for c in changed]
     wos = sorted(f for f in os.listdir(os.path.join(ROOT, "work-orders")) if re.match(r"WO-\d{3}\.md$", f))
     specs = []
@@ -76,7 +83,7 @@ def main(argv):
         print(f"git commit -q -m {msg!r}")
         if apply:
             subprocess.run(["git", "add", "--", *files], cwd=ROOT, check=True)
-            subprocess.run(["git", "commit", "-q", "-m", msg], cwd=ROOT, check=True)
+            subprocess.run([*gitc, "commit", "-q", "-m", msg], cwd=ROOT, check=True)
             print(f"committed {wo}")
     if extra:
         print("\n# not matched by any work order (decide yourself; commander-side fixes belong to the WO they fixed):")

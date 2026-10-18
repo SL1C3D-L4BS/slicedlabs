@@ -33,7 +33,9 @@ def doc_path(doc_id):
     return "registry/%s-x.json" % doc_id
 
 
-def build(root, contract='{"contracts": [{"id": "C1", "enforced_by": "just real"}, {"id": "C2", "verified_by": "pending"}]}'):
+def build(
+    root, contract='{"contracts": [{"id": "C1", "enforced_by": "just real"}, {"id": "C2", "verified_by": "pending"}]}'
+):
     docs = [{"id": d, "authoring_wo": WO} for d in gate.EXPECTED_IDS]
     eps = [{"episode": e, "document": gate.EXPECTED_IDS[0], "wo": WO} for e in gate.EXPECTED_EPISODES]
     write(root, gate.REL, json.dumps({"schema": gate.SCHEMA, "documents": docs, "episodes": eps}))
@@ -136,17 +138,26 @@ class Fixture(unittest.TestCase):
         self.assertEqual(rules(errors), {"R-V1-EPISODES"})
         self.assertEqual(len(errors), 2)
         self.setUp()
-        self.mutate(lambda d: d["episodes"].append({"episode": "SL-EP-021", "document": gate.EXPECTED_IDS[0], "wo": WO}))
+        self.mutate(
+            lambda d: d["episodes"].append({"episode": "SL-EP-021", "document": gate.EXPECTED_IDS[0], "wo": WO})
+        )
         self.assertTrue(any("outside 001-020" in e for e in self.run_gate()[0]))
 
     def test_contract_unknown_recipe_and_prose(self):
-        build(self.root, '{"c": [{"id": "C1", "enforced_by": "just nothere"}, {"id": "C2", "verified_by": "somebody checks"}]}')
+        build(
+            self.root,
+            '{"c": [{"id": "C1", "enforced_by": "just nothere"}, {"id": "C2", "verified_by": "somebody checks"}]}',
+        )
         errors = self.run_gate()[0]
         self.assertEqual(rules(errors), {"R-V1-CONTRACT"})
         self.assertEqual(len(errors), 2)
 
     def test_contract_stub_recipe_is_pending_not_failure(self):
-        build(self.root, '{"c": [{"id": "C1", "enforced_by": "just stubbed"}, {"id": "C2", "enforcement": "prose", "verified_by": "pending"}]}')
+        build(
+            self.root,
+            '{"c": [{"id": "C1", "enforced_by": "just stubbed"}, {"id": "C2", "enforcement": "prose", "verified_by": '
+            '"pending"}]}',
+        )
         errors, rep = self.run_gate()
         self.assertEqual(errors, [])
         self.assertEqual(len(rep["pending"]), 2)

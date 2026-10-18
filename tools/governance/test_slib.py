@@ -179,7 +179,11 @@ class RuleEngineTests(unittest.TestCase):
         self.assertIn("R-DUP-ID", rules_of(b))
 
     def test_volume_self_unknown_and_cycle(self):
-        for deps, expect in ((["SL-VOL-01"], "depends on itself"), (["SL-VOL-09"], "unknown volume"), (["SL-VOL-02"], "cycle")):
+        for deps, expect in (
+            (["SL-VOL-01"], "depends on itself"),
+            (["SL-VOL-09"], "unknown volume"),
+            (["SL-VOL-02"], "cycle"),
+        ):
             b = good()
             b["registry"]["volumes"][0]["depends_on_volumes"] = deps
             msgs = [f["message"] for f in slib.check_bundle(b)]
@@ -239,7 +243,13 @@ class RuleEngineTests(unittest.TestCase):
             {"from": "Verifying", "to": "Demonstrated", "date": "2026-10-17"},
             {"from": "Demonstrated", "to": "Accepted", "date": "2026-10-17"},
         ]
-        ep["completion"] = {"revision": "r", "evidence": ["evidence/WO-003.json"], "benchmarks": [], "open_defects": [], "exceptions": []}
+        ep["completion"] = {
+            "revision": "r",
+            "evidence": ["evidence/WO-003.json"],
+            "benchmarks": [],
+            "open_defects": [],
+            "exceptions": [],
+        }
         self.assertEqual(rules_of(b), {"R-DEP-ACCEPTED"})
 
     def test_evidence_needs_a_completion_record(self):
