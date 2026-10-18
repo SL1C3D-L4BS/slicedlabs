@@ -1,0 +1,36 @@
+{
+  "schema": "sl-reg-006/1",
+  "classes": [
+    {
+      "id": "SL-EXC-C1",
+      "name": "console certification",
+      "description": "Allowed exemption class: console certification (master plan section 3.1)."
+    },
+    {
+      "id": "SL-EXC-C2",
+      "name": "platform signing",
+      "description": "Allowed exemption class: platform signing (master plan section 3.1)."
+    },
+    {
+      "id": "SL-EXC-C3",
+      "name": "specialist simulation solvers",
+      "description": "Allowed exemption class: specialist simulation solvers (master plan section 3.1)."
+    },
+    {
+      "id": "SL-EXC-C4",
+      "name": "legal or regulatory validation",
+      "description": "Allowed exemption class: legal or regulatory validation (master plan section 3.1)."
+    },
+    {
+      "id": "SL-EXC-C5",
+      "name": "interchange import/export",
+      "description": "Allowed exemption class: interchange import/export (master plan section 3.1)."
+    },
+    {
+      "id": "SL-EXC-C6",
+      "name": "AI model training",
+      "description": "Allowed exemption class: AI model training (master plan section 3.1)."
+    }
+  ],
+  "exceptions": []
+}
