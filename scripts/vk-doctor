@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# vk-doctor (WO-016): advisory Vulkan device report. Runs `vulkaninfo`, prints the device identity and the
+# facts the engine plans around (mesh shaders and ray tracing are absent on this machine's RADV device).
+# Opens a VkInstance through vulkaninfo, so it is not part of `check`. Always exits 0.
+# Run via `just vk-doctor`.
+set -u
+
+if ! command -v vulkaninfo >/dev/null 2>&1; then
+  echo "vk-doctor: vulkaninfo not found (advisory; install vulkan-tools)"
+  exit 0
+fi
+
+summary="$(timeout 60 vulkaninfo --summary 2>&1)" || {
+  echo "vk-doctor: vulkaninfo --summary failed (no device or loader problem); advisory only"
+  printf '%s\n' "$summary" | head -n 3
+  exit 0
+}
+
+echo "vk-doctor: instance and devices (vulkaninfo --summary)"
+printf '%s\n' "$summary" | grep -E 'Vulkan Instance Version|deviceName|deviceType|apiVersion|driverName|driverInfo' | sed 's/^[ \t]*/  /'
+
+full="$(timeout 120 vulkaninfo 2>/dev/null || true)"
+echo "vk-doctor: extension facts (full vulkaninfo)"
+if [ -z "$full" ]; then
+  echo "  full vulkaninfo produced no output; extension facts unavailable"
+  exit 0
+fi
+for ext in VK_EXT_mesh_shader VK_KHR_ray_tracing_pipeline VK_KHR_acceleration_structure VK_KHR_ray_query; do
+  if printf '%s\n' "$full" | grep -q "$ext"; then
+    echo "  $ext: present"
+  else
+    echo "  $ext: absent"
+  fi
+done
+exit 0
