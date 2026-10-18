@@ -492,11 +492,11 @@
     },
     "fabric-gen-check": {
       "owner": "WO-045",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-gen": {
       "owner": "WO-045",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-event-schema-check": {
       "owner": "WO-047",
@@ -508,11 +508,11 @@
     },
     "fabric-ownership-check": {
       "owner": "WO-048",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-f2": {
       "owner": "WO-048",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-surface-check": {
       "owner": "WO-051",
