@@ -154,7 +154,9 @@ def contract_scan(root, recipes):
                 total += 1
                 texts = value if isinstance(value, list) else [value]
                 if not texts or not all(isinstance(t, str) and t.strip() for t in texts):
-                    errors.append("%s: R-V1-CONTRACT: %s must be a recipe name or `pending`, found %r" % (label, key, value))
+                    errors.append(
+                        "%s: R-V1-CONTRACT: %s must be a recipe name or `pending`, found %r" % (label, key, value)
+                    )
                     continue
                 for text in texts:
                     s = text.strip()
@@ -164,9 +166,13 @@ def contract_scan(root, recipes):
                     m = _JUST.match(s)
                     name = m.group(1) if m else (s if _NAME.match(s) else None)
                     if name is None:
-                        errors.append("%s: R-V1-CONTRACT: %s %r is neither `pending` nor `just <recipe>`" % (label, key, s))
+                        errors.append(
+                            "%s: R-V1-CONTRACT: %s %r is neither `pending` nor `just <recipe>`" % (label, key, s)
+                        )
                     elif name not in recipes:
-                        errors.append("%s: R-V1-CONTRACT: %s names recipe %s, which is not in the justfile" % (label, key, name))
+                        errors.append(
+                            "%s: R-V1-CONTRACT: %s names recipe %s, which is not in the justfile" % (label, key, name)
+                        )
                     elif name in stubs:
                         pending.append((label, "recipe %s is still a stub" % name))
     return errors, total, pending
@@ -230,8 +236,19 @@ def gate(root):
         if werr:
             errors.append(werr)
         elif doc_id in owner and reg_wo.get(doc_id) != wo:
-            errors.append("%s: R-V1-OWNER: %s authoring_wo %r differs from %s (%r)" % (REL, doc_id, wo, REG_REL, reg_wo.get(doc_id)))
-        rows.append((doc_id, path or "-", "ok" if not ferr else "FAIL", wo if isinstance(wo, str) else "-", "ok" if doc_id in owner and not werr else "FAIL"))
+            errors.append(
+                "%s: R-V1-OWNER: %s authoring_wo %r differs from %s (%r)"
+                % (REL, doc_id, wo, REG_REL, reg_wo.get(doc_id))
+            )
+        rows.append(
+            (
+                doc_id,
+                path or "-",
+                "ok" if not ferr else "FAIL",
+                wo if isinstance(wo, str) else "-",
+                "ok" if doc_id in owner and not werr else "FAIL",
+            )
+        )
 
     # (4) episodes
     seen, primary = [], {}
@@ -243,7 +260,9 @@ def gate(root):
         seen.append(ep)
         primary[ep] = (entry.get("document"), entry.get("wo"))
         if entry.get("document") not in EXPECTED_IDS:
-            errors.append("%s: R-V1-EPISODES: %s primary document %r is not one of the 20" % (REL, ep, entry.get("document")))
+            errors.append(
+                "%s: R-V1-EPISODES: %s primary document %r is not one of the 20" % (REL, ep, entry.get("document"))
+            )
         werr = _wo_error(root, entry.get("wo"), "%s wo" % ep, "R-V1-EPISODES")
         if werr:
             errors.append(werr)
@@ -267,7 +286,9 @@ def render(rep, errors):
     for doc_id, path, fok, wo, ook in rep["rows"]:
         lines.append("%-15s %-52s %-5s %-7s %-5s" % (doc_id, path, fok, wo, ook))
     eps = rep["episodes"]
-    lines.append("episodes: %d/20 with a primary document and work order" % sum(1 for e in EXPECTED_EPISODES if e in eps))
+    lines.append(
+        "episodes: %d/20 with a primary document and work order" % sum(1 for e in EXPECTED_EPISODES if e in eps)
+    )
     for label, reason in rep["pending"]:
         lines.append("pending: %s: %s" % (label, reason))
     lines.append(
