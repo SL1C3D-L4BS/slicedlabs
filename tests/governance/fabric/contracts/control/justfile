@@ -1,0 +1,5 @@
+fabric-ok *args:
+    @echo ok
+
+fabric-stub *args:
+    @just stub fabric-stub

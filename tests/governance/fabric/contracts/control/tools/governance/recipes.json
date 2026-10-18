@@ -1,0 +1,13 @@
+{
+  "schema": "sl-recipes/1",
+  "recipes": {
+    "fabric-ok": {
+      "owner": "WO-901",
+      "status": "implemented"
+    },
+    "fabric-stub": {
+      "owner": "WO-902",
+      "status": "stub"
+    }
+  }
+}

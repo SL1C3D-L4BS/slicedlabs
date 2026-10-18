@@ -1,0 +1,3 @@
+# nothrow-allow.txt (WO-036): audited exceptions to the fabric nothrow lint.
+# One entry per line: <path>:<rule> <reason>. An entry without a reason is itself an error (N-ALLOW).
+# Rules: N-THROW N-TRY N-AT N-STO N-FS N-UNORDERED N-NEW. Paths are relative to the repository root.
