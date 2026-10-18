@@ -115,12 +115,23 @@ class GeneratorTests(TreeCase):
             self.assertEqual(self.doc(doc_id)["path"], path)
 
     def test_deferred_documents_and_episodes(self):
-        arch = self.doc("SL-ARCH-001")
-        self.assertIsNone(arch["path"])
+        arch = self.doc("SL-ARCH-001")  # placed by WO-035 (ARCH_SLUGS); later ARCH ids stay unplaced
+        self.assertEqual(arch["path"], "docs/arch/SL-ARCH-001-canonical-project-model.md")
+        self.assertIsNone(self.doc("SL-ARCH-003")["path"])
         self.assertEqual(arch["episodes"], ["SL-EP-%03d" % n for n in range(61, 81)])
         self.assertEqual(self.doc("SL-PLAN-001")["episodes"], [])
         self.assertEqual(self.doc("SL-GOV-003")["episodes"], ["SL-EP-005", "SL-EP-006", "SL-EP-017"])
         self.assertEqual(self.doc("SL-VOL-02-SPEC")["episodes"][0], "SL-EP-021")
+
+    def test_arch_slugs_place_only_their_documents(self):
+        self.assertEqual(
+            self.doc("SL-ARCH-002")["path"], "docs/arch/SL-ARCH-002-transaction-undo-recovery.md"
+        )  # not slugify(title): the slug is fixed in ARCH_SLUGS
+        self.assertNotEqual(cmd_gen_docs.slugify(self.doc("SL-ARCH-002")["title"]), "transaction-undo-recovery")
+        docs = cmd_gen_docs.build(self.root)["documents"]
+        placed = sorted(d["id"] for d in docs if d["kind"] == "ARCH" and d["path"])
+        self.assertEqual(placed, sorted(cmd_gen_docs.ARCH_SLUGS))
+        self.assertTrue(all(d["path"] is None for d in docs if d["kind"] == "OPS"))
 
     def test_authoring_wo(self):
         self.assertEqual(self.doc("SL-REG-001")["authoring_wo"], "WO-005")
@@ -240,6 +251,23 @@ class RegistryTests(TreeCase):
         self.assertEqual(
             sorted(e.split(":")[0] for e in errs), ["docs/gov/SL-GOV-050-extra.md", "registry/SL-REG-009-extra.json"]
         )
+
+    def test_unregistered_arch_files(self):
+        arch = doc_text("SL-ARCH-001").replace("kind: GOV", "kind: ARCH")
+        self.write("docs/arch/SL-ARCH-001-canonical-project-model.md", arch)
+        self.write("docs/arch/SL-ARCH-003-runtime.md", doc_text("SL-ARCH-003").replace("kind: GOV", "kind: ARCH"))
+        self.write("docs/arch/README.md", "readme\n")
+        errs = [e for e in self.errors() if "R-DOCS-UNREGISTERED" in e]
+        self.assertEqual([e.split(":")[0] for e in errs], ["docs/arch/SL-ARCH-003-runtime.md"])
+
+    def test_arch_front_matter_is_derived(self):
+        arch = doc_text("SL-ARCH-002").replace("kind: GOV", "kind: ARCH")
+        self.write("docs/arch/SL-ARCH-002-transaction-undo-recovery.md", arch)
+        view, problems = cmd_gen_docs.derive_view(self.root, cmd_gen_docs.build(self.root), {})
+        d = next(x for x in view if x["id"] == "SL-ARCH-002")
+        self.assertEqual((d["status"], d["version"], problems), ("Draft", "0.1.0", []))
+        self.write("docs/arch/SL-ARCH-002-transaction-undo-recovery.md", doc_text("SL-ARCH-009"))
+        self.assertIn("R-DOCS-FRONT", rules(self.errors()))
 
     def test_missing_register(self):
         os.remove(os.path.join(self.root, *cmd_gen_docs.REGISTER_REL.split("/")))

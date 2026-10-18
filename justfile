@@ -69,7 +69,7 @@ registry-schema-selftest:
 neg-registry:
     @bash tests/gates/neg_registry.sh
 
-# controlled documents in docs/gov, docs/plan, docs/vol: front matter, sections, citations, length
+# controlled documents in docs/gov, docs/arch, docs/plan, docs/vol: front matter, sections, citations, length
 doc-check:
     @python3 -I tools/governance/cmd_check_docs.py
 
@@ -101,7 +101,7 @@ vol01-coverage:
 constitution-check:
     @python3 -I tools/governance/cmd_constitution_check.py
 
-# list sl-data contracts in docs/gov whose verified_by is pending or names a stub recipe; never fails (WO-006)
+# list sl-data contracts in docs/gov and docs/arch whose verifier is pending, a stub recipe or a missing test; never fails (WO-006, WO-035)
 contracts-pending:
     @python3 -I tools/governance/cmd_contracts_pending.py
 
@@ -125,7 +125,7 @@ exception-check:
 policy-contracts-check:
     @python3 -I tools/governance/cmd_policy_contracts_check.py
 
-# SL-PLAN-002/004/005 and SL-VOL-03-SPEC agree with SL-REG-002: episode ids, 4.3 gate episodes, graph file, 041-060 records, Kohi table, clean room (WO-011)
+# SL-PLAN-002/004/005, SL-VOL-03-SPEC and SL-VOL-04-SPEC agree with SL-REG-002: episode ids, 4.3 gate episodes, graph file, 041-060 and 061-080 records (R-PLAN-VOL04: traces both ways, one primary_wo), Kohi table, clean room (WO-011, WO-035)
 plan-check:
     @python3 -I tools/governance/cmd_plan_check.py
 
@@ -321,7 +321,7 @@ acceptance-049-060:
     @bash scripts/acceptance-049-060
 
 # every negative test and selftest (WO-020)
-negatives: neg-format neg-doc neg-registry neg-rtm neg-deps neg-deps-missing neg-deps-unpinned-provider neg-vcpkg-absent neg-feature-removed neg-feature-unlisted neg-probe-never-fails neg-vk-layer-missing neg-ci-local-red doctor-selftest
+negatives: neg-format neg-doc neg-registry neg-rtm neg-deps neg-deps-missing neg-deps-unpinned-provider neg-vcpkg-absent neg-feature-removed neg-feature-unlisted neg-probe-never-fails neg-vk-layer-missing neg-ci-local-red doctor-selftest neg-plan
     @echo "negatives: ok"
 
 # the final `check` ratchet as a recipe (same dependency list); `check` itself is the protected gate line (WO-020)
@@ -522,13 +522,15 @@ doctor-strict *args:
 
 # ---- stubs declared for Volume 04 (WO-035..WO-063); each owner replaces its body ----
 
-# owner WO-035
+# negative test: planted SL-VOL-04-SPEC drift (primary_wo not in work_orders, acceptance absent from the primary WO, a tracing WO unlisted) fails plan-check naming R-PLAN-VOL04 and the episode; the control copy passes (WO-035)
 neg-plan *args:
-    @{{just_executable()}} stub neg-plan
+    @bash tests/gates/neg_plan.sh
 
-# owner WO-035
-fabric-test *args:
-    @{{just_executable()}} stub fabric-test
+# fabric-test <area>: configure and build preset debug, then run the CTest label fabric_<area>; an area with no tests fails (--no-tests=error); in no gate (WO-035)
+fabric-test area:
+    @cmake --preset debug
+    @cmake --build --preset debug
+    @ctest --preset debug -L {{quote("^fabric_" + area + "$")}} --no-tests=error --output-on-failure
 
 # owner WO-036
 fabric-contracts-check *args:

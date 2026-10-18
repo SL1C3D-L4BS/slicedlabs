@@ -436,11 +436,11 @@
     },
     "neg-plan": {
       "owner": "WO-035",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-test": {
       "owner": "WO-035",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-contracts-check": {
       "owner": "WO-036",

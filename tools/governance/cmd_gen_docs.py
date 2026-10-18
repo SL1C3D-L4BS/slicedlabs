@@ -66,6 +66,12 @@ TITLE_OVERRIDES = {"SL-GOV-001": "Platform Constitution and Engineering Doctrine
 ALIASES = {"SL-GOV-001": ["Engine Constitution"]}
 # kinds whose location is decided when the document is written (ADR-0001 names only docs/gov, plan, vol)
 UNPLACED_KINDS = ("ARCH", "OPS")
+# ARCH documents placed under docs/arch when written (WO-035); the slug is fixed here because a file name need not
+# equal slugify(title). Every other ARCH id stays unplaced (path null) until its own work order adds it.
+ARCH_SLUGS = {
+    "SL-ARCH-001": "canonical-project-model",
+    "SL-ARCH-002": "transaction-undo-recovery",
+}
 
 _ROW = re.compile(r"^\|\s*(SL-(GOV|ARCH|PLAN|OPS|REG)-(\d{3}))\s*\|(.+)\|(.+)\|\s*$")
 _VOL_HEADING = re.compile(r"^### \*\*Volume (\d{2}) — (.+?)\*\*\s*$")
@@ -158,6 +164,8 @@ def load_vol01(root):
 def doc_path(doc_id, kind, title):
     if kind == "VOL":
         return "docs/vol/%s.md" % doc_id
+    if doc_id in ARCH_SLUGS:
+        return "docs/arch/%s-%s.md" % (doc_id, ARCH_SLUGS[doc_id])
     if kind in UNPLACED_KINDS:
         return None
     number = doc_id.rsplit("-", 1)[1]

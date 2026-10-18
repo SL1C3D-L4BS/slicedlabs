@@ -7,7 +7,7 @@ Rules (each failure line contains the rule id):
   R-DOCS-COUNT     104 documents: 62 named plus 42 SL-VOL-nn-SPEC
   R-DOCS-FRONT     a registered document file has valid front matter (id, status) per docs/templates/DOC.md
   R-DOCS-APPROVAL  Approved comes only from registry/SL-REG-001.approvals.json with a matching sha256
-  R-DOCS-UNREGISTERED  every document file under docs/gov, docs/plan, docs/vol and registry/SL-REG-nnn-*.json
+  R-DOCS-UNREGISTERED  every document file under docs/gov, docs/arch, docs/plan, docs/vol and registry/SL-REG-nnn-*.json
                    is a registered path
 
 Status, version and sha256 are derived at check time (cmd_gen_docs.derive_view), never stored.
@@ -25,6 +25,7 @@ import slib  # noqa: E402
 
 SCAN = (
     ("docs/gov", re.compile(r"^SL-GOV-\d{3}.*\.md$")),
+    ("docs/arch", re.compile(r"^SL-ARCH-\d{3}.*\.md$")),
     ("docs/plan", re.compile(r"^SL-PLAN-\d{3}.*\.md$")),
     ("docs/vol", re.compile(r"^SL-VOL-\d{2}-SPEC\.md$")),
     ("registry", re.compile(r"^SL-REG-\d{3}-[A-Za-z0-9-]+\.json$")),

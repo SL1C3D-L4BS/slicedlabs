@@ -1,4 +1,4 @@
-"""doc-check: controlled documents in docs/gov, docs/plan and docs/vol follow docs/templates/DOC.md.
+"""doc-check: controlled documents in docs/gov, docs/arch, docs/plan and docs/vol follow docs/templates/DOC.md.
 
 Rules (each failure line starts with the rule id):
   R-DOC-FRONT    front matter parses and has every key with a valid value
@@ -18,7 +18,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import slgov  # noqa: E402
 
-DOC_DIRS = ("docs/gov", "docs/plan", "docs/vol")
+DOC_DIRS = ("docs/gov", "docs/arch", "docs/plan", "docs/vol")
 EXEMPT_PREFIX = "SL-PLAN-001"
 KINDS = ("GOV", "ARCH", "PLAN", "OPS", "REG", "VOL")
 STATUSES = ("Draft", "InReview", "Approved", "Superseded")
