@@ -1,0 +1,26 @@
+# Sliced Labs development image (WO-033). Arch Linux with exactly the packages in toolchain/packages.txt.
+# Build from the repository root with scripts/dev-image/build.sh (podman). Not built on the workstation yet.
+#
+# Base pin: the digest of archlinux:base-devel is NOT recorded yet (no network when this file was written).
+# After the first pull record it here and pass it as SL_DEV_IMAGE_BASE=archlinux@sha256:<digest> to build.sh:
+#   podman inspect --format '{{.Digest}}' docker.io/library/archlinux:base-devel
+# base digest: unrecorded
+ARG BASE=docker.io/library/archlinux:base-devel
+FROM ${BASE}
+
+# Arch is rolling: -Syu always, never a partial upgrade. The package list is data (toolchain/packages.txt).
+COPY toolchain/packages.txt /tmp/packages.txt
+RUN pacman -Syu --needed --noconfirm $(cat /tmp/packages.txt) \
+    && rm -f /tmp/packages.txt \
+    && pacman -Scc --noconfirm
+
+# Non-root user for every build and test.
+RUN useradd --create-home --shell /bin/bash dev
+USER dev
+WORKDIR /home/dev/slicedlabs
+
+# Smoke step: the installed tools must match toolchain/lock.json (drift is an error for required tools).
+COPY --chown=dev:dev justfile ./
+COPY --chown=dev:dev scripts/doctor scripts/doctor
+COPY --chown=dev:dev toolchain toolchain
+RUN just doctor-strict
