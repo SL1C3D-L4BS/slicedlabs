@@ -1,0 +1,20 @@
+# Build trees and personal presets
+build/
+CMakeUserPresets.json
+# Sandbox mount-target stubs (0-byte files or char devices left in the tree; never commit them)
+/.bash_profile
+/.bashrc
+/.zshrc
+/.zprofile
+/.profile
+/.gitconfig
+/.gitmodules
+/.idea
+/.vscode
+/.mcp.json
+/.ripgreprc
+/.claude/*
+!/.claude/rules/
+!/.claude/agents/
+!/.claude/skills/
+/.claude/.cc-writes

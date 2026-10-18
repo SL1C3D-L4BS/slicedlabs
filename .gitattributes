@@ -1,0 +1,3 @@
+* text=auto eol=lf
+third_party/** -text
+docs/plan/SL-PLAN-001-master-plan.md -text
