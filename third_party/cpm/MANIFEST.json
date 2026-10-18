@@ -5,9 +5,10 @@
   "license": "MIT",
   "upstream": "https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.43.2/CPM.cmake",
   "provenance": "local-cache",
-  "verified_upstream": false,
-  "tree_sha256": "8846067407893cce14827a9bd345b12c41f73f167d8b4f64e05ab50a444a481d",
+  "verified_upstream": true,
+  "tree_sha256": "6d2ace4bc077d6e6d62fa72557db590b2867ea80a28fea0376853afbfa49e767",
   "files": {
-    "CPM.cmake": "49a3bef91ceb65bb66d57255e12d1ffd22abc2f6408fa9fe4534c544a2f232aa"
+    "CPM.cmake": "49a3bef91ceb65bb66d57255e12d1ffd22abc2f6408fa9fe4534c544a2f232aa",
+    "LICENSE.txt": "b5c01e4c8c9c4a6e7c52cf3a6de3571a8ae26b7436a5675082d1a767d285070d"
   }
 }
