@@ -7,7 +7,11 @@ change a status. `docs/templates/EPISODE.md` is the full per-episode template (W
 - `041-048.md` (WO-021): SL-EP-041 to SL-EP-048, the Foundation episodes of Volume 03. One `## SL-EP-nnn — <registry
   title>` section each with `### Done`, `### Decisions`, `### Acceptance`, `### Evidence`, `### Open issues`, then the
   starter-prompt acceptance transcripts from `build/acceptance/*.log`.
-- Gate: `just episodes-doc-check 041-048` (`tools/governance/cmd_episodes_doc_check.py`; rules `R-EPDOC-RANGE`,
+- `049-060.md` (WO-034): SL-EP-049 to SL-EP-060, the infrastructure episodes (formatting, static analysis, test tiers,
+  fixtures, local and hosted CI, provenance, diagnostics, docs, dependency ingestion, development image, release gate), in
+  the same five sub-headings, then the acceptance transcripts of `just acceptance-049-060` (`build/acceptance/5-*.log` to
+  `9-*.log`).
+- Gate: `just episodes-doc-check 041-048` and `just episodes-doc-check 049-060` (`tools/governance/cmd_episodes_doc_check.py`; rules `R-EPDOC-RANGE`,
   `R-EPDOC-FILE`, `R-EPDOC-SECTION`, `R-EPDOC-HEADINGS`, `R-EPDOC-ACCEPT`, `R-EPDOC-DECISIONS`;
   `python3 -I tools/governance/cmd_episodes_doc_check.py --selftest` plants one defect per rule).
 - Episodes 001 to 020 get their records with the Volume 01 work orders.

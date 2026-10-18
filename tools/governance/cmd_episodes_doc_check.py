@@ -96,15 +96,21 @@ def check_text(text, episodes, recipes, adrs, lo, hi):
             errors.append("R-EPDOC-SECTION: line %d: section %s is outside the range %03d-%03d" % (line, label, lo, hi))
             continue
         if number in seen:
-            errors.append("R-EPDOC-SECTION: line %d: %s has a second section (first at line %d)" % (line, label, seen[number]))
+            errors.append(
+                "R-EPDOC-SECTION: line %d: %s has a second section (first at line %d)" % (line, label, seen[number])
+            )
             continue
         seen[number] = line
         want = episodes.get(number)
         if want is not None and title != want:
-            errors.append("R-EPDOC-SECTION: line %d: %s title is '%s', the registry title is '%s'" % (line, label, title, want))
+            errors.append(
+                "R-EPDOC-SECTION: line %d: %s title is '%s', the registry title is '%s'" % (line, label, title, want)
+            )
         names = tuple(h for h, _ in subs)
         if names != SUBHEADINGS:
-            errors.append("R-EPDOC-HEADINGS: %s: sub-headings are %s, want exactly %s" % (label, list(names), list(SUBHEADINGS)))
+            errors.append(
+                "R-EPDOC-HEADINGS: %s: sub-headings are %s, want exactly %s" % (label, list(names), list(SUBHEADINGS))
+            )
             continue
         bodies = dict(subs)
         for h in SUBHEADINGS:
@@ -115,7 +121,9 @@ def check_text(text, episodes, recipes, adrs, lo, hi):
             errors.append("R-EPDOC-ACCEPT: %s: Acceptance names no `just <recipe>`" % label)
         for r in sorted(set(used)):
             if r not in recipes:
-                errors.append("R-EPDOC-ACCEPT: %s: Acceptance names `just %s`, which is not a justfile recipe" % (label, r))
+                errors.append(
+                    "R-EPDOC-ACCEPT: %s: Acceptance names `just %s`, which is not a justfile recipe" % (label, r)
+                )
         ids = ADR_RE.findall(bodies["Decisions"])
         if not ids and not NONE_RE.search(bodies["Decisions"]):
             errors.append("R-EPDOC-DECISIONS: %s: Decisions names no ADR-NNNN and does not say 'none'" % label)
@@ -176,7 +184,9 @@ def selftest():
     )
     plants = {
         "R-EPDOC-SECTION": good.replace("— Beta", "— Gamma"),
-        "R-EPDOC-HEADINGS": good.replace("### Evidence\nbuild/x\n### Open issues", "### Open issues\nnone\n### Evidence\nbuild/x\n### Open issues", 1),
+        "R-EPDOC-HEADINGS": good.replace(
+            "### Evidence\nbuild/x\n### Open issues", "### Open issues\nnone\n### Evidence\nbuild/x\n### Open issues", 1
+        ),
         "R-EPDOC-ACCEPT": good.replace("`just fast`", "`just nope`", 1),
         "R-EPDOC-DECISIONS": good.replace("ADR-0001", "ADR-0099", 1),
     }
