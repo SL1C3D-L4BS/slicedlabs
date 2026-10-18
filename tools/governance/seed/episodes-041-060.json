@@ -1,145 +1,148 @@
 {
- "episodes": {
-  "SL-EP-041": {
-   "decision_status": "Locked",
-   "kohi_ref": "Architecture overview and setup (#000–#002)",
-   "release": {
-    "milestone": "Foundation"
-   }
+  "episodes": {
+    "SL-EP-041": {
+      "decision_status": "Locked",
+      "kohi_ref": "Architecture overview and setup (#000–#002)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-042": {
+      "decision_status": "Conditional",
+      "kohi_ref": "Architecture overview and setup (#000–#002)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-043": {
+      "decision_status": "Locked",
+      "kohi_ref": "Architecture overview and setup (#000–#002)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-044": {
+      "decision_status": "Experimental",
+      "kohi_ref": "Architecture overview and setup (#000–#002)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-045": {
+      "decision_status": "Locked",
+      "kohi_ref": "Architecture overview and setup (#000–#002)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-046": {
+      "decision_status": "Locked",
+      "kohi_ref": "Architecture overview and setup (#000–#002)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-047": {
+      "decision_status": "Locked",
+      "kohi_ref": "Architecture overview and setup (#000–#002)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-048": {
+      "decision_status": "Conditional",
+      "kohi_ref": "Architecture overview and setup (#000–#002)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-049": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-050": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-051": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-052": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-053": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-054": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      },
+      "decision_note": "hosted CI (GitHub Actions) is conditional on the first push and run; workflows written and pin-verified (WO-028)"
+    },
+    "SL-EP-055": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-056": {
+      "decision_status": "Conditional",
+      "kohi_ref": "Logging and assertions (#003)",
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-057": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      },
+      "decision_note": "Doxygen-based API reference is conditional on the tool being installed on the reference machine; build and link checks exist (WO-031)"
+    },
+    "SL-EP-058": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      }
+    },
+    "SL-EP-059": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      },
+      "decision_note": "the development image is conditional on a podman build with network; lock, package list and Containerfile exist (WO-033)"
+    },
+    "SL-EP-060": {
+      "decision_status": "Conditional",
+      "kohi_ref": null,
+      "release": {
+        "milestone": "Foundation"
+      }
+    }
   },
-  "SL-EP-042": {
-   "decision_status": "Conditional",
-   "kohi_ref": "Architecture overview and setup (#000–#002)",
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-043": {
-   "decision_status": "Locked",
-   "kohi_ref": "Architecture overview and setup (#000–#002)",
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-044": {
-   "decision_status": "Experimental",
-   "kohi_ref": "Architecture overview and setup (#000–#002)",
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-045": {
-   "decision_status": "Locked",
-   "kohi_ref": "Architecture overview and setup (#000–#002)",
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-046": {
-   "decision_status": "Locked",
-   "kohi_ref": "Architecture overview and setup (#000–#002)",
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-047": {
-   "decision_status": "Locked",
-   "kohi_ref": "Architecture overview and setup (#000–#002)",
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-048": {
-   "decision_status": "Conditional",
-   "kohi_ref": "Architecture overview and setup (#000–#002)",
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-049": {
-   "decision_status": "Conditional",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-050": {
-   "decision_status": "Conditional",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-051": {
-   "decision_status": "Conditional",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-052": {
-   "decision_status": "Conditional",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-053": {
-   "decision_status": "Conditional",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-054": {
-   "decision_status": "Unresolved",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-055": {
-   "decision_status": "Conditional",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-056": {
-   "decision_status": "Conditional",
-   "kohi_ref": "Logging and assertions (#003)",
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-057": {
-   "decision_status": "Unresolved",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-058": {
-   "decision_status": "Conditional",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-059": {
-   "decision_status": "Unresolved",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  },
-  "SL-EP-060": {
-   "decision_status": "Conditional",
-   "kohi_ref": null,
-   "release": {
-    "milestone": "Foundation"
-   }
-  }
- },
- "schema": "sl-episodes-seed/1"
+  "schema": "sl-episodes-seed/1"
 }

@@ -194,7 +194,13 @@ def parse_plan(text):
         if m:
             if part_no is None:
                 raise ParseError("line %d: volume before the first part" % lineno)
-            cur_vol = {"number": int(m.group(1)), "title": unescape(m.group(2)), "part": part_no, "goal": None, "numbers": []}
+            cur_vol = {
+                "number": int(m.group(1)),
+                "title": unescape(m.group(2)),
+                "part": part_no,
+                "goal": None,
+                "numbers": [],
+            }
             volumes.append(cur_vol)
             continue
         if line.startswith("### "):
@@ -226,7 +232,10 @@ def parse_plan(text):
         if nums != list(range(v["first"], v["last"] + 1)):
             raise ParseError("volume %02d episode numbers are not contiguous" % v["number"])
         if table_ranges.get(v["number"]) != (v["first"], v["last"]):
-            raise ParseError("volume %02d range %d-%d differs from section 4.1 %s" % (v["number"], v["first"], v["last"], table_ranges.get(v["number"])))
+            raise ParseError(
+                "volume %02d range %d-%d differs from section 4.1 %s"
+                % (v["number"], v["first"], v["last"], table_ranges.get(v["number"]))
+            )
     if sorted(table_ranges) != [v["number"] for v in volumes]:
         raise ParseError("section 4.1 and the volume headings list different volumes")
     return {
@@ -302,7 +311,10 @@ def build_registry(plan, plan_sha, seeds):
             if seed["kohi_ref"] != kohi:
                 raise ParseError("seed %s kohi_ref %r differs from plan section 5.1 %r" % (eid, seed["kohi_ref"], kohi))
             if seed["release"]["milestone"] != milestone:
-                raise ParseError("seed %s milestone %r differs from plan section 1.4 %r" % (eid, seed["release"]["milestone"], milestone))
+                raise ParseError(
+                    "seed %s milestone %r differs from plan section 1.4 %r"
+                    % (eid, seed["release"]["milestone"], milestone)
+                )
             decision = seed["decision_status"]
         episodes.append(
             {"id": eid, "number": n, "volume": vol_id(e["volume_number"]), "title": e["title"], "summary": e["summary"],
@@ -336,7 +348,9 @@ def dumps(obj):
 def lock_projection(reg):
     """The immutable projection: volumes (id, range, title) and episodes (id, volume, title)."""
     return {
-        "volumes": [{"id": v["id"], "first": v["first"], "last": v["last"], "title": v["title"]} for v in reg["volumes"]],
+        "volumes": [
+            {"id": v["id"], "first": v["first"], "last": v["last"], "title": v["title"]} for v in reg["volumes"]
+        ],
         "episodes": [{"id": e["id"], "volume": e["volume"], "title": e["title"]} for e in reg["episodes"]],
     }
 
@@ -379,7 +393,9 @@ def compare(plan, plan_sha, reg, lock_text=None):
     """Differences between a fresh parse and the registry that amendments do not cover."""
     problems = []
     if reg["source"]["sha256"] != plan_sha:
-        problems.append("source sha256 %s differs from the plan sha256 %s" % (reg["source"]["sha256"][:12], plan_sha[:12]))
+        problems.append(
+            "source sha256 %s differs from the plan sha256 %s" % (reg["source"]["sha256"][:12], plan_sha[:12])
+        )
     if reg["parts"] != plan["parts"]:
         problems.append("parts differ from the plan part headings")
     fresh_vols = {vol_id(v["number"]): v for v in plan["volumes"]}
@@ -407,7 +423,9 @@ def compare(plan, plan_sha, reg, lock_text=None):
                 continue
             if covered and key in ("title", "summary", "meaning_sha256"):
                 continue
-            problems.append("%s %s: plan has %r, registry has %r (no amendment covers it)" % (eid, key, want[key], r[key]))
+            problems.append(
+                "%s %s: plan has %r, registry has %r (no amendment covers it)" % (eid, key, want[key], r[key])
+            )
     if lock_text is not None and lock_text.strip() != lock_digest(reg):
         problems.append("%s does not match the registry's immutable projection (volumes and episode titles)" % LOCK_REL)
     return problems
@@ -437,7 +455,10 @@ def run_check(root):
 def run_generate(root, force):
     reg_path = os.path.join(root, REG_REL)
     if os.path.exists(reg_path) and not force:
-        print("gen_episodes: %s exists and is authoritative; refusing to overwrite (use --force, or --check)" % REG_REL, file=sys.stderr)
+        print(
+            "gen_episodes: %s exists and is authoritative; refusing to overwrite (use --force, or --check)" % REG_REL,
+            file=sys.stderr,
+        )
         return 2
     try:
         plan, plan_sha = load_plan(root)
@@ -454,7 +475,10 @@ def run_generate(root, force):
     if not os.path.exists(accepted):
         with open(accepted, "w", encoding="utf-8", newline="\n") as fh:
             fh.write("{}\n")
-    print("gen_episodes: wrote %s (%d episodes, %d volumes), %s" % (REG_REL, len(reg["episodes"]), len(reg["volumes"]), LOCK_REL))
+    print(
+        "gen_episodes: wrote %s (%d episodes, %d volumes), %s"
+        % (REG_REL, len(reg["episodes"]), len(reg["volumes"]), LOCK_REL)
+    )
     return 0
 
 

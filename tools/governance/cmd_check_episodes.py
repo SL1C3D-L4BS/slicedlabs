@@ -53,7 +53,11 @@ def golden(reg, plan, plan_actual, plan_pinned, lock_text, accepted):
         bad("GOLDEN", "/parts", "expected parts %s, found %s" % (list(GOLDEN_PARTS), list(found_parts)))
     nulls = sum(1 for e in eps if e["summary"] is None)
     if nulls != GOLDEN_NULL_SUMMARIES:
-        bad("GOLDEN", "/episodes", "expected %d title-only episodes (null summary), found %d" % (GOLDEN_NULL_SUMMARIES, nulls))
+        bad(
+            "GOLDEN",
+            "/episodes",
+            "expected %d title-only episodes (null summary), found %d" % (GOLDEN_NULL_SUMMARIES, nulls),
+        )
     # the volume dependency graph equals master plan 4.2
     want = {}
     for src, dst in plan["edges"]:
@@ -65,16 +69,32 @@ def golden(reg, plan, plan_actual, plan_pinned, lock_text, accepted):
                 % (v["id"], sorted(have), sorted(want.get(v["id"], set()))))
     # the plan itself
     if plan_actual != plan_pinned:
-        bad("GOLDEN", "/source/sha256", "%s hashes to %s, pinned %s" % (gen.PLAN_REL, plan_actual[:12], plan_pinned[:12]))
+        bad(
+            "GOLDEN",
+            "/source/sha256",
+            "%s hashes to %s, pinned %s" % (gen.PLAN_REL, plan_actual[:12], plan_pinned[:12]),
+        )
     if reg["source"]["sha256"] != plan_actual:
-        bad("GOLDEN", "/source/sha256", "registry source sha256 %s is not the plan's %s" % (reg["source"]["sha256"][:12], plan_actual[:12]))
+        bad(
+            "GOLDEN",
+            "/source/sha256",
+            "registry source sha256 %s is not the plan's %s" % (reg["source"]["sha256"][:12], plan_actual[:12]),
+        )
     # the ADR-0003 waiver (041-048 stop at Demonstrated until 020 is Accepted)
     if list(reg["lifecycle"]["waivers"]) != list(gen.WAIVERS):
-        bad("GOLDEN", "/lifecycle/waivers", "waivers must be exactly the ADR-0003 waiver for SL-EP-041..SL-EP-048 (max_status Demonstrated)")
+        bad(
+            "GOLDEN",
+            "/lifecycle/waivers",
+            "waivers must be exactly the ADR-0003 waiver for SL-EP-041..SL-EP-048 (max_status Demonstrated)",
+        )
     # the lock and the governed accepted stub
     if lock_text.strip() != gen.lock_digest(reg):
-        bad("LOCK", gen.LOCK_REL, "immutable projection (volumes id/range/title, episodes id/volume/title) no longer matches the lock; "
-            "a scope change needs the founder to re-lock")
+        bad(
+            "LOCK",
+            gen.LOCK_REL,
+            "immutable projection (volumes id/range/title, episodes id/volume/title) no longer matches the lock; "
+            "a scope change needs the founder to re-lock",
+        )
     if not isinstance(accepted, dict):
         bad("ACCEPTED", gen.ACCEPTED_REL, "must be a JSON object")
     return out
@@ -158,7 +178,12 @@ def _m_dep_accepted(r):
 def _m_no_evidence(r):
     ep = r["episodes"][70]
     ep["status"] = "Demonstrated"
-    ep["history"] = _hist(("Planned", "Specified"), ("Specified", "InProgress"), ("InProgress", "Verifying"), ("Verifying", "Demonstrated"))
+    ep["history"] = _hist(
+        ("Planned", "Specified"),
+        ("Specified", "InProgress"),
+        ("InProgress", "Verifying"),
+        ("Verifying", "Demonstrated"),
+    )
 
 
 def _m_waiver_gone(r):
@@ -231,10 +256,14 @@ def mutation_selftest(ctx):
             print("registry-check mutation selftest: %s: %s named" % (label, tag))
         else:
             failed += 1
-            print("registry-check mutation selftest: FAIL: %s: expected %s, found %s" % (label, tag, found or "nothing"))
+            print(
+                "registry-check mutation selftest: FAIL: %s: expected %s, found %s" % (label, tag, found or "nothing")
+            )
     if failed:
         return 1
-    print("registry-check mutation selftest: ok (clean registry exit 0, %d planted defects each named)" % len(MUTATIONS))
+    print(
+        "registry-check mutation selftest: ok (clean registry exit 0, %d planted defects each named)" % len(MUTATIONS)
+    )
     return 0
 
 
