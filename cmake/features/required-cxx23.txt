@@ -1,0 +1,24 @@
+# Required C++23 features (one id per line); each has cmake/features/cxx23/<id>.cpp.
+# Decided by `just features-measure --apply` on clang and gcc; changes go through an ADR
+# (SL-GOV-004) and a change to SL-EP-043.
+byteswap
+deducing_this
+expected
+flat_map
+flat_set
+generator
+if_consteval
+mdspan
+move_only_function
+multidim_subscript
+optional_monadic
+print
+ranges_enumerate
+ranges_fold
+ranges_to
+ranges_zip
+static_call_operator
+string_contains
+string_resize_and_overwrite
+to_underlying
+unreachable

@@ -1,0 +1,3 @@
+# Deferred C++23 candidates: fail on a supported compiler; tested and reported, never fatal.
+# The comment is the measured reason (rewritten by `just features-measure`).
+stdfloat  # clang: __cpp_lib_stdfloat is missing or too old; gcc: __cpp_lib_stdfloat is missing or too old
