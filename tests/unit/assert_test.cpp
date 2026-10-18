@@ -139,7 +139,9 @@ TEST_CASE("write_assert_report writes the JSON report file") {
   captured got;
   std::optional<sl::assert_report> copy;
   const sl::scoped_assert_handler guard([&](const sl::assert_report &r) {
-    const auto path = std::filesystem::temp_directory_path() / "sl_assert_report_test.json";
+    // the test working directory (ctest runs in the build tree): /tmp is read-only inside the
+    // factory verify jail
+    const auto path = std::filesystem::current_path() / "sl_assert_report_test.json";
     const sl::result<void> written = sl::write_assert_report(r, path.string().c_str());
     REQUIRE(written.has_value());
     std::ifstream in(path);

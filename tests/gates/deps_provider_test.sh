@@ -89,8 +89,9 @@ case "$provider" in
     lock_with "$work/lock-remote.json" 'd["packages"]["doctest"]["providers"]["cpm"].update(url=sys.argv[3], url_hash=sys.argv[4])' "https://example.invalid/doctest-2.5.3.tar.gz" "$have_sha"
     extra=("-DSL_DEPS_LOCK_OVERRIDE=$work/lock-remote.json" -DSL_DEPS_PROVIDERS=cpm)
     expect_configure_failure "remote url, empty cache, offline" "$work/b-remote" "cache miss" "_cpm_cache" "SL_OFFLINE"
-    # reject 3: the lock as shipped has no cpm pin
-    extra=(-DSL_DEPS_PROVIDERS=cpm)
+    # reject 3: a lock with no cpm pin (url_hash and git_commit null); the shipped lock has been pinned since 2026-10-17
+    lock_with "$work/lock-unpinned.json" 'd["packages"]["doctest"]["providers"]["cpm"].update(url_hash=None, git_commit=None)'
+    extra=("-DSL_DEPS_LOCK_OVERRIDE=$work/lock-unpinned.json" -DSL_DEPS_PROVIDERS=cpm)
     expect_configure_failure "unpinned lock" "$work/b-unpinned" "cpm provider unpinned" "deps-lock-refresh"
 
     extra=(-DSL_DEPS_PROVIDERS=cpm "-DSL_DEPS_LOCK_OVERRIDE=$work/lock-good.json")
