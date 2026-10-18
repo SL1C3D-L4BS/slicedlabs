@@ -24,6 +24,26 @@
     "deps/vcpkg/share/doctest/doctestConfigVersion.cmake": {
       "sha256": "251f6bfe1a221e7efdcdc13e8050dd6bec18bd50863c8189bc236cd82823c2fa",
       "bytes": 400
+    },
+    "fabric/README.md": {
+      "sha256": "6f2fdc557443eb613e9b1ef34ebd22097b56ff896dfc103df042a00b338f9542",
+      "bytes": 6091
+    },
+    "fabric/hash/vectors.json": {
+      "sha256": "0bc72ad7248daa607d263331d21d12d56758bb8f51d2496936b05acc036b3761",
+      "bytes": 23642
+    },
+    "fabric/slb/accept.json": {
+      "sha256": "c5375d7c8b1ec1114599b8f7c483087da28b7ba9d723b256dc63151a90877ee9",
+      "bytes": 143132
+    },
+    "fabric/slb/reject.json": {
+      "sha256": "d96cd6a66b2bf532c75288ccf66593fe11f60bfd64549767d9355ae99d06c604",
+      "bytes": 50109
+    },
+    "fabric/slb/schemas.json": {
+      "sha256": "8a7ebe8dc97fd321e16c3b294e1bb7fd1bd9ceeb1aa6a2de83b6f0be070f1b1f",
+      "bytes": 4333
     }
   }
 }
