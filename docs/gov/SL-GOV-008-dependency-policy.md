@@ -57,10 +57,10 @@ are specified, not yet enforced.
     {"id": "C05", "text": "CI resolves vendored, cpm, system, vcpkg and hash-verifies; dev resolves system, vendored, cpm, vcpkg.", "enforced_by": "just deps-provider-test", "episodes": [47, 48]},
     {"id": "C06", "text": "An integrity failure is fatal and never falls through to the next provider.", "enforced_by": "just neg-deps", "episodes": [48, 58]},
     {"id": "C07", "text": "Agents never fetch or install; networked recipes are founder-only and outside check.", "enforced_by": "just gates-check", "episodes": [15, 48]},
-    {"id": "C08", "text": "Every dependency licence is on the allowlist.", "enforced_by": "just deps-check", "episodes": [15, 58]},
+    {"id": "C08", "text": "Every dependency licence is on the allowlist.", "enforced_by": "just deps-licenses", "episodes": [15, 58]},
     {"id": "C09", "text": "Every file under third_party is listed in a manifest generated from the lock.", "enforced_by": "just deps-check", "episodes": [48, 58]},
     {"id": "C10", "text": "Only packages that a target consumes are locked.", "enforced_by": "just deps-check", "episodes": [48]},
-    {"id": "C11", "text": "Locks are refreshed monthly or on a published CVE, by the founder.", "enforced_by": "pending", "episodes": [48, 58]},
+    {"id": "C11", "text": "Locks are refreshed monthly or on a published CVE, by the founder.", "enforced_by": "just deps-check", "episodes": [48, 58]},
     {"id": "C12", "text": "vcpkg is optional and founder-installed; its baseline stays null and unpinned until the founder pins it, recorded honestly.", "enforced_by": "just neg-deps-unpinned-provider", "episodes": [48]}
   ],
   "providers": ["vendored", "system", "cpm", "vcpkg"],
@@ -82,7 +82,7 @@ are specified, not yet enforced.
 - C01: `just gov008-lock-check` compares providers, provider_order and licenses_allowed with the lock `policy` block (numerator: differing keys, denominator: three, threshold 0). It passes when the lock does not exist yet.
 - C02 to C06, C08 to C10 and C12: `deps-check`, `deps-provider-test`, `neg-deps` and `neg-deps-unpinned-provider` are owned by WO-017 and WO-018 and are stubs until those land.
 - C07: `just gates-check` scans recipes for network fetches (tools/governance/slgov.py, FORBIDDEN_FETCH).
-- C11: calendar review by the founder; no automated enforcement.
+- C11: `just deps-check` fails on an open finding in `deps/vulnerabilities.json` against a locked version (R-DEPS-VULN); the monthly refresh is a founder calendar review (master plan episode 058).
 - Review of this file: `just doc-check` and `just registry-docs-check`.
 
 ## Traceability

@@ -66,7 +66,9 @@ def contract_errors(policy, recipes):
     if len(set(ids)) != len(ids):
         errors.append("%s:1: R-POL-CONTRACTS: duplicate contract ids %s" % (DOC_REL, ids))
     elif ids != expected:
-        errors.append("%s:1: R-POL-CONTRACTS: ids must be C01..C%02d in order, found %s" % (DOC_REL, CONTRACT_COUNT, ids))
+        errors.append(
+            "%s:1: R-POL-CONTRACTS: ids must be C01..C%02d in order, found %s" % (DOC_REL, CONTRACT_COUNT, ids)
+        )
     for i, c in enumerate(contracts):
         if not isinstance(c, dict):
             errors.append("%s:1: R-POL-CONTRACTS: contract %d is not an object" % (DOC_REL, i + 1))
@@ -82,16 +84,24 @@ def contract_errors(policy, recipes):
             continue
         m = ENFORCER_RE.match(by) if isinstance(by, str) else None
         if not m:
-            errors.append("%s:1: R-POL-ENFORCER: %s enforced_by %r must be 'pending' or 'just <recipe>'" % (DOC_REL, cid, by))
+            errors.append(
+                "%s:1: R-POL-ENFORCER: %s enforced_by %r must be 'pending' or 'just <recipe>'" % (DOC_REL, cid, by)
+            )
         elif m.group(1) not in recipes:
-            errors.append("%s:1: R-POL-ENFORCER: %s names recipe '%s' which is not in the justfile" % (DOC_REL, cid, m.group(1)))
+            errors.append(
+                "%s:1: R-POL-ENFORCER: %s names recipe '%s' which is not in the justfile" % (DOC_REL, cid, m.group(1))
+            )
     return errors
 
 
 def provider_errors(policy):
     errors = []
     providers = policy.get("providers")
-    if not isinstance(providers, list) or sorted(providers) != sorted(PROVIDERS) or len(set(providers)) != len(providers):
+    if (
+        not isinstance(providers, list)
+        or sorted(providers) != sorted(PROVIDERS)
+        or len(set(providers)) != len(providers)
+    ):
         errors.append("%s:1: R-POL-PROVIDERS: providers must be exactly %s" % (DOC_REL, list(PROVIDERS)))
         return errors
     order = policy.get("provider_order")
@@ -100,13 +110,21 @@ def provider_errors(policy):
     for mode in ("ci", "dev"):
         lst = order.get(mode)
         if not isinstance(lst, list) or sorted(lst) != sorted(providers):
-            errors.append("%s:1: R-POL-PROVIDERS: provider_order.%s %r is not a permutation of %s" % (DOC_REL, mode, lst, providers))
+            errors.append(
+                "%s:1: R-POL-PROVIDERS: provider_order.%s %r is not a permutation of %s"
+                % (DOC_REL, mode, lst, providers)
+            )
     return errors
 
 
 def license_errors(policy):
     lic = policy.get("licenses_allowed")
-    if not isinstance(lic, list) or not lic or not all(isinstance(x, str) and x.strip() for x in lic) or len(set(lic)) != len(lic):
+    if (
+        not isinstance(lic, list)
+        or not lic
+        or not all(isinstance(x, str) and x.strip() for x in lic)
+        or len(set(lic)) != len(lic)
+    ):
         return ["%s:1: R-POL-LICENSES: licenses_allowed must be a non-empty list of unique strings" % DOC_REL]
     return []
 
