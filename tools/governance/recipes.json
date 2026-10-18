@@ -476,11 +476,11 @@
     },
     "fabric-schema-check": {
       "owner": "WO-040",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-schema": {
       "owner": "WO-040",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-determinism": {
       "owner": "WO-041",
