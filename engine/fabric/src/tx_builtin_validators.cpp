@@ -1,6 +1,8 @@
 // The built-in validator chain of the transaction manager (WO-050, SL-ARCH-002 ARCH2-R05 and
-// `validation_stages`; WO-048 authority, WO-049 provenance). WO-058 appends the identity
-// validator to builtin_validators() below (only that line and its include).
+// `validation_stages`; WO-048 authority, WO-049 provenance, WO-058 identity). The identity
+// validator (identity.hpp) owns the tombstone-reuse rule (R-INV-ID-REUSE, which replaced
+// WO-050's R-STR-TOMBSTONE) and the id-class rule (R-INV-ID-CLASS, moved out of
+// fabric.invariants).
 //
 // Each validator looks only at what the patch changed (the staged changes and the ops), so the
 // work is bounded by changed records times validators (SL-ARCH-002 Measures, performance), with
@@ -21,6 +23,7 @@
 #include "sl/fabric/authority.hpp"
 #include "sl/fabric/deps.hpp"
 #include "sl/fabric/id.hpp"
+#include "sl/fabric/identity.hpp"
 #include "sl/fabric/patch.hpp"
 #include "sl/fabric/provenance.hpp"
 #include "sl/fabric/schema.hpp"
@@ -78,9 +81,6 @@ public:
   [[nodiscard]] result<void> run(const validation_context &ctx,
                                  std::vector<diagnostic> &out) const override {
     const patch &p = ctx.patch();
-    // The state before the patch is the snapshot the manager staged over; tombstones are visible
-    // only there (a state_reader reads a retired id as absent).
-    const auto *base = dynamic_cast<const snapshot *>(&ctx.before());
     for (std::size_t i = 0; i < p.ops.size(); ++i) {
       const patch_op &op = p.ops[i];
       if (op.kind == op_kind::annotate) {
@@ -99,19 +99,6 @@ public:
         out.push_back(finding(validator_stage::structural, "R-STR-TYPE", op.target, op.path,
                               errc::invalid_argument,
                               std::format("op {} ({}) has no type", i, to_string(op.kind))));
-      }
-      if (op.kind == op_kind::create_record && base != nullptr && p.meta.undo_of.empty()) {
-        auto e = base->entry(op.target);
-        if (!e) {
-          return std::unexpected(e.error());
-        }
-        if (*e && (*e)->kind == entry_kind::tombstone) {
-          out.push_back(finding(validator_stage::structural, "R-STR-TOMBSTONE", op.target, op.path,
-                                errc::id_reuse,
-                                std::format("op {} creates {}, a retired id; only an undo "
-                                            "(undo_of) may revive it",
-                                            i, op.target.to_string())));
-        }
       }
     }
     return {};
@@ -288,12 +275,6 @@ public:
       if (t == nullptr || !t->is_record()) {
         continue;
       }
-      if (t->record_class != id_class::none && c.id.cls() != t->record_class) {
-        out.push_back(finding(
-            validator_stage::invariants, "R-INV-ID-CLASS", c.id, {}, errc::id_class_mismatch,
-            std::format("{} has class {}, type {} has record class {}", c.id.to_string(),
-                        to_string(c.id.cls()), t->name, to_string(t->record_class))));
-      }
       const auto edges = edges_of(c.id, *c.after, schemas);
       if (!edges) {
         continue;
@@ -381,6 +362,7 @@ builtin_validators(const builtin_validator_env &env) {
   chain.push_back(std::make_shared<invariants_validator>());
   chain.push_back(
       std::make_shared<provenance_validator>(*env.provenance, *env.actors, *env.domains));
+  chain.push_back(std::make_shared<identity_validator>());
   return chain;
 }
 
