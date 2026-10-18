@@ -620,25 +620,29 @@ fabric-ownership-check *args:
 neg-fabric-f2 *args:
     @bash tests/gates/neg_fabric_f2.sh
 
-# owner WO-051
+# fabric-surface-check (F5): the public headers engine/fabric/include/sl/fabric/*.hpp expose no mutation outside the passkey: R-F5-FRIEND (friend not in tools/fabric/surface-allow.txt), R-F5-MUTABLE, R-F5-CAP (mutation_capability constructible, copyable or passed other than by const&), R-F5-SETTER (writable view or set_* on value, snapshot, snapshot_entry, record_view), R-F5-INCLUDE (internal/ header); reports file:line (WO-051, FAB-INV-F5-03)
 fabric-surface-check *args:
-    @{{just_executable()}} stub fabric-surface-check
+    @python3 -I tools/fabric/surface_check.py {{args}}
 
-# owner WO-051
+# negative test: a public `value &at_mut();` in a copy of value.hpp fails fabric-surface-check naming R-F5-SETTER and its file:line; a copy of the tree with the f5::authorized_scope line removed from tx_manager.cpp fails fabric_f5_ledger_test with bypassing > 0 and mutations > 0; the control runs pass (WO-051)
 neg-fabric-f5 *args:
-    @{{just_executable()}} stub neg-fabric-f5
+    @bash tests/gates/neg_fabric_f5.sh
 
-# owner WO-055
+# fabric-crash-sweep: build preset debug and run the recovery sweeps `ctest --preset debug -R "^fabric_recovery_.*sweep"`: truncation at every byte offset of a 40-commit log, every single-bit flip of a small log, a crash after every storage primitive and at every failpoint under every faulty-vfs crash policy; sizes scale with SL_FABRIC_SWEEP_SCALE (WO-055, FAB-INV-RCV-01, -02, -09)
 fabric-crash-sweep *args:
-    @{{just_executable()}} stub fabric-crash-sweep
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug
+    @ctest --preset debug -R "^fabric_recovery_.*sweep" --no-tests=error --output-on-failure {{args}}
 
-# owner WO-055
+# negative test: a copy of the tree whose log backend acknowledges a commit before its frames are durable (the fsync removed; the script asserts the edit) builds the crash sweep, which must fail naming FAB-INV-RCV-09 and a lost acknowledged commit; the unedited control copy passes (WO-055)
 neg-fabric-crash-sweep *args:
-    @{{just_executable()}} stub neg-fabric-crash-sweep
+    @bash tests/gates/neg_fabric_crash_sweep.sh
 
-# owner WO-055
-fabric-soak *args:
-    @{{just_executable()}} stub fabric-soak
+# fabric-soak [iters]: the per-primitive crash sweep once per iteration with a random seed (SL_FABRIC_SOAK_SEED), printing the seed of a failure to rerun it; never part of check (WO-055)
+fabric-soak iters='5':
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug --target fabric_recovery_crash_sweep_test
+    @for i in $(seq 1 {{iters}}); do seed=$(od -An -N4 -tu4 /dev/urandom | tr -d ' '); echo "fabric-soak: iteration $i seed $seed"; SL_FABRIC_SOAK_SEED=$seed ctest --preset debug -R '^fabric_recovery_crash_sweep_test$' --no-tests=error --output-on-failure || { echo "fabric-soak: FAIL seed $seed (rerun: SL_FABRIC_SOAK_SEED=$seed ctest --preset debug -R '^fabric_recovery_crash_sweep_test$')"; exit 1; }; done; echo "fabric-soak: ok, {{iters}} random seeds"
 
 # owner WO-059
 fabric-fsck *args:
