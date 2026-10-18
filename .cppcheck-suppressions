@@ -1,0 +1,7 @@
+# cppcheck suppressions for `just analyze` (WO-025). One `id:path-glob` per line, each with the reason above it.
+# Prefer an inline `// cppcheck-suppress <id>` next to the code (--inline-suppr is on); list here only what is global.
+# Generated and third-party code is not ours to fix.
+*:third_party/*
+*:build/*
+# cppcheck cannot see through the standard library headers of the toolchain; it says so as information, not a defect.
+missingIncludeSystem

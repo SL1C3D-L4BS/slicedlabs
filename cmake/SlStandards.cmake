@@ -148,7 +148,10 @@ if(NOT _sl_ccache_mode STREQUAL "OFF")
 endif()
 message(STATUS "sliced: compiler cache ${SL_CCACHE_USED}")
 
-# sl_target(<tgt>): the one place a target takes the language standard, warnings, sanitizer and Debug policy.
+# --- release hardening (SL_HARDEN) and the gcc analyzer (SL_ANALYZER): WO-025 ---
+include(SlHardening)
+
+# sl_target(<tgt>): the one place a target takes the language standard, warnings, sanitizer, Debug and hardening policy.
 function(sl_target tgt)
   set_target_properties(${tgt} PROPERTIES
     CXX_STANDARD ${SL_CXX_STANDARD} CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
@@ -158,5 +161,13 @@ function(sl_target tgt)
   endforeach()
   if(SL_SANITIZE_LINK)
     target_link_options(${tgt} PRIVATE ${SL_SANITIZE_LINK})
+  endif()
+  # Hardening after the Debug flags: its -ftrivial-auto-var-init=zero is the later flag and wins in a Debug configure.
+  if(SL_HARDEN)
+    target_compile_options(${tgt} PRIVATE ${SL_HARDEN_COMPILE})
+    target_link_options(${tgt} PRIVATE ${SL_HARDEN_LINK})
+  endif()
+  if(SL_ANALYZER_FLAGS)
+    target_compile_options(${tgt} PRIVATE ${SL_ANALYZER_FLAGS})
   endif()
 endfunction()

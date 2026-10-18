@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# check-hardening BINARY...: proves the hardening flags reached the binaries by reading the ELF (readelf and nm; nothing
+# is run). One line per check, exit 1 naming each property that is missing. For SL_HARDEN=ON builds (the ci-release and
+# ci-gcc-release presets): a sanitizer or Debug build fails it on purpose. WO-025, SL-EP-050.
+#
+# Per binary: PIE, RELRO segment, BIND_NOW (full RELRO), no executable stack, no text relocations, CET notes (IBT and
+# SHSTK, x86-64 only), no sanitizer runtime (bounds checks trap instead). Across the set: a stack protector and
+# _FORTIFY_SOURCE leave evidence only where the code has a local array or a fortifiable libc call with a known object
+# size, so each needs the evidence in at least one of the binaries given (sl_tests has both, sl_sandbox the canary).
+# The bounds traps themselves are proved by running tests/proofs/trap_bounds (ctest, ExpectSignal.cmake), not here.
+set -euo pipefail
+
+(($# > 0)) || {
+  echo "usage: check-hardening BINARY..." >&2
+  exit 2
+}
+for tool in readelf nm; do
+  command -v "$tool" >/dev/null || {
+    echo "check-hardening: $tool not found (pacman -S binutils)" >&2
+    exit 2
+  }
+done
+
+bad=0
+missing=()
+bin=
+pass() { printf 'ok   %s: %s\n' "$bin" "$1"; }
+fail() {
+  printf 'FAIL %s: %s\n' "$bin" "$1"
+  bad=1
+  missing+=("$1")
+}
+# ck DESCRIPTION REGEX TEXT: pass when TEXT matches REGEX. nck: pass when it does not.
+ck() { if grep -qE -- "$2" <<<"$3"; then pass "$1"; else fail "$1"; fi; }
+nck() { if grep -qE -- "$2" <<<"$3"; then fail "$1"; else pass "$1"; fi; }
+
+canary_in=()
+fortify_in=()
+for bin in "$@"; do
+  if [[ ! -f $bin ]]; then
+    fail "no such file"
+    continue
+  fi
+  header=$(readelf -hW "$bin")
+  dynamic=$(readelf -dW "$bin")
+  segments=$(readelf -lW "$bin")
+  notes=$(readelf -nW "$bin" | tr '\n' ' ')
+  imports=$(nm -D --undefined-only "$bin" | awk '{print $NF}' | sed 's/@.*//')
+  # defined and undefined symbols of a non-stripped binary: a statically linked sanitizer runtime shows here
+  symbols=$( (nm "$bin" 2>/dev/null || true) | awk '{print $NF}' | sed 's/@.*//')
+
+  ck "PIE" 'DYN \(Position-Independent Executable' "$header"
+  ck "RELRO segment" 'GNU_RELRO' "$segments"
+  ck "BIND_NOW (full RELRO)" '(BIND_NOW|Flags: NOW|Flags_1:.* NOW)' "$dynamic"
+  # a GNU_STACK header whose flags include E is an executable stack
+  nck "non-executable stack" 'GNU_STACK.* RWE|GNU_STACK.* R E ' "$segments"
+  nck "no text relocations" '\(TEXTREL\)|Flags:.*TEXTREL' "$dynamic"
+  if [[ $(uname -m) == x86_64 ]]; then
+    ck "CET (IBT and SHSTK notes)" 'IBT.*SHSTK|SHSTK.*IBT' "$notes"
+  fi
+  nck "no sanitizer runtime, defined or imported (bounds checks trap)" '^_*(asan|ubsan|tsan|msan|lsan|sanitizer)_' "$symbols"
+  if grep -qxE '__stack_chk_fail' <<<"$imports"; then
+    canary_in+=("$bin")
+    printf 'info %s: imports __stack_chk_fail (stack protector in use)\n' "$bin"
+  fi
+  # __stack_chk_fail ends in _fail, so only the fortified libc wrappers (__snprintf_chk, __memcpy_chk, ...) match
+  if grep -qE '^__[a-z0-9_]+_chk$' <<<"$imports"; then
+    fortify_in+=("$bin")
+    printf 'info %s: imports %s (_FORTIFY_SOURCE in use)\n' "$bin" "$(grep -E '^__[a-z0-9_]+_chk$' <<<"$imports" | head -n 3 | tr '\n' ' ')"
+  fi
+done
+
+bin="(set of $#)"
+if ((${#canary_in[@]} > 0)); then
+  pass "stack protector (__stack_chk_fail imported by ${canary_in[*]##*/})"
+else
+  fail "stack protector (no binary imports __stack_chk_fail)"
+fi
+if ((${#fortify_in[@]} > 0)); then
+  pass "_FORTIFY_SOURCE (a __*_chk libc wrapper is imported by ${fortify_in[*]##*/})"
+else
+  fail "_FORTIFY_SOURCE (no binary imports a __*_chk libc wrapper)"
+fi
+
+if ((bad)); then
+  printf 'check-hardening: FAIL, missing: %s\n' "$(printf '%s; ' "${missing[@]}")"
+  exit 1
+fi
+echo "check-hardening: ok ($# binaries)"
