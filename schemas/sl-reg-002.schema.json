@@ -1,0 +1,549 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/sl-reg-002.schema.json",
+  "title": "SL-REG-002 episode register (authoritative)",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "sl-reg-002/1"
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "plan": {
+          "const": "SL-PLAN-001"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "plan",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "lifecycle": {
+      "type": "object",
+      "properties": {
+        "states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/state"
+          },
+          "uniqueItems": true
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/state"
+            },
+            "minItems": 2
+          }
+        },
+        "waivers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/waiver"
+          }
+        }
+      },
+      "required": [
+        "states",
+        "transitions",
+        "waivers"
+      ],
+      "additionalProperties": false
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/part"
+      },
+      "minItems": 1
+    },
+    "volumes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/volume"
+      },
+      "minItems": 1
+    },
+    "episodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/episode"
+      },
+      "minItems": 1
+    },
+    "amendments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/registry_amendment"
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "source",
+    "lifecycle",
+    "parts",
+    "volumes",
+    "episodes",
+    "amendments"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "ep_id": {
+      "type": "string",
+      "pattern": "^SL-EP-[0-9]{3}$"
+    },
+    "vol_id": {
+      "type": "string",
+      "pattern": "^SL-VOL-[0-9]{2}$"
+    },
+    "wo_id": {
+      "type": "string",
+      "pattern": "^WO-[0-9]{3}$"
+    },
+    "doc_id": {
+      "type": "string",
+      "pattern": "^SL-[A-Z]+-[0-9]{2,3}(-SPEC)?$"
+    },
+    "adr_id": {
+      "type": "string",
+      "pattern": "^ADR-[0-9]{4}$"
+    },
+    "exc_id": {
+      "type": "string",
+      "pattern": "^SL-EXC-[0-9]{3}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "state": {
+      "enum": [
+        "Planned",
+        "Specified",
+        "InProgress",
+        "Verifying",
+        "Demonstrated",
+        "Accepted",
+        "Blocked",
+        "Reopened"
+      ]
+    },
+    "decision_status": {
+      "enum": [
+        "Locked",
+        "Conditional",
+        "Experimental",
+        "Unresolved"
+      ]
+    },
+    "waiver": {
+      "type": "object",
+      "properties": {
+        "rule": {
+          "const": "R-DEP-ACCEPTED"
+        },
+        "adr": {
+          "$ref": "#/$defs/adr_id"
+        },
+        "first": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "last": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_status": {
+          "$ref": "#/$defs/state"
+        }
+      },
+      "required": [
+        "rule",
+        "adr",
+        "first",
+        "last",
+        "max_status"
+      ],
+      "additionalProperties": false
+    },
+    "part": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "first": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "last": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "number",
+        "title",
+        "first",
+        "last"
+      ],
+      "additionalProperties": false
+    },
+    "volume": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/vol_id"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "part": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "first": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "last": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "goal": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "depends_on_volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/vol_id"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "number",
+        "title",
+        "part",
+        "first",
+        "last",
+        "goal",
+        "depends_on_volumes"
+      ],
+      "additionalProperties": false
+    },
+    "history_entry": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/state"
+        },
+        "to": {
+          "$ref": "#/$defs/state"
+        },
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "date"
+      ],
+      "additionalProperties": false
+    },
+    "amendment": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adr": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^ADR-[0-9]{4}$"
+        },
+        "from_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "to_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "traceability_updated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "date",
+        "note",
+        "impact",
+        "adr",
+        "from_sha256",
+        "to_sha256",
+        "traceability_updated"
+      ],
+      "additionalProperties": false
+    },
+    "registry_amendment": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adr": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^ADR-[0-9]{4}$"
+        },
+        "episodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ep_id"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "date",
+        "note",
+        "impact",
+        "adr",
+        "episodes"
+      ],
+      "additionalProperties": false
+    },
+    "completion": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "benchmarks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "open_defects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/exc_id"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "revision",
+        "evidence",
+        "benchmarks",
+        "open_defects",
+        "exceptions"
+      ],
+      "additionalProperties": false
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "milestone": {
+          "enum": [
+            "Foundation",
+            "Core loop",
+            "Production",
+            "Early Access",
+            "1.0",
+            null
+          ]
+        },
+        "platforms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "milestone",
+        "platforms"
+      ],
+      "additionalProperties": false
+    },
+    "episode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/ep_id"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "volume": {
+          "$ref": "#/$defs/vol_id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "meaning_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "status": {
+          "$ref": "#/$defs/state"
+        },
+        "decision_status": {
+          "$ref": "#/$defs/decision_status"
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ep_id"
+          },
+          "uniqueItems": true
+        },
+        "work_orders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/wo_id"
+          },
+          "uniqueItems": true
+        },
+        "acceptance": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "kohi_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "release": {
+          "$ref": "#/$defs/release"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/doc_id"
+          },
+          "uniqueItems": true
+        },
+        "completion": {
+          "$ref": "#/$defs/completion"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/history_entry"
+          }
+        },
+        "amendments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/amendment"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "number",
+        "volume",
+        "title",
+        "summary",
+        "meaning_sha256",
+        "status",
+        "decision_status",
+        "depends_on",
+        "work_orders",
+        "acceptance",
+        "kohi_ref",
+        "release",
+        "documents",
+        "completion",
+        "history",
+        "amendments"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

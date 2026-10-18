@@ -1,0 +1,108 @@
+{
+  "schema": "sl-recipes/1",
+  "note": "Every justfile recipe, with the work order that owns it. A stub exits 3 and prints 'stub: owner WO-0xx'. The owner of a stub flips it to implemented in its own WO; tools/governance/cmd_factory_selftest.py checks this file against the justfile.",
+  "recipes": {
+    "default": {"owner": "WO-001", "status": "implemented"},
+    "fast": {"owner": "WO-001", "status": "implemented"},
+    "check": {"owner": "WO-001", "status": "implemented"},
+    "wo-check": {"owner": "WO-001", "status": "implemented"},
+    "layout-check": {"owner": "WO-001", "status": "implemented"},
+    "gates-check": {"owner": "WO-001", "status": "implemented"},
+    "fmt-check": {"owner": "WO-001", "status": "implemented"},
+    "fmt": {"owner": "WO-001", "status": "implemented"},
+    "tools-test": {"owner": "WO-001", "status": "implemented"},
+    "adr-check": {"owner": "WO-001", "status": "implemented"},
+    "doctor": {"owner": "WO-001", "status": "implemented"},
+    "factory-selftest": {"owner": "WO-001", "status": "implemented"},
+    "neg-format": {"owner": "WO-001", "status": "implemented"},
+    "stub": {"owner": "WO-001", "status": "implemented"},
+
+    "registry-schema-selftest": {"owner": "WO-002", "status": "implemented"},
+    "neg-registry": {"owner": "WO-002", "status": "implemented"},
+
+    "doc-check": {"owner": "WO-003", "status": "implemented"},
+    "neg-doc": {"owner": "WO-003", "status": "implemented"},
+
+    "registry-check": {"owner": "WO-004", "status": "implemented"},
+    "registry-gen-check": {"owner": "WO-004", "status": "implemented"},
+    "registry-stats": {"owner": "WO-004", "status": "implemented"},
+
+    "registry-docs-check": {"owner": "WO-005", "status": "implemented"},
+    "vol01-coverage": {"owner": "WO-005", "status": "implemented"},
+
+    "constitution-check": {"owner": "WO-006", "status": "implemented"},
+    "contracts-pending": {"owner": "WO-006", "status": "implemented"},
+
+    "rtm-check": {"owner": "WO-007", "status": "implemented"},
+    "neg-rtm": {"owner": "WO-007", "status": "implemented"},
+
+    "capability-check": {"owner": "WO-008", "status": "implemented"},
+
+    "exception-check": {"owner": "WO-009", "status": "implemented"},
+
+    "policy-contracts-check": {"owner": "WO-010", "status": "implemented"},
+
+    "plan-check": {"owner": "WO-011", "status": "implemented"},
+    "registry-views": {"owner": "WO-011", "status": "implemented"},
+    "registry-views-check": {"owner": "WO-011", "status": "implemented"},
+
+    "evidence-verify": {"owner": "WO-012", "status": "implemented"},
+    "evidence-record": {"owner": "WO-012", "status": "implemented"},
+    "ep-advance": {"owner": "WO-012", "status": "implemented"},
+
+    "doctor-selftest": {"owner": "WO-013", "status": "implemented"},
+
+    "configure": {"owner": "WO-014", "status": "implemented"},
+    "build": {"owner": "WO-014", "status": "implemented"},
+    "test-preset": {"owner": "WO-014", "status": "implemented"},
+    "workflow": {"owner": "WO-014", "status": "implemented"},
+    "cpp-smoke": {"owner": "WO-014", "status": "implemented"},
+    "presets-check": {"owner": "WO-014", "status": "implemented"},
+    "warnings-table-test": {"owner": "WO-014", "status": "implemented"},
+    "gate-build": {"owner": "WO-014", "status": "implemented"},
+
+    "features-check": {"owner": "WO-015", "status": "implemented"},
+    "features-measure": {"owner": "WO-015", "status": "implemented"},
+    "cxx26-report": {"owner": "WO-015", "status": "implemented"},
+    "neg-feature-removed": {"owner": "WO-015", "status": "implemented"},
+    "neg-feature-unlisted": {"owner": "WO-015", "status": "implemented"},
+    "neg-probe-never-fails": {"owner": "WO-015", "status": "implemented"},
+
+    "vk-check": {"owner": "WO-016", "status": "implemented"},
+    "vk-doctor": {"owner": "WO-016", "status": "implemented"},
+    "neg-vk-layer-missing": {"owner": "WO-016", "status": "implemented"},
+
+    "deps-check": {"owner": "WO-017", "status": "implemented"},
+    "deps-lock": {"owner": "WO-017", "status": "implemented"},
+    "deps-sync-vcpkg": {"owner": "WO-017", "status": "implemented"},
+    "deps-vendor": {"owner": "WO-017", "status": "implemented"},
+    "gov008-lock-check": {"owner": "WO-017", "status": "implemented"},
+    "neg-deps": {"owner": "WO-017", "status": "implemented"},
+    "neg-deps-unpinned-provider": {"owner": "WO-017", "status": "implemented"},
+
+    "test": {"owner": "WO-018", "status": "implemented"},
+    "deps-provider-test": {"owner": "WO-018", "status": "implemented"},
+    "neg-deps-missing": {"owner": "WO-018", "status": "implemented"},
+
+    "neg-vcpkg-absent": {"owner": "WO-019", "status": "implemented"},
+    "deps-lock-refresh": {"owner": "WO-019", "status": "implemented"},
+    "deps-cpm-smoke": {"owner": "WO-019", "status": "implemented"},
+    "deps-vcpkg-smoke": {"owner": "WO-019", "status": "implemented"},
+
+    "ci-local": {"owner": "WO-020", "status": "implemented"},
+    "fresh-clone-check": {"owner": "WO-020", "status": "implemented"},
+    "neg-ci-local-red": {"owner": "WO-020", "status": "implemented"},
+    "acceptance-041-048": {"owner": "WO-020", "status": "implemented"},
+    "negatives": {"owner": "WO-020", "status": "implemented"},
+    "check-ratchet": {"owner": "WO-020", "status": "implemented"},
+    "check-full": {"owner": "WO-020", "status": "implemented"},
+
+    "episodes-doc-check": {"owner": "WO-021", "status": "implemented"},
+    "deps-register": {"owner": "WO-021", "status": "implemented"},
+
+    "vol01-gate": {"owner": "WO-022", "status": "implemented"},
+    "gov-check": {"owner": "WO-022", "status": "implemented"},
+
+    "constitution-frozen": {"owner": "WO-023", "status": "implemented"}
+  }
+}

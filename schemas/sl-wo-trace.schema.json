@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/sl-wo-trace.schema.json",
+  "title": "Work-order trace record",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/wo_id"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "class": {
+      "enum": [
+        "S",
+        "M",
+        "L"
+      ]
+    },
+    "traces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ep_id"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    }
+  },
+  "required": [
+    "id",
+    "path",
+    "traces"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "wo_id": {
+      "type": "string",
+      "pattern": "^WO-[0-9]{3}$"
+    },
+    "ep_id": {
+      "type": "string",
+      "pattern": "^SL-EP-[0-9]{3}$"
+    }
+  }
+}

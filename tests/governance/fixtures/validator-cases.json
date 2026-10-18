@@ -1,0 +1,881 @@
+{
+ "note": "Validator agreement cases: slib must give `valid`, and python jsonschema too when importable.",
+ "cases": [
+  {
+   "name": "type string ok",
+   "schema": {
+    "type": "string"
+   },
+   "instance": "a",
+   "valid": true
+  },
+  {
+   "name": "type string rejects",
+   "schema": {
+    "type": "string"
+   },
+   "instance": 1,
+   "valid": false
+  },
+  {
+   "name": "type integer ok",
+   "schema": {
+    "type": "integer"
+   },
+   "instance": 3,
+   "valid": true
+  },
+  {
+   "name": "type integer rejects",
+   "schema": {
+    "type": "integer"
+   },
+   "instance": 3.5,
+   "valid": false
+  },
+  {
+   "name": "type number ok",
+   "schema": {
+    "type": "number"
+   },
+   "instance": 2.5,
+   "valid": true
+  },
+  {
+   "name": "type number rejects",
+   "schema": {
+    "type": "number"
+   },
+   "instance": "2",
+   "valid": false
+  },
+  {
+   "name": "type boolean ok",
+   "schema": {
+    "type": "boolean"
+   },
+   "instance": true,
+   "valid": true
+  },
+  {
+   "name": "type boolean rejects",
+   "schema": {
+    "type": "boolean"
+   },
+   "instance": 1,
+   "valid": false
+  },
+  {
+   "name": "type null ok",
+   "schema": {
+    "type": "null"
+   },
+   "instance": null,
+   "valid": true
+  },
+  {
+   "name": "type null rejects",
+   "schema": {
+    "type": "null"
+   },
+   "instance": 0,
+   "valid": false
+  },
+  {
+   "name": "type array ok",
+   "schema": {
+    "type": "array"
+   },
+   "instance": [],
+   "valid": true
+  },
+  {
+   "name": "type array rejects",
+   "schema": {
+    "type": "array"
+   },
+   "instance": {},
+   "valid": false
+  },
+  {
+   "name": "type object ok",
+   "schema": {
+    "type": "object"
+   },
+   "instance": {},
+   "valid": true
+  },
+  {
+   "name": "type object rejects",
+   "schema": {
+    "type": "object"
+   },
+   "instance": [],
+   "valid": false
+  },
+  {
+   "name": "integer accepts 1.0",
+   "schema": {
+    "type": "integer"
+   },
+   "instance": 1.0,
+   "valid": true
+  },
+  {
+   "name": "integer rejects true",
+   "schema": {
+    "type": "integer"
+   },
+   "instance": true,
+   "valid": false
+  },
+  {
+   "name": "number rejects true",
+   "schema": {
+    "type": "number"
+   },
+   "instance": true,
+   "valid": false
+  },
+  {
+   "name": "type list ok",
+   "schema": {
+    "type": [
+     "string",
+     "null"
+    ]
+   },
+   "instance": null,
+   "valid": true
+  },
+  {
+   "name": "type list rejects",
+   "schema": {
+    "type": [
+     "string",
+     "null"
+    ]
+   },
+   "instance": 5,
+   "valid": false
+  },
+  {
+   "name": "enum member",
+   "schema": {
+    "enum": [
+     "a",
+     1,
+     null
+    ]
+   },
+   "instance": null,
+   "valid": true
+  },
+  {
+   "name": "enum 1 vs true",
+   "schema": {
+    "enum": [
+     1
+    ]
+   },
+   "instance": true,
+   "valid": false
+  },
+  {
+   "name": "enum true vs 1",
+   "schema": {
+    "enum": [
+     true
+    ]
+   },
+   "instance": 1,
+   "valid": false
+  },
+  {
+   "name": "enum 1 vs 1.0",
+   "schema": {
+    "enum": [
+     1
+    ]
+   },
+   "instance": 1.0,
+   "valid": true
+  },
+  {
+   "name": "enum nested",
+   "schema": {
+    "enum": [
+     {
+      "a": [
+       1,
+       2
+      ]
+     }
+    ]
+   },
+   "instance": {
+    "a": [
+     1,
+     2
+    ]
+   },
+   "valid": true
+  },
+  {
+   "name": "enum nested bool",
+   "schema": {
+    "enum": [
+     {
+      "a": [
+       1
+      ]
+     }
+    ]
+   },
+   "instance": {
+    "a": [
+     true
+    ]
+   },
+   "valid": false
+  },
+  {
+   "name": "const string",
+   "schema": {
+    "const": "x"
+   },
+   "instance": "x",
+   "valid": true
+  },
+  {
+   "name": "const mismatch",
+   "schema": {
+    "const": "x"
+   },
+   "instance": "y",
+   "valid": false
+  },
+  {
+   "name": "const zero vs false",
+   "schema": {
+    "const": 0
+   },
+   "instance": false,
+   "valid": false
+  },
+  {
+   "name": "pattern search",
+   "schema": {
+    "pattern": "b"
+   },
+   "instance": "abc",
+   "valid": true
+  },
+  {
+   "name": "pattern anchored",
+   "schema": {
+    "pattern": "^b"
+   },
+   "instance": "abc",
+   "valid": false
+  },
+  {
+   "name": "pattern ignores non-string",
+   "schema": {
+    "pattern": "^x$"
+   },
+   "instance": 5,
+   "valid": true
+  },
+  {
+   "name": "pattern repeat",
+   "schema": {
+    "type": "string",
+    "pattern": "^SL-EP-[0-9]{3}$"
+   },
+   "instance": "SL-EP-041",
+   "valid": true
+  },
+  {
+   "name": "pattern trailing newline",
+   "schema": {
+    "type": "string",
+    "pattern": "^a$"
+   },
+   "instance": "a\n",
+   "valid": true
+  },
+  {
+   "name": "minLength",
+   "schema": {
+    "minLength": 2
+   },
+   "instance": "a",
+   "valid": false
+  },
+  {
+   "name": "minLength unicode",
+   "schema": {
+    "minLength": 2
+   },
+   "instance": "\u00e9\u00e9",
+   "valid": true
+  },
+  {
+   "name": "minLength ignores non-string",
+   "schema": {
+    "minLength": 2
+   },
+   "instance": 1,
+   "valid": true
+  },
+  {
+   "name": "minimum",
+   "schema": {
+    "minimum": 1
+   },
+   "instance": 0,
+   "valid": false
+  },
+  {
+   "name": "minimum equal",
+   "schema": {
+    "minimum": 1
+   },
+   "instance": 1,
+   "valid": true
+  },
+  {
+   "name": "maximum",
+   "schema": {
+    "maximum": 1
+   },
+   "instance": 2,
+   "valid": false
+  },
+  {
+   "name": "minimum ignores bool",
+   "schema": {
+    "minimum": 5
+   },
+   "instance": true,
+   "valid": true
+  },
+  {
+   "name": "minItems",
+   "schema": {
+    "minItems": 1
+   },
+   "instance": [],
+   "valid": false
+  },
+  {
+   "name": "minItems ignores object",
+   "schema": {
+    "minItems": 1
+   },
+   "instance": {},
+   "valid": true
+  },
+  {
+   "name": "required missing",
+   "schema": {
+    "required": [
+     "a"
+    ]
+   },
+   "instance": {},
+   "valid": false
+  },
+  {
+   "name": "required present",
+   "schema": {
+    "required": [
+     "a"
+    ]
+   },
+   "instance": {
+    "a": null
+   },
+   "valid": true
+  },
+  {
+   "name": "required ignores array",
+   "schema": {
+    "required": [
+     "a"
+    ]
+   },
+   "instance": [],
+   "valid": true
+  },
+  {
+   "name": "properties ok",
+   "schema": {
+    "properties": {
+     "a": {
+      "type": "string"
+     }
+    }
+   },
+   "instance": {
+    "a": "x"
+   },
+   "valid": true
+  },
+  {
+   "name": "properties bad",
+   "schema": {
+    "properties": {
+     "a": {
+      "type": "string"
+     }
+    }
+   },
+   "instance": {
+    "a": 1
+   },
+   "valid": false
+  },
+  {
+   "name": "properties extra allowed",
+   "schema": {
+    "properties": {
+     "a": {
+      "type": "string"
+     }
+    }
+   },
+   "instance": {
+    "b": 1
+   },
+   "valid": true
+  },
+  {
+   "name": "additionalProperties false",
+   "schema": {
+    "properties": {
+     "a": {}
+    },
+    "additionalProperties": false
+   },
+   "instance": {
+    "a": 1,
+    "b": 2
+   },
+   "valid": false
+  },
+  {
+   "name": "additionalProperties false ok",
+   "schema": {
+    "properties": {
+     "a": {}
+    },
+    "additionalProperties": false
+   },
+   "instance": {
+    "a": 1
+   },
+   "valid": true
+  },
+  {
+   "name": "additionalProperties true",
+   "schema": {
+    "additionalProperties": true
+   },
+   "instance": {
+    "a": 1
+   },
+   "valid": true
+  },
+  {
+   "name": "additionalProperties schema ok",
+   "schema": {
+    "additionalProperties": {
+     "type": "integer"
+    }
+   },
+   "instance": {
+    "a": 1
+   },
+   "valid": true
+  },
+  {
+   "name": "additionalProperties schema bad",
+   "schema": {
+    "additionalProperties": {
+     "type": "integer"
+    }
+   },
+   "instance": {
+    "a": "x"
+   },
+   "valid": false
+  },
+  {
+   "name": "nullable object ok null",
+   "schema": {
+    "type": [
+     "object",
+     "null"
+    ],
+    "properties": {
+     "a": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "a"
+    ],
+    "additionalProperties": false
+   },
+   "instance": null,
+   "valid": true
+  },
+  {
+   "name": "nullable object missing",
+   "schema": {
+    "type": [
+     "object",
+     "null"
+    ],
+    "properties": {
+     "a": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "a"
+    ],
+    "additionalProperties": false
+   },
+   "instance": {},
+   "valid": false
+  },
+  {
+   "name": "nullable object extra",
+   "schema": {
+    "type": [
+     "object",
+     "null"
+    ],
+    "properties": {
+     "a": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "a"
+    ],
+    "additionalProperties": false
+   },
+   "instance": {
+    "a": "x",
+    "b": 1
+   },
+   "valid": false
+  },
+  {
+   "name": "items ok",
+   "schema": {
+    "items": {
+     "type": "integer"
+    }
+   },
+   "instance": [
+    1,
+    2
+   ],
+   "valid": true
+  },
+  {
+   "name": "items bad",
+   "schema": {
+    "items": {
+     "type": "integer"
+    }
+   },
+   "instance": [
+    1,
+    "2"
+   ],
+   "valid": false
+  },
+  {
+   "name": "items ignores object",
+   "schema": {
+    "items": {
+     "type": "integer"
+    }
+   },
+   "instance": {
+    "a": "x"
+   },
+   "valid": true
+  },
+  {
+   "name": "uniqueItems ok",
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    1,
+    2,
+    3
+   ],
+   "valid": true
+  },
+  {
+   "name": "uniqueItems dup",
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    "a",
+    "a"
+   ],
+   "valid": false
+  },
+  {
+   "name": "uniqueItems 1 vs true",
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    1,
+    true
+   ],
+   "valid": true
+  },
+  {
+   "name": "uniqueItems 0 vs false",
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    0,
+    false
+   ],
+   "valid": true
+  },
+  {
+   "name": "uniqueItems 1 vs 1.0",
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    1,
+    1.0
+   ],
+   "valid": false
+  },
+  {
+   "name": "uniqueItems nested",
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    {
+     "a": [
+      1
+     ]
+    },
+    {
+     "a": [
+      1
+     ]
+    }
+   ],
+   "valid": false
+  },
+  {
+   "name": "uniqueItems nested bool",
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    {
+     "a": [
+      1
+     ]
+    },
+    {
+     "a": [
+      true
+     ]
+    }
+   ],
+   "valid": true
+  },
+  {
+   "name": "uniqueItems false",
+   "schema": {
+    "uniqueItems": false
+   },
+   "instance": [
+    1,
+    1
+   ],
+   "valid": true
+  },
+  {
+   "name": "ref ok",
+   "schema": {
+    "$defs": {
+     "id": {
+      "type": "string",
+      "pattern": "^X-[0-9]+$"
+     },
+     "ids": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/id"
+      }
+     }
+    },
+    "properties": {
+     "a": {
+      "$ref": "#/$defs/ids"
+     }
+    }
+   },
+   "instance": {
+    "a": [
+     "X-1",
+     "X-22"
+    ]
+   },
+   "valid": true
+  },
+  {
+   "name": "ref bad item",
+   "schema": {
+    "$defs": {
+     "id": {
+      "type": "string",
+      "pattern": "^X-[0-9]+$"
+     },
+     "ids": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/id"
+      }
+     }
+    },
+    "properties": {
+     "a": {
+      "$ref": "#/$defs/ids"
+     }
+    }
+   },
+   "instance": {
+    "a": [
+     "X-1",
+     "Y-2"
+    ]
+   },
+   "valid": false
+  },
+  {
+   "name": "ref root",
+   "schema": {
+    "type": "object",
+    "properties": {
+     "n": {
+      "$ref": "#"
+     }
+    }
+   },
+   "instance": {
+    "n": {
+     "n": {}
+    }
+   },
+   "valid": true
+  },
+  {
+   "name": "ref root bad",
+   "schema": {
+    "type": "object",
+    "properties": {
+     "n": {
+      "$ref": "#"
+     }
+    }
+   },
+   "instance": {
+    "n": 5
+   },
+   "valid": false
+  },
+  {
+   "name": "ref with sibling",
+   "schema": {
+    "$defs": {
+     "s": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "a": {
+      "$ref": "#/$defs/s",
+      "minLength": 3
+     }
+    }
+   },
+   "instance": {
+    "a": "ab"
+   },
+   "valid": false
+  },
+  {
+   "name": "boolean schema true",
+   "schema": {
+    "properties": {
+     "a": true
+    }
+   },
+   "instance": {
+    "a": 1
+   },
+   "valid": true
+  },
+  {
+   "name": "boolean schema false",
+   "schema": {
+    "properties": {
+     "a": false
+    }
+   },
+   "instance": {
+    "a": 1
+   },
+   "valid": false
+  },
+  {
+   "name": "annotations ignored",
+   "schema": {
+    "title": "t",
+    "description": "d",
+    "$comment": "c",
+    "default": 1,
+    "examples": [
+     1
+    ],
+    "type": "string"
+   },
+   "instance": "x",
+   "valid": true
+  },
+  {
+   "name": "empty schema",
+   "schema": {},
+   "instance": {
+    "anything": [
+     1
+    ]
+   },
+   "valid": true
+  }
+ ]
+}

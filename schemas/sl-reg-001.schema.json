@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/sl-reg-001.schema.json",
+  "title": "SL-REG-001 document register",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "sl-reg-001/1"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/document"
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "documents"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "doc_id": {
+      "type": "string",
+      "pattern": "^SL-[A-Z]+-[0-9]{2,3}(-SPEC)?$"
+    },
+    "ep_id": {
+      "type": "string",
+      "pattern": "^SL-EP-[0-9]{3}$"
+    },
+    "wo_id": {
+      "type": "string",
+      "pattern": "^WO-[0-9]{3}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "document": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/doc_id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "kind": {
+          "enum": [
+            "GOV",
+            "ARCH",
+            "PLAN",
+            "OPS",
+            "REG",
+            "VOL"
+          ]
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "Planned",
+            "Draft",
+            "InReview",
+            "Approved",
+            "Superseded"
+          ]
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "episodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ep_id"
+          },
+          "uniqueItems": true
+        },
+        "authoring_wo": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^WO-[0-9]{3}$"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "aliases",
+        "kind",
+        "path",
+        "status",
+        "version",
+        "sha256",
+        "episodes",
+        "authoring_wo"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

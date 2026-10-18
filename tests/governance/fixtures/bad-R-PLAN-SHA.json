@@ -1,0 +1,394 @@
+{
+  "fixture": "sl-fixture/1",
+  "registry": {
+    "schema": "sl-reg-002/1",
+    "source": {
+      "plan": "SL-PLAN-001",
+      "sha256": "09fe4c9a7954aaff28915365b6cf078502bbb2390672bb7524bcddef9ae6c627"
+    },
+    "lifecycle": {
+      "states": [
+        "Planned",
+        "Specified",
+        "InProgress",
+        "Verifying",
+        "Demonstrated",
+        "Accepted",
+        "Blocked",
+        "Reopened"
+      ],
+      "transitions": [
+        [
+          "Planned",
+          "Specified"
+        ],
+        [
+          "Specified",
+          "InProgress"
+        ],
+        [
+          "InProgress",
+          "Verifying"
+        ],
+        [
+          "Verifying",
+          "InProgress"
+        ],
+        [
+          "Verifying",
+          "Demonstrated"
+        ],
+        [
+          "Verifying",
+          "Blocked"
+        ],
+        [
+          "Demonstrated",
+          "Accepted"
+        ],
+        [
+          "Accepted",
+          "Reopened"
+        ],
+        [
+          "Blocked",
+          "InProgress"
+        ],
+        [
+          "Reopened",
+          "InProgress"
+        ]
+      ],
+      "waivers": []
+    },
+    "parts": [
+      {
+        "number": 1,
+        "title": "Part I - Foundations",
+        "first": 1,
+        "last": 5
+      }
+    ],
+    "volumes": [
+      {
+        "id": "SL-VOL-01",
+        "number": 1,
+        "title": "Vision",
+        "part": 1,
+        "first": 1,
+        "last": 2,
+        "goal": null,
+        "depends_on_volumes": []
+      },
+      {
+        "id": "SL-VOL-02",
+        "number": 2,
+        "title": "Mathematics",
+        "part": 1,
+        "first": 3,
+        "last": 5,
+        "goal": "Foundations.",
+        "depends_on_volumes": [
+          "SL-VOL-01"
+        ]
+      }
+    ],
+    "episodes": [
+      {
+        "id": "SL-EP-001",
+        "number": 1,
+        "volume": "SL-VOL-01",
+        "title": "Define the product",
+        "summary": "Engine, editor and platform as one family.",
+        "meaning_sha256": "0e5fe875a821e897c96d1c291cf1e8ccd18385bb2e010cecde19194d8ce3dbaa",
+        "status": "Accepted",
+        "decision_status": "Locked",
+        "depends_on": [],
+        "work_orders": [
+          "WO-001"
+        ],
+        "acceptance": [
+          "just check"
+        ],
+        "kohi_ref": null,
+        "release": {
+          "milestone": "Foundation",
+          "platforms": [
+            "linux"
+          ]
+        },
+        "documents": [
+          "SL-GOV-001"
+        ],
+        "completion": {
+          "revision": "r1",
+          "evidence": [
+            "evidence/WO-001.json"
+          ],
+          "benchmarks": [],
+          "open_defects": [],
+          "exceptions": []
+        },
+        "history": [
+          {
+            "from": "Planned",
+            "to": "Specified",
+            "date": "2026-10-17"
+          },
+          {
+            "from": "Specified",
+            "to": "InProgress",
+            "date": "2026-10-17"
+          },
+          {
+            "from": "InProgress",
+            "to": "Verifying",
+            "date": "2026-10-17"
+          },
+          {
+            "from": "Verifying",
+            "to": "Demonstrated",
+            "date": "2026-10-17"
+          },
+          {
+            "from": "Demonstrated",
+            "to": "Accepted",
+            "date": "2026-10-17"
+          }
+        ],
+        "amendments": []
+      },
+      {
+        "id": "SL-EP-002",
+        "number": 2,
+        "volume": "SL-VOL-01",
+        "title": "Establish the competitive position",
+        "summary": "Compare Unreal, Unity and Godot.",
+        "meaning_sha256": "2cbb31baaa970ff4b00ebf152be2f74d9f8928a5553992df8b838335b815e596",
+        "status": "Demonstrated",
+        "decision_status": "Conditional",
+        "depends_on": [
+          "SL-EP-001"
+        ],
+        "work_orders": [
+          "WO-002"
+        ],
+        "acceptance": [
+          "just check"
+        ],
+        "kohi_ref": null,
+        "release": {
+          "milestone": "Foundation",
+          "platforms": [
+            "linux"
+          ]
+        },
+        "documents": [
+          "SL-PLAN-002"
+        ],
+        "completion": {
+          "revision": "r1",
+          "evidence": [
+            "evidence/WO-002.json"
+          ],
+          "benchmarks": [],
+          "open_defects": [],
+          "exceptions": []
+        },
+        "history": [
+          {
+            "from": "Planned",
+            "to": "Specified",
+            "date": "2026-10-17"
+          },
+          {
+            "from": "Specified",
+            "to": "InProgress",
+            "date": "2026-10-17"
+          },
+          {
+            "from": "InProgress",
+            "to": "Verifying",
+            "date": "2026-10-17"
+          },
+          {
+            "from": "Verifying",
+            "to": "Demonstrated",
+            "date": "2026-10-17"
+          }
+        ],
+        "amendments": [
+          {
+            "date": "2026-10-17",
+            "note": "Narrowed to engines.",
+            "impact": "No downstream change.",
+            "adr": null,
+            "from_sha256": "5990c0607f7540f104f9f1934adf8cb7acfc4b243734880d55eea2a230ab9b6a",
+            "to_sha256": "2cbb31baaa970ff4b00ebf152be2f74d9f8928a5553992df8b838335b815e596",
+            "traceability_updated": true
+          }
+        ]
+      },
+      {
+        "id": "SL-EP-003",
+        "number": 3,
+        "volume": "SL-VOL-02",
+        "title": "Linear algebra for engines",
+        "summary": null,
+        "meaning_sha256": "98cecc01f1cfc410873db1f716a7ae34f3cae539739fb98720c91f1554cc5bb2",
+        "status": "InProgress",
+        "decision_status": "Conditional",
+        "depends_on": [
+          "SL-EP-001"
+        ],
+        "work_orders": [
+          "WO-003"
+        ],
+        "acceptance": [
+          "just check"
+        ],
+        "kohi_ref": null,
+        "release": {
+          "milestone": "Foundation",
+          "platforms": [
+            "linux"
+          ]
+        },
+        "documents": [],
+        "completion": null,
+        "history": [
+          {
+            "from": "Planned",
+            "to": "Specified",
+            "date": "2026-10-17"
+          },
+          {
+            "from": "Specified",
+            "to": "InProgress",
+            "date": "2026-10-17"
+          }
+        ],
+        "amendments": []
+      },
+      {
+        "id": "SL-EP-004",
+        "number": 4,
+        "volume": "SL-VOL-02",
+        "title": "Coordinate systems",
+        "summary": "Spaces and transforms.",
+        "meaning_sha256": "ee86d65dd3579642a248d68af4bce0913f6af3baa8fdb50c79744c0e911a106b",
+        "status": "Planned",
+        "decision_status": "Conditional",
+        "depends_on": [],
+        "work_orders": [],
+        "acceptance": [
+          "just check"
+        ],
+        "kohi_ref": null,
+        "release": {
+          "milestone": "Foundation",
+          "platforms": [
+            "linux"
+          ]
+        },
+        "documents": [],
+        "completion": null,
+        "history": [],
+        "amendments": []
+      },
+      {
+        "id": "SL-EP-005",
+        "number": 5,
+        "volume": "SL-VOL-02",
+        "title": "Quaternions",
+        "summary": null,
+        "meaning_sha256": "fb1d9473eff25fab4edec8d10df48a2bf00ce188662ee11d535ac1e46ebb699d",
+        "status": "Planned",
+        "decision_status": "Conditional",
+        "depends_on": [],
+        "work_orders": [],
+        "acceptance": [
+          "just check"
+        ],
+        "kohi_ref": null,
+        "release": {
+          "milestone": "Foundation",
+          "platforms": [
+            "linux"
+          ]
+        },
+        "documents": [],
+        "completion": null,
+        "history": [],
+        "amendments": []
+      }
+    ],
+    "amendments": []
+  },
+  "documents": {
+    "schema": "sl-reg-001/1",
+    "documents": [
+      {
+        "id": "SL-GOV-001",
+        "title": "Engine Constitution",
+        "aliases": [],
+        "kind": "GOV",
+        "path": null,
+        "status": "Planned",
+        "version": null,
+        "sha256": null,
+        "episodes": [
+          "SL-EP-001"
+        ],
+        "authoring_wo": null
+      },
+      {
+        "id": "SL-PLAN-002",
+        "title": "Dependency graph",
+        "aliases": [],
+        "kind": "PLAN",
+        "path": null,
+        "status": "Planned",
+        "version": null,
+        "sha256": null,
+        "episodes": [
+          "SL-EP-002"
+        ],
+        "authoring_wo": "WO-011"
+      }
+    ]
+  },
+  "work_orders": [
+    {
+      "id": "WO-001",
+      "path": "work-orders/WO-001.md",
+      "class": "M",
+      "traces": [
+        "SL-EP-001"
+      ]
+    },
+    {
+      "id": "WO-002",
+      "path": "work-orders/WO-002.md",
+      "class": "M",
+      "traces": [
+        "SL-EP-002"
+      ]
+    },
+    {
+      "id": "WO-003",
+      "path": "work-orders/WO-003.md",
+      "class": "M",
+      "traces": [
+        "SL-EP-003"
+      ]
+    }
+  ],
+  "plan_sha256": "77ddfb898d260e3b10990dcc3789ea8bd9a7aba33680543f531dc7d842f55b79",
+  "views": {
+    "registry/views/episodes.md": {
+      "expected_sha256": "2bcb43cbc8f6b7ef66331532881143fcbae60a879db3a8fb853f645bb24c2b3c",
+      "actual_sha256": "2bcb43cbc8f6b7ef66331532881143fcbae60a879db3a8fb853f645bb24c2b3c"
+    }
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/sl-reg-006.schema.json",
+  "title": "SL-REG-006 exception register",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "sl-reg-006/1"
+    },
+    "classes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/exception_class"
+      }
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/exception"
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "classes",
+    "exceptions"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "ep_id": {
+      "type": "string",
+      "pattern": "^SL-EP-[0-9]{3}$"
+    },
+    "adr_id": {
+      "type": "string",
+      "pattern": "^ADR-[0-9]{4}$"
+    },
+    "exc_id": {
+      "type": "string",
+      "pattern": "^SL-EXC-[0-9]{3}$"
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "exception_class": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^SL-EXC-C[0-9]$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "exception": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/exc_id"
+        },
+        "class": {
+          "type": "string",
+          "pattern": "^SL-EXC-C[0-9]$"
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "episodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ep_id"
+          },
+          "uniqueItems": true
+        },
+        "approver": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approved": {
+          "$ref": "#/$defs/date"
+        },
+        "expires": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "adr": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^ADR-[0-9]{4}$"
+        },
+        "invariant": {
+          "type": "string",
+          "pattern": "^F[1-8]$"
+        },
+        "review": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        }
+      },
+      "required": [
+        "id",
+        "class",
+        "subject",
+        "reason",
+        "episodes",
+        "approver",
+        "approved",
+        "expires",
+        "adr"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
