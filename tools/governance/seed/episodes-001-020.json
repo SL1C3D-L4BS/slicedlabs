@@ -1,0 +1,145 @@
+{
+ "episodes": {
+  "SL-EP-001": {
+   "decision_status": "Locked",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-002": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-003": {
+   "decision_status": "Locked",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-004": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-005": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-006": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-007": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-008": {
+   "decision_status": "Unresolved",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-009": {
+   "decision_status": "Locked",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-010": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-011": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-012": {
+   "decision_status": "Locked",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-013": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-014": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-015": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-016": {
+   "decision_status": "Unresolved",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-017": {
+   "decision_status": "Locked",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-018": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-019": {
+   "decision_status": "Conditional",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  },
+  "SL-EP-020": {
+   "decision_status": "Locked",
+   "kohi_ref": null,
+   "release": {
+    "milestone": "Foundation"
+   }
+  }
+ },
+ "schema": "sl-episodes-seed/1"
+}
