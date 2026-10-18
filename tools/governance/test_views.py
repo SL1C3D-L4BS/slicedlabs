@@ -171,7 +171,9 @@ class PlanCheckTest(Tree):
         self.assertTrue(any("SL-EP-059" in e for e in errors))
 
     def test_neg_vol03_wrong_work_order(self):
-        self.edit("docs/vol/SL-VOL-03-SPEC.md", '"work_orders": ["WO-015", "WO-021"]', '"work_orders": ["WO-016", "WO-021"]')
+        self.edit(
+            "docs/vol/SL-VOL-03-SPEC.md", '"work_orders": ["WO-015", "WO-021"]', '"work_orders": ["WO-016", "WO-021"]'
+        )
         errors = cmd_plan_check.plan_errors(self.root)
         self.assertEqual(self.rules(), ["R-PLAN-VOL03"])
         self.assertTrue(any("WO-016" in e and "SL-EP-043" in e for e in errors))
@@ -185,7 +187,9 @@ class PlanCheckTest(Tree):
         self.assertEqual(self.rules(), ["R-PLAN-KOHI"])
 
     def test_neg_code_fence_in_clean_room_doc(self):
-        self.edit("docs/plan/SL-PLAN-005-kohi-alignment-map.md", "## Open issues", "```\nvoid f();\n```\n\n## Open issues")
+        self.edit(
+            "docs/plan/SL-PLAN-005-kohi-alignment-map.md", "## Open issues", "```\nvoid f();\n```\n\n## Open issues"
+        )
         self.assertEqual(self.rules(), ["R-PLAN-CLEAN-ROOM"])
 
     def test_neg_missing_document(self):

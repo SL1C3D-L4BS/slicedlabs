@@ -75,7 +75,10 @@ def gate_errors(texts, reg):
     for phase, vol, gate in PHASES:
         ep = "SL-EP-%03d" % gate
         if ep not in text:
-            out.append("%s:1: R-PLAN-GATE: gate episode %s of phase %s (master plan section 4.3) is not cited" % (path, ep, phase))
+            out.append(
+                "%s:1: R-PLAN-GATE: gate episode %s of phase %s (master plan section 4.3) is not cited"
+                % (path, ep, phase)
+            )
         if last.get(vol) != gate:
             out.append("%s:1: R-PLAN-GATE: phase %s gate %s is not the last episode of %s in SL-REG-002 (%s)"
                        % (path, phase, ep, vol, last.get(vol)))
@@ -91,7 +94,10 @@ def graph_errors(root, texts, reg):
     if have is None:
         out.append("%s:1: R-PLAN-GRAPH: %s is missing; run `just registry-views`" % (path, GRAPH_REF))
     elif have != cmd_views.volume_graph_mmd(reg):
-        out.append("%s:1: R-PLAN-GRAPH: %s does not match the volume graph of SL-REG-002; run `just registry-views`" % (path, GRAPH_REF))
+        out.append(
+            "%s:1: R-PLAN-GRAPH: %s does not match the volume graph of SL-REG-002; run `just registry-views`"
+            % (path, GRAPH_REF)
+        )
     return out
 
 
@@ -142,8 +148,11 @@ def vol03_errors(root, texts, reg):
     if got != want:
         missing = [w for w in want if w not in got]
         extra = [g for g in got if g not in want]
-        out.append("%s:1: R-PLAN-VOL03: records must cover exactly SL-EP-%03d to SL-EP-%03d in order (missing %s; unexpected %s)"
-                   % (path, VOL03_FIRST, VOL03_LAST, missing or "none", extra or "none"))
+        out.append(
+            "%s:1: R-PLAN-VOL03: records must cover exactly SL-EP-%03d to SL-EP-%03d in order (missing %s; unexpected "
+            "%s)"
+            % (path, VOL03_FIRST, VOL03_LAST, missing or "none", extra or "none")
+        )
     tr = traces(root)
     listed = {}
     for rec in data["episodes"]:
@@ -153,7 +162,10 @@ def vol03_errors(root, texts, reg):
         eid = ep["id"]
         for field, reg_value in (("title", ep["title"]), ("purpose", ep["summary"])):
             if rec.get(field) != reg_value:
-                out.append("%s:1: R-PLAN-VOL03: %s %s %r differs from the registry %r" % (path, eid, field, rec.get(field), reg_value))
+                out.append(
+                    "%s:1: R-PLAN-VOL03: %s %s %r differs from the registry %r"
+                    % (path, eid, field, rec.get(field), reg_value)
+                )
         for key in ("work_orders", "acceptance", "kohi_ref", "seam"):
             if key not in rec:
                 out.append("%s:1: R-PLAN-VOL03: %s lacks '%s'" % (path, eid, key))
@@ -170,7 +182,9 @@ def vol03_errors(root, texts, reg):
             if not isinstance(wo, str) or not WO_RE.match(wo) or wo not in tr:
                 out.append("%s:1: R-PLAN-VOL03: %s lists %s which has no file in work-orders/" % (path, eid, wo))
             elif eid not in tr[wo]:
-                out.append("%s:1: R-PLAN-VOL03: %s lists %s but its Traces line does not name %s" % (path, eid, wo, eid))
+                out.append(
+                    "%s:1: R-PLAN-VOL03: %s lists %s but its Traces line does not name %s" % (path, eid, wo, eid)
+                )
     for wo in sorted(tr):
         for eid in sorted(tr[wo]):
             if eid in listed and wo not in listed[eid]:
@@ -198,12 +212,18 @@ def kohi_errors(texts, reg):
     if have is None:
         out.append("%s:1: R-PLAN-KOHI: arc table (header '%s') not found" % (path, cmd_views.ARC_TABLE_HEADER))
     elif have != want:
-        out.append("%s:1: R-PLAN-KOHI: arc table differs from the one generated from kohi_ref; copy it from registry/views/kohi-map.md" % path)
+        out.append(
+            "%s:1: R-PLAN-KOHI: arc table differs from the one generated from kohi_ref; copy it from "
+            "registry/views/kohi-map.md"
+            % path
+        )
     if "clean_room: true" not in text:
         out.append("%s:1: R-PLAN-KOHI: must state `clean_room: true` for Kohi-referenced episodes" % path)
     for n, line in enumerate(text.splitlines(), 1):
         if FENCE_RE.match(line):
-            out.append("%s:%d: R-PLAN-CLEAN-ROOM: code fence in a clean-room document; Kohi is a guide only" % (path, n))
+            out.append(
+                "%s:%d: R-PLAN-CLEAN-ROOM: code fence in a clean-room document; Kohi is a guide only" % (path, n)
+            )
     return out
 
 
