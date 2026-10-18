@@ -484,11 +484,11 @@
     },
     "fabric-determinism": {
       "owner": "WO-041",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-determinism": {
       "owner": "WO-041",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-gen-check": {
       "owner": "WO-045",
