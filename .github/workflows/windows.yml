@@ -1,0 +1,66 @@
+# Windows configure evidence (WO-028, ADR-0006): the hosted windows-latest job is the ONLY route to real Windows
+# evidence. The structural checks on Linux (presets check, flag-table tests, clang-cl probe, portability lint) are not a
+# Windows configure and are never reported as one. Run this by hand with workflow_dispatch after the first push; until
+# it has passed, the 041-048 episode notes list Windows as unverified and no Windows support claim is made.
+#
+# It configures only (no build): `cmake --preset win-msvc-debug` and `cmake --preset win-clangcl-debug`, both Ninja,
+# inside the Visual Studio developer shell (x64). The CMake logs are uploaded so a failure can be read offline.
+#
+# Action shas are tag commits resolved via api.github.com on 2026-10-17 (docs/ops/ci.md, "Resolving the pins").
+name: windows
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          persist-credentials: false
+
+      - name: Visual Studio developer shell (x64)
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756  # v1.13.0 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          arch: x64
+
+      - name: Tool versions
+        run: |
+          cmake --version
+          ninja --version
+          cl
+          clang-cl --version
+
+      - name: Configure win-msvc-debug
+        run: cmake --preset win-msvc-debug
+
+      - name: Configure win-clangcl-debug
+        if: always()
+        run: cmake --preset win-clangcl-debug
+
+      - name: Upload CMake logs
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          name: windows-cmake-logs
+          path: |
+            build/win-msvc-debug/CMakeFiles/CMakeConfigureLog.yaml
+            build/win-msvc-debug/CMakeFiles/CMakeOutput.log
+            build/win-msvc-debug/CMakeFiles/CMakeError.log
+            build/win-msvc-debug/CMakeCache.txt
+            build/win-clangcl-debug/CMakeFiles/CMakeConfigureLog.yaml
+            build/win-clangcl-debug/CMakeFiles/CMakeOutput.log
+            build/win-clangcl-debug/CMakeFiles/CMakeError.log
+            build/win-clangcl-debug/CMakeCache.txt
+          if-no-files-found: warn

@@ -1,0 +1,147 @@
+# CI (WO-028): mirrors `scripts/ci-local.sh` on a clean hosted Linux runner (master plan episodes 053/054, SL-OPS-001
+# in docs/ops/ci.md). The job runs the same default path as a local `just ci-local`: doctor, fmt-check, gov-check, then
+# the workflows ci-clang, ci-gcc and ci-asan. `just ci-yaml-check` (tools/ci/check_workflows.py) guards this file.
+#
+# PINS TO RESOLVE BEFORE THE FIRST RUN (founder): the action shas and the tarball sha256 values below are placeholders
+# (all zeros, marked UNVERIFIED) because they could not be looked up offline. A placeholder fails closed: the action
+# does not resolve and `sha256sum --check` fails. `just ci-yaml-check` reports each one as R-CI-UNVERIFIED-SHA
+# (a warning; `--strict` makes it an error). See docs/ops/ci.md, "Resolving the pins".
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      # Tool pins. apt supplies ninja 1.11, gcc-14 (below the gcc 16 floor of toolchain/environments.json: the
+      # doctor reports drift, which only warns), mold, ccache and shellcheck. cmake, clang/LLVM (clang, clang-format,
+      # clang-tidy, lld at the 23 floor) and just come from the official release tarballs, verified by sha256.
+      CMAKE_VERSION: "4.4.4"
+      CMAKE_SHA256: "e5bb807f7728cb60cd8b27ebc97a2edb469b68655f21e844a600c3575b76f5bb"  # cmake-4.4.4-SHA-256.txt (Kitware release)
+      LLVM_VERSION: "23.1.3"
+      LLVM_SHA256: "ca9fe385a5d9e2d88132dc0e23a00e9f87f38fa75f67207b5e457d208e71d013"  # sha256 of LLVM-23.1.3-Linux-X64.tar.xz streamed from the GitHub release on 2026-10-17 (2016524848 bytes)
+      JUST_VERSION: "1.59.0"
+      JUST_SHA256: "409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e"  # SHA256SUMS (casey/just 1.59.0 release)
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 1G
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          persist-credentials: false
+
+      - name: Install apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build gcc-14 g++-14 mold ccache shellcheck
+
+      - name: Install cmake, LLVM and just (release tarballs, sha256 verified)
+        run: |
+          set -euo pipefail
+          tools="$HOME/tools"
+          dl="$RUNNER_TEMP/dl"
+          mkdir -p "$tools/bin" "$dl"
+          fetch() {
+            curl --fail --location --silent --show-error --retry 3 --output "$dl/$3" "$1"
+            echo "$2  $dl/$3" | sha256sum --check --strict -
+          }
+          fetch "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz" \
+            "$CMAKE_SHA256" cmake.tar.gz
+          fetch "https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz" \
+            "$LLVM_SHA256" llvm.tar.xz
+          fetch "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+            "$JUST_SHA256" just.tar.gz
+          mkdir -p "$tools/cmake" "$tools/llvm"
+          tar -xzf "$dl/cmake.tar.gz" -C "$tools/cmake" --strip-components=1
+          tar -xJf "$dl/llvm.tar.xz" -C "$tools/llvm" --strip-components=1
+          tar -xzf "$dl/just.tar.gz" -C "$tools/bin" just
+          ln -sf /usr/bin/gcc-14 "$tools/bin/gcc"
+          ln -sf /usr/bin/g++-14 "$tools/bin/g++"
+          {
+            echo "$tools/bin"
+            echo "$tools/cmake/bin"
+            echo "$tools/llvm/bin"
+          } >> "$GITHUB_PATH"
+
+      - name: Tool versions
+        run: |
+          bash scripts/doctor || true
+          cmake --version
+          clang --version
+          g++ --version
+          just --version
+
+      - name: ccache
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57  # v4.2.0 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          path: .ccache
+          key: ccache-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ github.ref_name }}-
+            ccache-${{ runner.os }}-
+
+      - name: shellcheck
+        run: shellcheck scripts/ci-local.sh scripts/doctor
+
+      - name: ci-local (doctor, fmt-check, gov-check, workflows ci-clang ci-gcc ci-asan)
+        run: bash scripts/ci-local.sh
+
+      - name: ccache statistics
+        if: always()
+        run: ccache --show-stats
+
+      - name: Failure summary
+        if: failure()
+        run: |
+          {
+            echo "### ci-local failed"
+            echo
+            log="$(ls -t build/ci-local/*.log 2>/dev/null | head -n 1 || true)"
+            if [ -n "$log" ]; then
+              echo "Last step log: \`$log\` (tail below; all logs are in the ci-logs artifact)"
+              echo '```'
+              tail -n 60 "$log"
+              echo '```'
+            else
+              echo "No ci-local step log was written (the failure happened before or outside ci-local)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload acceptance logs
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          name: acceptance
+          path: build/acceptance
+          if-no-files-found: ignore
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          name: test-report
+          path: build/debug/test-report.xml
+          if-no-files-found: ignore
+
+      - name: Upload ci-local logs
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          name: ci-logs
+          path: |
+            build/ci-local/*.log
+            build/*/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore

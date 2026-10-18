@@ -1,0 +1,9 @@
+# Keeps the pinned action shas current (WO-028). The version comment on each `uses:` line is updated with the sha.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
