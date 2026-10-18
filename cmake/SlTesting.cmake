@@ -1,0 +1,118 @@
+# Test infrastructure (WO-026, SL-EP-051, SL-GOV-009). Four tiers, each a ctest LABEL with a default timeout:
+#   unit 10 s, integration 60 s, system 120 s, e2e 300 s.
+#
+#   sl_add_test(NAME <n> TIER unit|integration|system|e2e SOURCES <src>... [LIBS <lib>...] [TIMEOUT <s>]
+#               [WILL_FAIL] [HAS_MAIN])
+#       Builds executable <n>, registers ctest test <n> with LABELS <tier>, the tier (or given) TIMEOUT and, when
+#       SL_SANITIZE is set, the sanitizer runtime options. Unit and integration tests link sl::doctest and get a
+#       generated main (DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN in its own TU) unless HAS_MAIN says a source has one.
+#   sl_add_system_test(NAME <n> COMMAND <exe-target-or-path> [ARGS <arg>...] [PASS_REGEX <re>] [TIMEOUT <s>])
+#       Runs a built binary as a system-tier test: pass = exit 0, or (with PASS_REGEX) output matching the regex.
+#   sl_add_script_test(NAME <n> TIER <tier> SCRIPT <file.cmake> [ARGS -D<var>=<v>...] [TIMEOUT <s>])
+#       Runs `cmake <ARGS> -P <script>` as a test (the e2e tier).
+#
+# Every test is also appended to the global property SL_TEST_REGISTRY; sl_testing_finalize() writes it to
+# ${CMAKE_BINARY_DIR}/test-registry.tsv (tier, name, timeout) for `just test-report`.
+include_guard(GLOBAL)
+
+set(SL_TEST_TIERS unit integration system e2e)
+set(SL_TEST_TIMEOUT_unit 10)
+set(SL_TEST_TIMEOUT_integration 60)
+set(SL_TEST_TIMEOUT_system 120)
+set(SL_TEST_TIMEOUT_e2e 300)
+
+# Sanitizer runtime options for ctest (empty list when SL_SANITIZE is empty). Failures stop at the first report.
+function(_sl_test_sanitizer_env out)
+  set(env "")
+  if(SL_SANITIZE MATCHES "address")
+    list(APPEND env "ASAN_OPTIONS=halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1")
+  endif()
+  if(SL_SANITIZE MATCHES "undefined")
+    list(APPEND env "UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1")
+  endif()
+  if(SL_SANITIZE MATCHES "thread")
+    list(APPEND env "TSAN_OPTIONS=halt_on_error=1:second_deadlock_stack=1")
+  endif()
+  set(${out} "${env}" PARENT_SCOPE)
+endfunction()
+
+# Shared by the three entry points: validate the tier, apply labels, timeout, environment, registry.
+function(_sl_test_finish name tier timeout)
+  if(NOT tier IN_LIST SL_TEST_TIERS)
+    message(FATAL_ERROR "sliced: test '${name}': TIER must be one of ${SL_TEST_TIERS}, got '${tier}'")
+  endif()
+  if(timeout STREQUAL "")
+    set(timeout "${SL_TEST_TIMEOUT_${tier}}")
+  endif()
+  _sl_test_sanitizer_env(env)
+  set_tests_properties(${name} PROPERTIES LABELS "${tier}" TIMEOUT ${timeout})
+  if(env)
+    set_tests_properties(${name} PROPERTIES ENVIRONMENT "${env}")
+  endif()
+  set_property(GLOBAL APPEND PROPERTY SL_TEST_REGISTRY "${tier}\t${name}\t${timeout}")
+endfunction()
+
+function(sl_add_test)
+  cmake_parse_arguments(PARSE_ARGV 0 T "WILL_FAIL;HAS_MAIN" "NAME;TIER;TIMEOUT" "SOURCES;LIBS")
+  if(NOT T_NAME OR NOT T_TIER OR NOT T_SOURCES)
+    message(FATAL_ERROR "sliced: sl_add_test needs NAME, TIER and SOURCES")
+  endif()
+  if(T_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "sliced: sl_add_test(${T_NAME}): unknown arguments ${T_UNPARSED_ARGUMENTS}")
+  endif()
+  set(sources ${T_SOURCES})
+  set(libs ${T_LIBS})
+  if(T_TIER STREQUAL "unit" OR T_TIER STREQUAL "integration")
+    sl_require(doctest)
+    list(APPEND libs sl::doctest)
+    if(NOT T_HAS_MAIN)
+      set(main "${CMAKE_CURRENT_BINARY_DIR}/${T_NAME}_doctest_main.cpp")
+      file(GENERATE OUTPUT "${main}" CONTENT "#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN\n#include <doctest/doctest.h>\n")
+      list(APPEND sources "${main}")
+    endif()
+  endif()
+  add_executable(${T_NAME} ${sources})
+  target_link_libraries(${T_NAME} PRIVATE ${libs})
+  sl_target(${T_NAME})
+  add_test(NAME ${T_NAME} COMMAND ${T_NAME})
+  if(T_WILL_FAIL)
+    set_tests_properties(${T_NAME} PROPERTIES WILL_FAIL TRUE)
+  endif()
+  _sl_test_finish(${T_NAME} ${T_TIER} "${T_TIMEOUT}")
+endfunction()
+
+function(sl_add_system_test)
+  cmake_parse_arguments(PARSE_ARGV 0 T "WILL_FAIL" "NAME;COMMAND;PASS_REGEX;TIMEOUT" "ARGS")
+  if(NOT T_NAME OR NOT T_COMMAND)
+    message(FATAL_ERROR "sliced: sl_add_system_test needs NAME and COMMAND")
+  endif()
+  add_test(NAME ${T_NAME} COMMAND ${T_COMMAND} ${T_ARGS})
+  if(T_PASS_REGEX)
+    set_tests_properties(${T_NAME} PROPERTIES PASS_REGULAR_EXPRESSION "${T_PASS_REGEX}")
+  endif()
+  if(T_WILL_FAIL)
+    set_tests_properties(${T_NAME} PROPERTIES WILL_FAIL TRUE)
+  endif()
+  _sl_test_finish(${T_NAME} system "${T_TIMEOUT}")
+endfunction()
+
+function(sl_add_script_test)
+  cmake_parse_arguments(PARSE_ARGV 0 T "" "NAME;TIER;SCRIPT;TIMEOUT" "ARGS")
+  if(NOT T_NAME OR NOT T_TIER OR NOT T_SCRIPT)
+    message(FATAL_ERROR "sliced: sl_add_script_test needs NAME, TIER and SCRIPT")
+  endif()
+  add_test(NAME ${T_NAME} COMMAND "${CMAKE_COMMAND}" ${T_ARGS} -P "${T_SCRIPT}")
+  _sl_test_finish(${T_NAME} ${T_TIER} "${T_TIMEOUT}")
+endfunction()
+
+# Call once, after every tier directory has been added.
+function(sl_testing_finalize)
+  get_property(reg GLOBAL PROPERTY SL_TEST_REGISTRY)
+  set(text "")
+  foreach(row IN LISTS reg)
+    string(APPEND text "${row}\n")
+  endforeach()
+  file(WRITE "${CMAKE_BINARY_DIR}/test-registry.tsv.tmp" "${text}")
+  file(COPY_FILE "${CMAKE_BINARY_DIR}/test-registry.tsv.tmp" "${CMAKE_BINARY_DIR}/test-registry.tsv" ONLY_IF_DIFFERENT)
+  file(REMOVE "${CMAKE_BINARY_DIR}/test-registry.tsv.tmp")
+endfunction()
