@@ -4,41 +4,114 @@
   "title": "SL-REG-003 requirements traceability matrix (requirement -> architecture -> implementation -> test)",
   "type": "object",
   "properties": {
-    "schema": { "const": "sl-reg-003/1" },
+    "schema": {
+      "const": "sl-reg-003/1"
+    },
     "requirements": {
       "type": "array",
-      "items": { "$ref": "#/$defs/requirement" }
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
     }
   },
-  "required": ["schema", "requirements"],
+  "required": [
+    "schema",
+    "requirements"
+  ],
   "additionalProperties": false,
   "$defs": {
-    "ep_id": { "type": "string", "pattern": "^SL-EP-[0-9]{3}$" },
-    "doc_id": { "type": "string", "pattern": "^SL-[A-Z]+-[0-9]{2,3}(-SPEC)?$" },
+    "ep_id": {
+      "type": "string",
+      "pattern": "^SL-EP-[0-9]{3}$"
+    },
+    "doc_id": {
+      "type": "string",
+      "pattern": "^SL-[A-Z]+-[0-9]{2,3}(-SPEC)?$"
+    },
     "measure": {
       "type": "object",
       "properties": {
-        "num": { "type": "string", "minLength": 1 },
-        "den": { "type": "string", "minLength": 1 },
-        "threshold": { "type": "string", "minLength": 1 }
+        "num": {
+          "type": "string",
+          "minLength": 1
+        },
+        "den": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threshold": {
+          "type": "string",
+          "minLength": 1
+        }
       },
-      "required": ["num", "den", "threshold"],
+      "required": [
+        "num",
+        "den",
+        "threshold"
+      ],
       "additionalProperties": false
     },
     "requirement": {
       "type": "object",
       "properties": {
-        "id": { "type": "string", "pattern": "^REQ-(DOCTRINE|FRAG|EXEC|GOV|QUALITY|RELEASE|USERS)-[0-9]{3}$" },
-        "text": { "type": "string", "minLength": 1 },
-        "src": { "type": "string", "minLength": 1 },
-        "measure": { "$ref": "#/$defs/measure" },
-        "evidence_type": { "type": "string", "minLength": 1 },
-        "architecture": { "type": "array", "items": { "$ref": "#/$defs/doc_id" }, "uniqueItems": true },
-        "episodes": { "type": "array", "items": { "$ref": "#/$defs/ep_id" }, "uniqueItems": true },
-        "tests": { "type": "array", "items": { "type": "string", "pattern": "^(just [a-z0-9-]+( [^ ]+)*|deferred:SL-EP-[0-9]{3})$" }, "uniqueItems": true },
-        "status": { "enum": ["planned", "implemented", "verified"] }
+        "id": {
+          "type": "string",
+          "pattern": "^REQ-(DOCTRINE|FRAG|EXEC|GOV|QUALITY|RELEASE|USERS)-[0-9]{3}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "src": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measure": {
+          "$ref": "#/$defs/measure"
+        },
+        "evidence_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "architecture": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/doc_id"
+          },
+          "uniqueItems": true
+        },
+        "episodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ep_id"
+          },
+          "uniqueItems": true
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(just [a-z0-9-]+( [^ ]+)*|deferred:SL-EP-[0-9]{3})$"
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "planned",
+            "implemented",
+            "verified"
+          ]
+        }
       },
-      "required": ["id", "text", "src", "architecture", "episodes", "tests", "status"],
+      "required": [
+        "id",
+        "text",
+        "src",
+        "architecture",
+        "episodes",
+        "tests",
+        "status"
+      ],
       "additionalProperties": false
     }
   }

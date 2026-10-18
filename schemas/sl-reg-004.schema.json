@@ -4,29 +4,76 @@
   "title": "SL-REG-004 capability register (master plan 2.2 subsystems and 2.7 parity rows)",
   "type": "object",
   "properties": {
-    "schema": { "const": "sl-reg-004/1" },
+    "schema": {
+      "const": "sl-reg-004/1"
+    },
     "capabilities": {
       "type": "array",
-      "items": { "$ref": "#/$defs/capability" }
+      "items": {
+        "$ref": "#/$defs/capability"
+      }
     }
   },
-  "required": ["schema", "capabilities"],
+  "required": [
+    "schema",
+    "capabilities"
+  ],
   "additionalProperties": false,
   "$defs": {
-    "ep_id": { "type": "string", "pattern": "^SL-EP-[0-9]{3}$" },
-    "arch_id": { "type": "string", "pattern": "^SL-ARCH-[0-9]{3}$" },
+    "ep_id": {
+      "type": "string",
+      "pattern": "^SL-EP-[0-9]{3}$"
+    },
+    "arch_id": {
+      "type": "string",
+      "pattern": "^SL-ARCH-[0-9]{3}$"
+    },
     "capability": {
       "type": "object",
       "properties": {
-        "id": { "type": "string", "pattern": "^CAP-(0[1-9]|1[0-2])-[A-Z0-9]+(-[A-Z0-9]+)*$" },
-        "subsystem": { "type": "string", "pattern": "^(0[1-9]|1[0-2])$" },
-        "boundary": { "enum": ["core", "module", "plugin", "external", "hosted"] },
-        "interface_doc": { "$ref": "#/$defs/arch_id" },
-        "introduced_in": { "$ref": "#/$defs/ep_id" },
-        "unreal_counterpart": { "type": ["string", "null"] },
-        "src": { "type": "string", "minLength": 1 }
+        "id": {
+          "type": "string",
+          "pattern": "^CAP-(0[1-9]|1[0-2])-[A-Z0-9]+(-[A-Z0-9]+)*$"
+        },
+        "subsystem": {
+          "type": "string",
+          "pattern": "^(0[1-9]|1[0-2])$"
+        },
+        "boundary": {
+          "enum": [
+            "core",
+            "module",
+            "plugin",
+            "external",
+            "hosted"
+          ]
+        },
+        "interface_doc": {
+          "$ref": "#/$defs/arch_id"
+        },
+        "introduced_in": {
+          "$ref": "#/$defs/ep_id"
+        },
+        "unreal_counterpart": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "src": {
+          "type": "string",
+          "minLength": 1
+        }
       },
-      "required": ["id", "subsystem", "boundary", "interface_doc", "introduced_in", "unreal_counterpart", "src"],
+      "required": [
+        "id",
+        "subsystem",
+        "boundary",
+        "interface_doc",
+        "introduced_in",
+        "unreal_counterpart",
+        "src"
+      ],
       "additionalProperties": false
     }
   }
