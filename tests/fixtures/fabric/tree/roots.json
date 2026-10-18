@@ -1,0 +1,62 @@
+{
+  "format": "sl-tree-roots/1",
+  "doc": "Golden root digests of seeded trie entry sets (WO-046, FAB-INV-REV-01). Entry i of a set: id derive(class, well_known(namespace, 1), '<name>/<i>'); kind record, or for kinds 'cycle' (i mod 4) + 1 (record, tombstone, member, document); target SHA-256('tree-target/<i>') as an sha256 digest, absent for member entries. Root is the hex of the tree object id (algo sha256); depth the longest root-to-leaf path in nodes. Computed by an independent Python model over tools/fabric/slb_ref.py and by the C++ trie.",
+  "sets": [
+    {
+      "name": "empty",
+      "class": "entity",
+      "count": 0,
+      "kinds": "record",
+      "root": "8bf407c84a4829014f94808b3bb9d53d908b2914df5dd9e64a2b79497abe3716",
+      "depth": 1
+    },
+    {
+      "name": "one",
+      "class": "entity",
+      "count": 1,
+      "kinds": "record",
+      "root": "f74efbf2d2491f4d13fe55ad978f787ed3abb4647ee83718a67903559382d2b9",
+      "depth": 1
+    },
+    {
+      "name": "bucket32",
+      "class": "entity",
+      "count": 32,
+      "kinds": "record",
+      "root": "9ecce75d43a789c7ce21bf9d149fc085f297abad63dbf84989ed36f8ac7cae4c",
+      "depth": 1
+    },
+    {
+      "name": "split33",
+      "class": "entity",
+      "count": 33,
+      "kinds": "record",
+      "root": "720f2902e2f30877eaa8eecbaf8a9f14e48b145a216dd93e8a5051e03974e5d3",
+      "depth": 2
+    },
+    {
+      "name": "entity1000",
+      "class": "entity",
+      "count": 1000,
+      "kinds": "record",
+      "root": "3ed22b30955c2254710cfdeb6471f5d98dd6a8394b60d4ef96d34f49c07aedf3",
+      "depth": 3
+    },
+    {
+      "name": "asset5000",
+      "class": "asset",
+      "count": 5000,
+      "kinds": "record",
+      "root": "013052f793caaf65ceb28072ce84c5bab080c7979c1a669d72a82099b912107d",
+      "depth": 4
+    },
+    {
+      "name": "mixed_kinds",
+      "class": "entity",
+      "count": 200,
+      "kinds": "cycle",
+      "root": "f0d1470a558a843bd76e9d75cd44983553573ca64bd2a2e95df19ba62270518f",
+      "depth": 2
+    }
+  ]
+}
