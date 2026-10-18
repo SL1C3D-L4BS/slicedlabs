@@ -1,0 +1,85 @@
+{
+  "schema": "sl-toolchain-lock/1",
+  "written": "2026-10-17",
+  "host": {
+    "os": "arch",
+    "kernel": "7.2.11-zen1-1-zen"
+  },
+  "tools": {
+    "clang": {
+      "version": "23.1.3",
+      "arch_package": "clang",
+      "tier": "required"
+    },
+    "gcc": {
+      "version": "16.2.1",
+      "arch_package": "gcc",
+      "tier": "required"
+    },
+    "cmake": {
+      "version": "4.4.4",
+      "arch_package": "cmake",
+      "tier": "required"
+    },
+    "ninja": {
+      "version": "1.13.2",
+      "arch_package": "ninja",
+      "tier": "required"
+    },
+    "just": {
+      "version": "1.59.0",
+      "arch_package": "just",
+      "tier": "required"
+    },
+    "python3": {
+      "version": "3.14.8",
+      "arch_package": "python",
+      "tier": "required"
+    },
+    "clang-format": {
+      "version": "23.1.3",
+      "arch_package": "clang",
+      "tier": "required"
+    },
+    "clang-tidy": {
+      "version": "23.1.3",
+      "arch_package": "clang",
+      "tier": "required"
+    },
+    "mold": {
+      "version": "3.0.0",
+      "arch_package": "mold",
+      "tier": "optional"
+    },
+    "lld": {
+      "version": "23.1.3",
+      "arch_package": "lld",
+      "tier": "optional"
+    },
+    "ccache": {
+      "version": "4.14.1",
+      "arch_package": "ccache",
+      "tier": "optional"
+    },
+    "slangc": {
+      "version": "2026.18.2",
+      "arch_package": "shader-slang",
+      "tier": "optional"
+    },
+    "spirv-val": {
+      "version": "2026.4",
+      "arch_package": "spirv-tools",
+      "tier": "optional"
+    },
+    "renderdoccmd": {
+      "version": "1.46",
+      "arch_package": "renderdoc",
+      "tier": "optional"
+    },
+    "shellcheck": {
+      "version": "0.11.0",
+      "arch_package": "shellcheck",
+      "tier": "optional"
+    }
+  }
+}

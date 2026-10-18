@@ -16,7 +16,10 @@ fail() {
 # control: the real PATH
 bash "$doctor" >"$work/control.out" 2>&1
 rc=$?
-[ "$rc" -eq 0 ] || { cat "$work/control.out"; fail "control run exited $rc, expected 0 (install what it lists)"; }
+[ "$rc" -eq 0 ] || {
+  cat "$work/control.out"
+  fail "control run exited $rc, expected 0 (install what it lists)"
+}
 
 # restricted PATH dir: a symlink to every required tool except cmake
 mkdir "$work/bin"
@@ -41,9 +44,21 @@ done <"$work/required.txt"
 
 SL_DOCTOR_PATH="$work/bin" bash "$doctor" >"$work/missing.out" 2>&1
 rc=$?
-[ "$rc" -eq 1 ] || { cat "$work/missing.out"; fail "restricted run exited $rc, expected 1"; }
-grep -qE '^cmake +required +- +[^ ]+ +missing' "$work/missing.out" || { cat "$work/missing.out"; fail "restricted run did not report cmake missing"; }
-grep -qxF 'sudo pacman -S cmake' "$work/missing.out" || { cat "$work/missing.out"; fail "restricted run did not print 'sudo pacman -S cmake'"; }
-[ "$(grep -c '^sudo pacman -S ' "$work/missing.out")" -eq 1 ] || { cat "$work/missing.out"; fail "expected exactly one sudo pacman line"; }
+[ "$rc" -eq 1 ] || {
+  cat "$work/missing.out"
+  fail "restricted run exited $rc, expected 1"
+}
+grep -qE '^cmake +required +- +[^ ]+ +missing' "$work/missing.out" || {
+  cat "$work/missing.out"
+  fail "restricted run did not report cmake missing"
+}
+grep -qxF 'sudo pacman -S cmake' "$work/missing.out" || {
+  cat "$work/missing.out"
+  fail "restricted run did not print 'sudo pacman -S cmake'"
+}
+[ "$(grep -c '^sudo pacman -S ' "$work/missing.out")" -eq 1 ] || {
+  cat "$work/missing.out"
+  fail "expected exactly one sudo pacman line"
+}
 
 echo "doctor-selftest: ok (control exit 0; cmake absent -> exit 1 naming cmake)"

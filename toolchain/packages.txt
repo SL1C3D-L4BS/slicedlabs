@@ -1,0 +1,13 @@
+ccache
+clang
+cmake
+gcc
+just
+lld
+mold
+ninja
+python
+renderdoc
+shader-slang
+shellcheck
+spirv-tools

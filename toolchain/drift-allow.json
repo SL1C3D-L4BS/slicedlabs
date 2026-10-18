@@ -1,0 +1,5 @@
+{
+  "schema": "sl-drift-allow/1",
+  "note": "Required tools whose installed version may differ from lock.json for a while. Each entry: tool, reason, until (YYYY-MM-DD, inclusive). After the date `scripts/doctor --strict` fails again. Refresh the lock with `scripts/doctor --write-lock` instead of allowing drift for long.",
+  "allow": []
+}

@@ -1,19 +1,27 @@
 #!/usr/bin/env bash
 # doctor (WO-013): check the installed tools against toolchain/environments.json. No network.
-# Usage: scripts/doctor [--json]
+# Usage: scripts/doctor [--json | --write-lock | --strict | --devimage-check]
 #   table columns: tool, tier, installed version, minimum, verdict (ok | drift | missing)
 #   exit 1 when a required tool is missing, with one `sudo pacman -S <pkg>` line per missing package
 #   drift (below minimum, wrong pinned major, unreadable version) only warns
+#   --write-lock       write toolchain/lock.json with the exact installed versions (exit 1 if a tool is missing)
+#   --strict           drift from toolchain/lock.json is an error for required tools (a warning for optional
+#                      ones) unless toolchain/drift-allow.json lists the tool with a reason and an until-date (WO-033)
+#   --devimage-check   data check only (no tool is run): toolchain/packages.txt equals the set derived from
+#                      environments.json, lock.json covers every tool, the Containerfile uses packages.txt
 #   SL_DOCTOR_PATH overrides PATH for the tool lookup (tests); the doctor itself keeps the real PATH.
 # Run via `just doctor`.
 set -u
 
-json=0
+mode=table
 case "${1:-}" in
   "") ;;
-  --json) json=1 ;;
+  --json) mode=json ;;
+  --write-lock) mode=write-lock ;;
+  --strict) mode=strict ;;
+  --devimage-check) mode=devimage-check ;;
   *)
-    echo "usage: scripts/doctor [--json]" >&2
+    echo "usage: scripts/doctor [--json | --write-lock | --strict | --devimage-check]" >&2
     exit 2
     ;;
 esac
@@ -30,7 +38,8 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
-SL_DOCTOR_JSON="$json" python3 -I - "$data" <<'PY'
+SL_DOCTOR_MODE="$mode" python3 -I - "$data" <<'PY'
+import datetime
 import json
 import os
 import re
@@ -39,11 +48,124 @@ import shutil
 import subprocess
 import sys
 
+mode = os.environ.get("SL_DOCTOR_MODE", "table")
 with open(sys.argv[1], encoding="utf-8") as fh:
     env = json.load(fh)
 if env.get("schema") != "sl-environments/1":
     print("doctor: toolchain/environments.json: unexpected schema", file=sys.stderr)
     sys.exit(2)
+
+tc_dir = os.path.dirname(os.path.abspath(sys.argv[1]))
+lock_path = os.path.join(tc_dir, "lock.json")
+allow_path = os.path.join(tc_dir, "drift-allow.json")
+pkgs_path = os.path.join(tc_dir, "packages.txt")
+cfile_path = os.path.join(tc_dir, "..", "scripts", "dev-image", "Containerfile")
+LOCK_SCHEMA = "sl-toolchain-lock/1"
+ALLOW_SCHEMA = "sl-drift-allow/1"
+
+
+def load_json(path, what, errors):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except OSError:
+        errors.append("%s: cannot read %s" % (what, os.path.relpath(path)))
+    except ValueError as exc:
+        errors.append("%s: invalid JSON (%s)" % (what, exc))
+    return None
+
+
+def derived_packages():
+    return sorted({t["arch_package"] for t in env["tools"]})
+
+
+def check_lock(lock, errors):
+    if not isinstance(lock, dict) or lock.get("schema") != LOCK_SCHEMA:
+        errors.append("lock.json: schema must be %s" % LOCK_SCHEMA)
+        return {}
+    host = lock.get("host")
+    if not (isinstance(host, dict) and host.get("os") and host.get("kernel")):
+        errors.append("lock.json: host needs os and kernel")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(lock.get("written", ""))):
+        errors.append("lock.json: written must be YYYY-MM-DD")
+    locked = lock.get("tools")
+    if not isinstance(locked, dict):
+        errors.append("lock.json: tools must be an object")
+        return {}
+    for tool in env["tools"]:
+        ent = locked.get(tool["name"])
+        if not isinstance(ent, dict):
+            errors.append("lock.json: tool %s is not locked" % tool["name"])
+            continue
+        if not ent.get("version"):
+            errors.append("lock.json: %s has no version" % tool["name"])
+        if ent.get("arch_package") != tool["arch_package"]:
+            errors.append("lock.json: %s arch_package differs from environments.json" % tool["name"])
+        if ent.get("tier") != tool["tier"]:
+            errors.append("lock.json: %s tier differs from environments.json" % tool["name"])
+    known = {t["name"] for t in env["tools"]}
+    for name in sorted(set(locked) - known):
+        errors.append("lock.json: %s is not in environments.json" % name)
+    return locked
+
+
+def read_allow(errors):
+    """toolchain/drift-allow.json -> {tool: (reason, until)}; absent file means no allowances."""
+    if not os.path.exists(allow_path):
+        return {}
+    data = load_json(allow_path, "drift-allow.json", errors)
+    out = {}
+    if data is None:
+        return out
+    if not isinstance(data, dict) or data.get("schema") != ALLOW_SCHEMA or not isinstance(data.get("allow"), list):
+        errors.append("drift-allow.json: schema must be %s with an allow list" % ALLOW_SCHEMA)
+        return out
+    known = {t["name"] for t in env["tools"]}
+    for ent in data["allow"]:
+        name = ent.get("tool") if isinstance(ent, dict) else None
+        reason = ent.get("reason") if isinstance(ent, dict) else None
+        until = ent.get("until") if isinstance(ent, dict) else None
+        if name not in known:
+            errors.append("drift-allow.json: unknown tool %r" % (name,))
+        elif not (isinstance(reason, str) and reason.strip()):
+            errors.append("drift-allow.json: %s needs a reason" % name)
+        elif not (isinstance(until, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", until)):
+            errors.append("drift-allow.json: %s needs an until date (YYYY-MM-DD)" % name)
+        else:
+            out[name] = (reason.strip(), until)
+    return out
+
+
+if mode == "devimage-check":
+    errors = []
+    want = derived_packages()
+    try:
+        with open(pkgs_path, encoding="utf-8") as fh:
+            have_text = fh.read()
+    except OSError:
+        have_text = None
+        errors.append("packages.txt: missing (derive it: one arch_package per line, sorted, deduplicated)")
+    if have_text is not None and have_text != "".join(p + "\n" for p in want):
+        errors.append("packages.txt: differs from the set derived from environments.json (%s)" % ", ".join(want))
+    check_lock(load_json(lock_path, "lock.json", errors), errors)
+    read_allow(errors)
+    try:
+        with open(cfile_path, encoding="utf-8") as fh:
+            ctext = fh.read()
+        if "packages.txt" not in ctext:
+            errors.append("Containerfile: does not reference packages.txt")
+        if "doctor-strict" not in ctext:
+            errors.append("Containerfile: has no `just doctor-strict` smoke step")
+    except OSError:
+        errors.append("Containerfile: missing (scripts/dev-image/Containerfile)")
+    if not os.path.isfile(os.path.join(tc_dir, "..", "scripts", "dev-image", "build.sh")):
+        errors.append("build.sh: missing (scripts/dev-image/build.sh)")
+    if errors:
+        for e in errors:
+            print("devimage-check: FAIL: " + e)
+        sys.exit(1)
+    print("devimage-check: ok (%d packages, %d tools locked)" % (len(want), len(env["tools"])))
+    sys.exit(0)
 
 search = os.environ.get("SL_DOCTOR_PATH") or os.environ.get("PATH", "")
 child_env = dict(os.environ, PATH=search, LC_ALL="C")
@@ -91,7 +213,66 @@ for r in missing_req:
         packages.append(r["arch_package"])
 drift = [r for r in rows if r["verdict"] == "drift"]
 
-if os.environ.get("SL_DOCTOR_JSON") == "1":
+if mode == "write-lock":
+    bad = [r for r in rows if r["installed"] is None]
+    if bad:
+        for r in bad:
+            print("doctor: cannot lock %s (%s)" % (r["tool"], r["verdict"]))
+        print("doctor: FAIL: install the missing tools, then run --write-lock again")
+        sys.exit(1)
+    kernel = os.uname().release
+    os_id = "unknown"
+    try:
+        with open("/etc/os-release", encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("ID="):
+                    os_id = line[3:].strip().strip('"')
+    except OSError:
+        pass
+    lock = {"schema": LOCK_SCHEMA, "written": datetime.date.today().isoformat(),
+            "host": {"os": os_id, "kernel": kernel},
+            "tools": {r["tool"]: {"version": r["installed"], "arch_package": r["arch_package"],
+                                  "tier": r["tier"]} for r in rows}}
+    with open(lock_path, "w", encoding="utf-8") as fh:
+        json.dump(lock, fh, indent=2)
+        fh.write("\n")
+    print("doctor: wrote %s (%d tools)" % (os.path.relpath(lock_path), len(rows)))
+    sys.exit(0)
+
+if mode == "strict":
+    errors = []
+    warns = []
+    locked = check_lock(load_json(lock_path, "lock.json", errors), errors)
+    allow = read_allow(errors)
+    today = os.environ.get("SL_DOCTOR_TODAY") or datetime.date.today().isoformat()
+    for r in rows:
+        name, req = r["tool"], r["tier"] == "required"
+        want = (locked.get(name) or {}).get("version")
+        if want is None:
+            continue  # already reported by check_lock
+        if r["installed"] == want:
+            continue
+        have = r["installed"] or ("missing" if r["verdict"] == "missing" else "unreadable")
+        msg = "%s: installed %s, locked %s" % (name, have, want)
+        if not req:
+            warns.append(msg)
+        elif name in allow and allow[name][1] >= today:
+            warns.append("%s (allowed until %s: %s)" % (msg, allow[name][1], allow[name][0]))
+        elif name in allow:
+            errors.append("%s (drift-allow expired %s: %s)" % (msg, allow[name][1], allow[name][0]))
+        else:
+            errors.append(msg)
+    for w in warns:
+        print("doctor: warn: " + w)
+    for e in errors:
+        print("doctor: error: " + e)
+    if errors:
+        print("doctor: FAIL: drift from toolchain/lock.json (refresh with --write-lock, or list the tool in toolchain/drift-allow.json)")
+        sys.exit(1)
+    print("doctor: strict ok (%d tools match the lock)" % (len(rows) - len(warns)))
+    sys.exit(0)
+
+if mode == "json":
     print(json.dumps({"schema": "sl-doctor/1", "ok": not missing_req, "tools": rows,
                       "missing_required": [r["tool"] for r in missing_req],
                       "install": ["sudo pacman -S " + p for p in packages]}, indent=2))
