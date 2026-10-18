@@ -1,0 +1,10 @@
+{
+  "format": "sl-fabric-tx-golden/1",
+  "seed": 42,
+  "clocks_us": [1000000, 1760000000000000],
+  "base": "687e42b7631c18200c11ce96220c26baad940ef950fb200d4aa01f151cf92043",
+  "minted": "ent_0506P7M089ZCSFBXY9K7V6CR5Q",
+  "revision": "7c422485d7b292a5fdcdd38580362a929bc1ef5e4df2b6fb7f7d6ea8387e7de8",
+  "root": "1fea3f7b89dae01d10b657d4a23ad9545eff1aab5f459ccb8123f80138ba1dd8",
+  "tx": "txn_080BKCZW29C2Y9MJYG8E11YE67"
+}
