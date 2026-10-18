@@ -46,9 +46,9 @@ std::size_t largest = 0;
 // ThreadSanitizer ships its own global allocator and refuses a second definition at link time
 // (duplicate symbol under mold), so the probe is compiled out there: the peak stays 0 and the limit
 // checks still run.
-#if defined(__SANITIZE_THREAD__)
+#ifdef __SANITIZE_THREAD__
 #define SL_ALLOC_PROBE 0
-#elif defined(__has_feature)
+#elifdef __has_feature
 #if __has_feature(thread_sanitizer)
 #define SL_ALLOC_PROBE 0
 #else
