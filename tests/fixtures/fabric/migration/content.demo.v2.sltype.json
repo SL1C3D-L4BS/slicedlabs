@@ -1,0 +1,36 @@
+{
+  "format": "sl-type-def/1",
+  "module": "content.demo",
+  "domain": "content.demo",
+  "owner": "05",
+  "doc": "WO-057 migration fixture, version 2: item 2.0 (count widened, legacy removed and reserved, tag required) and note 3.0 (words, reached through the intermediate 2.0).",
+  "types": [
+    {
+      "name": "content.demo.item",
+      "kind": "struct",
+      "version": "2.0",
+      "record_class": "entity",
+      "state_class": "document",
+      "doc": "A thing in the valley.",
+      "fields": [
+        {"no": 1, "name": "label", "type": "string", "presence": "required"},
+        {"no": 2, "name": "count", "type": "u32", "presence": "required"},
+        {"no": 3, "name": "weight", "type": "f64", "presence": "optional"},
+        {"no": 5, "name": "tag", "type": "string", "presence": "required"}
+      ],
+      "reserved": [4]
+    },
+    {
+      "name": "content.demo.note",
+      "kind": "struct",
+      "version": "3.0",
+      "record_class": "entity",
+      "state_class": "document",
+      "doc": "Free text.",
+      "fields": [
+        {"no": 1, "name": "text", "type": "string", "presence": "required"},
+        {"no": 2, "name": "words", "type": "u64", "presence": "required"}
+      ]
+    }
+  ]
+}

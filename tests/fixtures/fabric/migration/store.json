@@ -1,0 +1,22 @@
+{
+  "format": "sl-migration-store/1",
+  "doc": "WO-057: one project state written under content.demo v1, and the state the v1 -> v2 migration must produce. Record ids are derive(entity, well_known(namespace, 1), \"wo057/\" + key); bodies are canonical text (ARCH1-R29) of the record's type in the named module.",
+  "v1": {
+    "module": "content.demo.v1.sltype.json",
+    "records": [
+      {"key": "item/lamp", "type": "content.demo.item", "body": "{\"label\":\"lamp\",\"count\":3,\"weight\":1.5,\"legacy\":\"brass\"}"},
+      {"key": "item/rope", "type": "content.demo.item", "body": "{\"label\":\"rope\",\"count\":12}"},
+      {"key": "note/sky", "type": "content.demo.note", "body": "{\"text\":\"lanterns over the valley\"}"},
+      {"key": "note/empty", "type": "content.demo.note", "body": "{\"text\":\"\"}"}
+    ]
+  },
+  "v2": {
+    "module": "content.demo.v2.sltype.json",
+    "records": [
+      {"key": "item/lamp", "type": "content.demo.item", "body": "{\"label\":\"lamp\",\"count\":3,\"weight\":1.5,\"tag\":\"untagged\"}"},
+      {"key": "item/rope", "type": "content.demo.item", "body": "{\"label\":\"rope\",\"count\":12,\"tag\":\"untagged\"}"},
+      {"key": "note/sky", "type": "content.demo.note", "body": "{\"text\":\"lanterns over the valley\",\"words\":4}"},
+      {"key": "note/empty", "type": "content.demo.note", "body": "{\"text\":\"\",\"words\":0}"}
+    ]
+  }
+}

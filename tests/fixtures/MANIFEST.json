@@ -33,6 +33,18 @@
       "sha256": "0bc72ad7248daa607d263331d21d12d56758bb8f51d2496936b05acc036b3761",
       "bytes": 23642
     },
+    "fabric/migration/content.demo.v1.sltype.json": {
+      "sha256": "c6cd2a3fcd8cf61eca4d8cd77e18680d91dc4c145d0c56b9d01fdc9e9503ec93",
+      "bytes": 1153
+    },
+    "fabric/migration/content.demo.v2.sltype.json": {
+      "sha256": "7fd2d022286778488d1255bcd1493480b61f8b7e0e6ee7375f4ba4ae9db7a009",
+      "bytes": 1217
+    },
+    "fabric/migration/store.json": {
+      "sha256": "b04b8df0980e59b5e1ad353f154d4b6adfc54d95d02935258e0671e2f20c08ea",
+      "bytes": 1385
+    },
     "fabric/schema/README.md": {
       "sha256": "209632f8fc8cd602064a2d2749d20bcf49e2845547fac0c2776ec6b380a48a33",
       "bytes": 1170
