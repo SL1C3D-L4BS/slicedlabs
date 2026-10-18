@@ -17,6 +17,8 @@ set(SL_LINKER "auto" CACHE STRING "Linker: auto, mold, lld or default")
 set_property(CACHE SL_LINKER PROPERTY STRINGS auto mold lld default)
 set(SL_CCACHE "AUTO" CACHE STRING "ccache launcher: AUTO, ON or OFF")
 set_property(CACHE SL_CCACHE PROPERTY STRINGS AUTO ON OFF)
+# Repo-local cache: the factory verify jail mounts $HOME read-only, so ~/.cache/ccache is unusable there.
+set(SL_CCACHE_DIR "${CMAKE_SOURCE_DIR}/build/.ccache" CACHE PATH "ccache directory (inside the repo build tree, usable in jails)")
 set(SL_PRESET "" CACHE STRING "Configure preset name (set by CMakePresets.json)")
 
 if(NOT SL_CXX_STANDARD MATCHES "^(23|26)$")
@@ -130,11 +132,13 @@ if(NOT _sl_ccache_mode STREQUAL "OFF")
     # A cache directory that cannot be written (a jail, a read-only home) would fail every compile: probe once.
     set(_sl_probe_src "${CMAKE_BINARY_DIR}/CMakeFiles/sl_ccache_probe.cpp")
     file(WRITE "${_sl_probe_src}" "\n")
-    execute_process(COMMAND "${SL_CCACHE_PROGRAM}" "${CMAKE_CXX_COMPILER}" -x c++ -c "${_sl_probe_src}"
+    file(MAKE_DIRECTORY "${SL_CCACHE_DIR}")
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E env "CCACHE_DIR=${SL_CCACHE_DIR}"
+      "${SL_CCACHE_PROGRAM}" "${CMAKE_CXX_COMPILER}" -x c++ -c "${_sl_probe_src}"
       -o "${CMAKE_BINARY_DIR}/CMakeFiles/sl_ccache_probe.o"
       RESULT_VARIABLE _sl_ccache_rc OUTPUT_QUIET ERROR_VARIABLE _sl_ccache_err)
     if(_sl_ccache_rc EQUAL 0)
-      set(CMAKE_CXX_COMPILER_LAUNCHER "${SL_CCACHE_PROGRAM}")
+      set(CMAKE_CXX_COMPILER_LAUNCHER "${CMAKE_COMMAND};-E;env;CCACHE_DIR=${SL_CCACHE_DIR};${SL_CCACHE_PROGRAM}")
       set(SL_CCACHE_USED "ccache")
     elseif(_sl_ccache_mode STREQUAL "ON")
       message(FATAL_ERROR "sliced: SL_CCACHE=ON but ccache is not usable: ${_sl_ccache_err}")
