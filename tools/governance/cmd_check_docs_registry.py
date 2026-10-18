@@ -62,7 +62,10 @@ def docs_errors(root):
     docs = expected["documents"]
     named = [d for d in docs if d["kind"] != "VOL"]
     if len(docs) != 104 or len(named) != 62:
-        errors.append("%s: R-DOCS-COUNT: %d documents (%d named), expected 104 (62 named)" % (cmd_gen_docs.REGISTER_REL, len(docs), len(named)))
+        errors.append(
+            "%s: R-DOCS-COUNT: %d documents (%d named), expected 104 (62 named)"
+            % (cmd_gen_docs.REGISTER_REL, len(docs), len(named))
+        )
     approvals, approvals_error = cmd_gen_docs.load_approvals(root)
     if approvals_error:
         errors.append("%s: R-DOCS-INPUT: %s" % (cmd_gen_docs.APPROVALS_REL, approvals_error))
@@ -89,8 +92,16 @@ def docs_errors(root):
                 "%s: R-DOCS-APPROVAL: front matter says Approved but %s has no entry in %s"
                 % (doc["path"], doc["id"], cmd_gen_docs.APPROVALS_REL)
             )
-        elif doc["status"] == "Approved" and not _claims_approved(root, doc) and doc["path"].endswith(".md") and doc["id"] not in cmd_gen_docs.NO_FRONT_MATTER:
-            errors.append("%s: R-DOCS-APPROVAL: approved in %s but front matter status is not Approved" % (doc["path"], cmd_gen_docs.APPROVALS_REL))
+        elif (
+            doc["status"] == "Approved"
+            and not _claims_approved(root, doc)
+            and doc["path"].endswith(".md")
+            and doc["id"] not in cmd_gen_docs.NO_FRONT_MATTER
+        ):
+            errors.append(
+                "%s: R-DOCS-APPROVAL: approved in %s but front matter status is not Approved"
+                % (doc["path"], cmd_gen_docs.APPROVALS_REL)
+            )
     registered = {d["path"] for d in docs if d["path"]}
     for rel_dir, pattern in SCAN:
         directory = os.path.join(root, *rel_dir.split("/"))

@@ -18,14 +18,22 @@ REAL = slgov.ROOT
 
 
 def doc_text(doc_id="SL-GOV-002", status="Draft", version="0.1.0"):
-    return "---\nid: %s\nkind: GOV\ntitle: \"T\"\nstatus: %s\nversion: %s\nowner: founder\n---\n# T\n" % (doc_id, status, version)
+    return "---\nid: %s\nkind: GOV\ntitle: \"T\"\nstatus: %s\nversion: %s\nowner: founder\n---\n# T\n" % (
+        doc_id,
+        status,
+        version,
+    )
 
 
 class TreeCase(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = self._tmp.name
-        for rel in ("docs/plan/SL-PLAN-001-master-plan.md", "registry/vol01-documents.json", "schemas/sl-reg-001.schema.json"):
+        for rel in (
+            "docs/plan/SL-PLAN-001-master-plan.md",
+            "registry/vol01-documents.json",
+            "schemas/sl-reg-001.schema.json",
+        ):
             self.put_copy(rel)
         os.makedirs(os.path.join(self.root, "work-orders"))
         for n in range(1, 24):
@@ -180,7 +188,9 @@ class ApprovalTests(TreeCase):
         self.write(self.PATH, doc_text(status="Approved"))
         self.write(cmd_gen_docs.APPROVALS_REL, json.dumps({"SL-GOV-002": {"sha256": self.sha(), "version": "1.0.0"}}))
         self.assertEqual(self.errors(), [])
-        view, _ = cmd_gen_docs.derive_view(self.root, cmd_gen_docs.build(self.root), cmd_gen_docs.load_approvals(self.root)[0])
+        view, _ = cmd_gen_docs.derive_view(
+            self.root, cmd_gen_docs.build(self.root), cmd_gen_docs.load_approvals(self.root)[0]
+        )
         d = next(x for x in view if x["id"] == "SL-GOV-002")
         self.assertEqual((d["status"], d["version"]), ("Approved", "1.0.0"))
 
@@ -192,7 +202,10 @@ class ApprovalTests(TreeCase):
         self.assertTrue(any("does not match" in e for e in errs))
 
     def test_approval_for_unknown_or_absent_document(self):
-        self.write(cmd_gen_docs.APPROVALS_REL, json.dumps({"SL-GOV-099": {"sha256": "0" * 64}, "SL-GOV-003": {"sha256": "0" * 64}}))
+        self.write(
+            cmd_gen_docs.APPROVALS_REL,
+            json.dumps({"SL-GOV-099": {"sha256": "0" * 64}, "SL-GOV-003": {"sha256": "0" * 64}}),
+        )
         self.assertEqual(len([e for e in self.errors() if "R-DOCS-APPROVAL" in e]), 2)
 
     def test_approvals_must_be_an_object(self):
@@ -224,7 +237,9 @@ class RegistryTests(TreeCase):
         self.write("registry/SL-REG-009-extra.json", "{}")
         self.write("registry/SL-REG-001.approvals.json", "{}")
         errs = [e for e in self.errors() if "R-DOCS-UNREGISTERED" in e]
-        self.assertEqual(sorted(e.split(":")[0] for e in errs), ["docs/gov/SL-GOV-050-extra.md", "registry/SL-REG-009-extra.json"])
+        self.assertEqual(
+            sorted(e.split(":")[0] for e in errs), ["docs/gov/SL-GOV-050-extra.md", "registry/SL-REG-009-extra.json"]
+        )
 
     def test_missing_register(self):
         os.remove(os.path.join(self.root, *cmd_gen_docs.REGISTER_REL.split("/")))

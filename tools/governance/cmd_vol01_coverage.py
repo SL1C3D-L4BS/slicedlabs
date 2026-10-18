@@ -78,7 +78,9 @@ def coverage_errors(root):
         ep = entry["episode"]
         seen.append(ep)
         if entry.get("document") not in EXPECTED_IDS:
-            errors.append("%s: R-V01-EPISODES: %s primary document %r is not one of the 20" % (REL, ep, entry.get("document")))
+            errors.append(
+                "%s: R-V01-EPISODES: %s primary document %r is not one of the 20" % (REL, ep, entry.get("document"))
+            )
         err = _wo_error(root, entry.get("wo"), "%s wo" % ep)
         if err:
             errors.append(err.replace("R-V01-OWNER", "R-V01-EPISODES"))

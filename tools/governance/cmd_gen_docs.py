@@ -146,7 +146,11 @@ def load_vol01(root):
             data = json.load(fh)
     except (OSError, ValueError) as exc:
         raise DocsError("%s: %s" % (VOL01_REL, exc)) from exc
-    if not isinstance(data, dict) or not isinstance(data.get("documents"), list) or not isinstance(data.get("episodes"), list):
+    if (
+        not isinstance(data, dict)
+        or not isinstance(data.get("documents"), list)
+        or not isinstance(data.get("episodes"), list)
+    ):
         raise DocsError("%s: expected an object with 'documents' and 'episodes' lists" % VOL01_REL)
     return data
 
@@ -248,11 +252,15 @@ def derive_one(root, entry, approvals):
             problems.append("%s:1: R-DOCS-FRONT: %s" % (path, exc))
         if meta is not None:
             if meta.get("id") != entry["id"]:
-                problems.append("%s:1: R-DOCS-FRONT: front matter id %r is not %s" % (path, meta.get("id"), entry["id"]))
+                problems.append(
+                    "%s:1: R-DOCS-FRONT: front matter id %r is not %s" % (path, meta.get("id"), entry["id"])
+                )
             if meta.get("status") in STATUSES:
                 status = meta["status"]
             else:
-                problems.append("%s:1: R-DOCS-FRONT: status %r must be one of %s" % (path, meta.get("status"), "|".join(STATUSES)))
+                problems.append(
+                    "%s:1: R-DOCS-FRONT: status %r must be one of %s" % (path, meta.get("status"), "|".join(STATUSES))
+                )
             if isinstance(meta.get("version"), str) and meta["version"]:
                 version = meta["version"]
     approval = approvals.get(entry["id"])
@@ -306,7 +314,9 @@ def main(argv):
         except OSError:
             current = None
         if current != text:
-            print("gen-docs: FAIL: %s is stale or missing; run python3 -I tools/governance/cmd_gen_docs.py" % REGISTER_REL)
+            print(
+                "gen-docs: FAIL: %s is stale or missing; run python3 -I tools/governance/cmd_gen_docs.py" % REGISTER_REL
+            )
             return 1
         print("gen-docs: ok")
         return 0
