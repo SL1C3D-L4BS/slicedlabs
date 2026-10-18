@@ -1,0 +1,29 @@
+{
+  "schema": "sl-fixtures/1",
+  "files": {
+    "README.md": {
+      "sha256": "0b8f8d109cceff4f51f5151fc31ea25919f31a045d293c07d09c45e7bda31c67",
+      "bytes": 812
+    },
+    "deps/cpm/fixture.json": {
+      "sha256": "eeba460b0019b8a6bc67e3c2c78e7cf0edec9b6775a6f7b7c138e6d5e02bc0ff",
+      "bytes": 404
+    },
+    "deps/cpm/make_fixture.sh": {
+      "sha256": "3ba056e9eea4425f6ba035be3ee0f6c9d48560e6fe7ce69a5fc08175b136aec8",
+      "bytes": 1483
+    },
+    "deps/vcpkg/fake-vcpkg.cmake": {
+      "sha256": "77a51b8e415dcea8ed6d6f100641e0438c8349bc8490d97ecc0026a6918b1389",
+      "bytes": 572
+    },
+    "deps/vcpkg/share/doctest/doctestConfig.cmake": {
+      "sha256": "e7bd3ee86c2399a06490708176c06668617050d76f115d5d4cbf051721ea3b2c",
+      "bytes": 438
+    },
+    "deps/vcpkg/share/doctest/doctestConfigVersion.cmake": {
+      "sha256": "251f6bfe1a221e7efdcdc13e8050dd6bec18bd50863c8189bc236cd82823c2fa",
+      "bytes": 400
+    }
+  }
+}

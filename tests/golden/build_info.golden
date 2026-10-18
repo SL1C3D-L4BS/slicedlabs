@@ -1,0 +1,8 @@
+sl_sandbox
+  compiler   <compiler> <version>
+  standard   C++<standard>
+  build type <build-type>
+  sanitizer  <sanitizer>
+  preset     <preset>
+  linker     <linker>
+  revision   <revision>
