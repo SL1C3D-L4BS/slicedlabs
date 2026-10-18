@@ -1,0 +1,10 @@
+# Fake vcpkg port config version for doctest (WO-019 fixture): version 2.5.3, exact or compatible-by-major requests.
+set(PACKAGE_VERSION "2.5.3")
+if(PACKAGE_FIND_VERSION VERSION_GREATER PACKAGE_VERSION)
+  set(PACKAGE_VERSION_COMPATIBLE FALSE)
+else()
+  set(PACKAGE_VERSION_COMPATIBLE TRUE)
+  if(PACKAGE_FIND_VERSION VERSION_EQUAL PACKAGE_VERSION)
+    set(PACKAGE_VERSION_EXACT TRUE)
+  endif()
+endif()

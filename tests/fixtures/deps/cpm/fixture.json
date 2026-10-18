@@ -1,0 +1,8 @@
+{
+  "schema": "sl-deps-fixture/1",
+  "note": "Built by make_fixture.sh from third_party/doctest; the test rebuilds it and fails when archive_sha256 drifts.",
+  "package": "doctest",
+  "archive_name": "doctest-2.5.3.tar",
+  "archive_sha256": "6fdd7528a13cf4df7726a9b6215f51b521dca387506a998ebfebe24c1fe5362a",
+  "source_header_sha256": "cfd518a3ef90f67e1f3ba514df23fb3627437de1a2feeba78cf5062a40021421"
+}
