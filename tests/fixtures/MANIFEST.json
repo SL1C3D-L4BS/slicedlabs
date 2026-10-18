@@ -69,6 +69,14 @@
       "sha256": "8a7ebe8dc97fd321e16c3b294e1bb7fd1bd9ceeb1aa6a2de83b6f0be070f1b1f",
       "bytes": 4333
     },
+    "fabric/tree/README.md": {
+      "sha256": "c5836614538f0cfcc59320aa94f7e5beb766b177833f6f149a96737d55214a61",
+      "bytes": 590
+    },
+    "fabric/tree/roots.json": {
+      "sha256": "4dad935a1ae36a28f6b30050c546069486a7f35cd36cb4ceb1bec0236822b1d0",
+      "bytes": 2015
+    },
     "fabric/types/README.md": {
       "sha256": "3096397c6193c72212b276f696f92df8aa1441d241a228a9d159ff27288aa537",
       "bytes": 984
