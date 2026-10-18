@@ -1,0 +1,12 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.event.causality",
+  "values": [
+    {},
+    {
+      "cause": "evt_090BB6G57C5QHKKHZNZ124YDVQ",
+      "tx": "txn_080809QB4PZENYG7J4KT501268",
+      "revision": "sha256:bd827f87e0bcc973c9c21921dc93217f4a90163ddced15f773ae1cf481235706"
+    }
+  ]
+}

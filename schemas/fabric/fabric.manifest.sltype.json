@@ -1,0 +1,197 @@
+{
+  "format": "sl-type-def/1",
+  "module": "fabric.manifest",
+  "domain": "fabric.manifest",
+  "owner": "02",
+  "doc": "The project manifest and its parts (ARCH1-R32 to ARCH1-R34).",
+  "types": [
+    {
+      "name": "fabric.manifest.format_version",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "major",
+          "type": "u32",
+          "presence": "required",
+          "doc": "Major version: a change readers of an older major refuse."
+        },
+        {
+          "no": 2,
+          "name": "minor",
+          "type": "u32",
+          "presence": "required",
+          "doc": "Minor version: additive changes within the major."
+        }
+      ],
+      "doc": "A major.minor format or module version."
+    },
+    {
+      "name": "fabric.manifest.version_range",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "at_least",
+          "type": "fabric.manifest.format_version",
+          "presence": "required",
+          "doc": "Lowest admitted version, inclusive."
+        },
+        {
+          "no": 2,
+          "name": "below",
+          "type": "fabric.manifest.format_version",
+          "presence": "required",
+          "doc": "First version no longer admitted, exclusive."
+        }
+      ],
+      "doc": "Admitted versions: at_least inclusive, below exclusive."
+    },
+    {
+      "name": "fabric.manifest.module_ranges",
+      "kind": "map",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "key": "string",
+      "element": "fabric.manifest.version_range",
+      "doc": "Required modules: module id to admitted version range."
+    },
+    {
+      "name": "fabric.manifest.string_list",
+      "kind": "list",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "string",
+      "doc": "Strings in order."
+    },
+    {
+      "name": "fabric.manifest.package_pin",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "package",
+          "type": "id",
+          "presence": "required",
+          "doc": "Package id of the pinned package."
+        },
+        {
+          "no": 2,
+          "name": "revision",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Revision object id the package is pinned to."
+        },
+        {
+          "no": 3,
+          "name": "mount",
+          "type": "string",
+          "presence": "required",
+          "doc": "Mount point of the package inside the project."
+        }
+      ],
+      "doc": "One pinned package revision and where it is mounted (ARCH1-R66)."
+    },
+    {
+      "name": "fabric.manifest.package_pins",
+      "kind": "oset",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "fabric.manifest.package_pin",
+      "doc": "Package pins in resolution order (ARCH1-R63)."
+    },
+    {
+      "name": "fabric.manifest.manifest",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "entity",
+      "state_class": "document",
+      "document_root": true,
+      "fields": [
+        {
+          "no": 1,
+          "name": "project",
+          "type": "id",
+          "presence": "required",
+          "doc": "Project id of the project."
+        },
+        {
+          "no": 2,
+          "name": "name",
+          "type": "string",
+          "presence": "required",
+          "doc": "Display name of the project."
+        },
+        {
+          "no": 3,
+          "name": "writer_format",
+          "type": "fabric.manifest.format_version",
+          "presence": "required",
+          "doc": "Format version of the engine that last wrote it."
+        },
+        {
+          "no": 4,
+          "name": "min_reader_format",
+          "type": "fabric.manifest.format_version",
+          "presence": "required",
+          "doc": "Oldest format version that can read it."
+        },
+        {
+          "no": 5,
+          "name": "schema_set",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Digest of the schema set of the head revision."
+        },
+        {
+          "no": 6,
+          "name": "modules",
+          "type": "fabric.manifest.module_ranges",
+          "presence": "required",
+          "doc": "Required modules with their admitted version ranges."
+        },
+        {
+          "no": 7,
+          "name": "capabilities",
+          "type": "fabric.manifest.string_list",
+          "presence": "required",
+          "doc": "Required capabilities by SL-REG-004 id."
+        },
+        {
+          "no": 8,
+          "name": "target_profiles",
+          "type": "fabric.manifest.string_list",
+          "presence": "required",
+          "doc": "Target profiles by SL-GOV-007 name."
+        },
+        {
+          "no": 9,
+          "name": "package_pins",
+          "type": "fabric.manifest.package_pins",
+          "presence": "required",
+          "doc": "Pinned packages in resolution order."
+        },
+        {
+          "no": 10,
+          "name": "default_branch",
+          "type": "string",
+          "presence": "required",
+          "doc": "Name of the default branch."
+        }
+      ],
+      "doc": "The project manifest at the well-known id (entity, ordinal 1) (ARCH1-R32)."
+    }
+  ]
+}

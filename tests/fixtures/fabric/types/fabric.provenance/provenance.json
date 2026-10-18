@@ -1,0 +1,23 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.provenance.provenance",
+  "values": [
+    {},
+    {
+      "input_ids": [
+        "ent_0504P1DBTNS9RH5X1EDM4V6A3C",
+        "ast_0407DB0G9E3PSFACRK7DX4BQ1N"
+      ],
+      "input_revisions": [
+        "sha256:2c16af55ca7112f42e6d09b3286ce36925a64c736f745fdb8ee4ebccffa6a967",
+        "sha256:dab0412e1db2f533133b7a45dc3553ff6700806757e063c36f5f6a2471eb8c5d"
+      ],
+      "toolchain_id": "slc-cook/1.4",
+      "parameters_digest": "sha256:d0f42e08086864d0c1aae076fa99fd3f3b5221d8c30e3eb436442266799a5eea",
+      "environment_hash": "sha256:1e506ec6e9d058b56638d358f125577669b543c166b8c04b9c8a1975f00f92c3"
+    },
+    {
+      "toolchain_id": "slc-cook/1.4"
+    }
+  ]
+}

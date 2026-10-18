@@ -1,0 +1,136 @@
+{
+  "format": "sl-type-def/1",
+  "module": "fabric.provenance",
+  "domain": "fabric.provenance",
+  "owner": "02",
+  "doc": "Provenance of derived records and epistemic classes (ARCH1-R42 to ARCH1-R44).",
+  "types": [
+    {
+      "name": "fabric.provenance.epistemic_class",
+      "kind": "enum",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "enumerators": [
+        {
+          "no": 1,
+          "name": "observed",
+          "doc": "Measured from a running system; immutable."
+        },
+        {
+          "no": 2,
+          "name": "imported",
+          "doc": "Read from an external source."
+        },
+        {
+          "no": 3,
+          "name": "asserted",
+          "doc": "Stated by an actor."
+        },
+        {
+          "no": 4,
+          "name": "calculated",
+          "doc": "Computed by a deterministic tool."
+        },
+        {
+          "no": 5,
+          "name": "inferred",
+          "doc": "Proposed by a heuristic or a model."
+        },
+        {
+          "no": 6,
+          "name": "accepted",
+          "doc": "Promoted by an actor holding accept on the domain."
+        }
+      ],
+      "doc": "Epistemic class of a record write (ARCH1-R42)."
+    },
+    {
+      "name": "fabric.provenance.id_list",
+      "kind": "list",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "id",
+      "doc": "Record ids in order."
+    },
+    {
+      "name": "fabric.provenance.digest_list",
+      "kind": "list",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "digest",
+      "doc": "Content digests in order."
+    },
+    {
+      "name": "fabric.provenance.provenance",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "input_ids",
+          "type": "fabric.provenance.id_list",
+          "presence": "optional",
+          "doc": "Record ids of the inputs."
+        },
+        {
+          "no": 2,
+          "name": "input_revisions",
+          "type": "fabric.provenance.digest_list",
+          "presence": "optional",
+          "doc": "Record content digests of the inputs, one per id."
+        },
+        {
+          "no": 3,
+          "name": "toolchain_id",
+          "type": "string",
+          "presence": "optional",
+          "doc": "Id of the toolchain that derived the record."
+        },
+        {
+          "no": 4,
+          "name": "parameters_digest",
+          "type": "digest",
+          "presence": "optional",
+          "doc": "Digest of the derivation parameters."
+        },
+        {
+          "no": 5,
+          "name": "environment_hash",
+          "type": "digest",
+          "presence": "optional",
+          "doc": "Hash of the derivation environment."
+        }
+      ],
+      "doc": "Exactly the five F3 fields; a missing one is provenance_incomplete (ARCH1-R43)."
+    },
+    {
+      "name": "fabric.provenance.input_ref",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "id",
+          "type": "id",
+          "presence": "required",
+          "doc": "Record id of the input."
+        },
+        {
+          "no": 2,
+          "name": "digest",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Content digest of the input record."
+        }
+      ],
+      "doc": "One input of a derivation: record id and content digest."
+    }
+  ]
+}

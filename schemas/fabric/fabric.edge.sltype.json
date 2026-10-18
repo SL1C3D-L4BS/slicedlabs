@@ -1,0 +1,75 @@
+{
+  "format": "sl-type-def/1",
+  "module": "fabric.edge",
+  "domain": "fabric.edge",
+  "owner": "02",
+  "doc": "Explicit dependency edge records (ARCH1-R55); the graph also takes edges from refs and provenance.",
+  "types": [
+    {
+      "name": "fabric.edge.edge_kind",
+      "kind": "enum",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "enumerators": [
+        {
+          "no": 1,
+          "name": "reference",
+          "doc": "A strong reference."
+        },
+        {
+          "no": 2,
+          "name": "containment",
+          "doc": "An owner and what it owns."
+        },
+        {
+          "no": 3,
+          "name": "derives_from",
+          "doc": "A derived record and one of its inputs."
+        },
+        {
+          "no": 4,
+          "name": "builds",
+          "doc": "A build target and what it builds from."
+        },
+        {
+          "no": 5,
+          "name": "validates",
+          "doc": "A test and what it validates."
+        }
+      ],
+      "doc": "Kind of a dependency edge (ARCH1-R55)."
+    },
+    {
+      "name": "fabric.edge.edge",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "entity",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "from",
+          "type": "id",
+          "presence": "required",
+          "doc": "Record id of the dependent record."
+        },
+        {
+          "no": 2,
+          "name": "to",
+          "type": "id",
+          "presence": "required",
+          "doc": "Record id of the record it depends on."
+        },
+        {
+          "no": 3,
+          "name": "kind",
+          "type": "fabric.edge.edge_kind",
+          "presence": "required",
+          "doc": "Kind of the edge."
+        }
+      ],
+      "doc": "An explicit edge: from depends on to."
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.provenance.digest_list",
+  "values": [
+    [],
+    [
+      "sha256:2c16af55ca7112f42e6d09b3286ce36925a64c736f745fdb8ee4ebccffa6a967"
+    ]
+  ]
+}

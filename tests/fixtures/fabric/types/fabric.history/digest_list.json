@@ -1,0 +1,11 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.history.digest_list",
+  "values": [
+    [],
+    [
+      "sha256:ae4dbbac42a5463327a31b53a6ed7f7ae03a65d8900a3acce0d9f734c3f2b74f",
+      "sha256:15716b4bfbf18fd26947e9d83eba5cdcaafe8fc518402e8d104d16d15b85979e"
+    ]
+  ]
+}

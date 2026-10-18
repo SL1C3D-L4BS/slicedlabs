@@ -1,0 +1,220 @@
+{
+  "format": "sl-gen-meta/1",
+  "module": "fabric.provenance",
+  "domain": "fabric.provenance",
+  "owner": "02",
+  "doc": "Provenance of derived records and epistemic classes (ARCH1-R42 to ARCH1-R44).",
+  "source": "schemas/fabric/fabric.provenance.sltype.json",
+  "types": [
+    {
+      "name": "fabric.provenance.epistemic_class",
+      "kind": "enum",
+      "version": "1.0",
+      "doc": "Epistemic class of a record write (ARCH1-R42).",
+      "domain": "fabric.provenance",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:4cc311a8648f8d0b3aa03e6d6cfce293d2bb053674596c451fdc24f09587b418",
+      "cpp": "sl::fabric::gen::fabric_provenance::epistemic_class",
+      "fields": [],
+      "enumerators": [
+        {
+          "no": 1,
+          "name": "observed",
+          "doc": "Measured from a running system; immutable.",
+          "since_minor": 0
+        },
+        {
+          "no": 2,
+          "name": "imported",
+          "doc": "Read from an external source.",
+          "since_minor": 0
+        },
+        {
+          "no": 3,
+          "name": "asserted",
+          "doc": "Stated by an actor.",
+          "since_minor": 0
+        },
+        {
+          "no": 4,
+          "name": "calculated",
+          "doc": "Computed by a deterministic tool.",
+          "since_minor": 0
+        },
+        {
+          "no": 5,
+          "name": "inferred",
+          "doc": "Proposed by a heuristic or a model.",
+          "since_minor": 0
+        },
+        {
+          "no": 6,
+          "name": "accepted",
+          "doc": "Promoted by an actor holding accept on the domain.",
+          "since_minor": 0
+        }
+      ]
+    },
+    {
+      "name": "fabric.provenance.id_list",
+      "kind": "list",
+      "version": "1.0",
+      "doc": "Record ids in order.",
+      "domain": "fabric.provenance",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:66242f0032d5b6a178bf1a616df0a58b2f50cc2ca1f81c6c98f728328dc55d5b",
+      "cpp": "sl::fabric::gen::fabric_provenance::id_list",
+      "fields": [],
+      "element": "id"
+    },
+    {
+      "name": "fabric.provenance.digest_list",
+      "kind": "list",
+      "version": "1.0",
+      "doc": "Content digests in order.",
+      "domain": "fabric.provenance",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:a4828bed643e60ab6e7c1eb975b152a3c1525eb3ac4fe4394b778265913f1d8b",
+      "cpp": "sl::fabric::gen::fabric_provenance::digest_list",
+      "fields": [],
+      "element": "digest"
+    },
+    {
+      "name": "fabric.provenance.provenance",
+      "kind": "struct",
+      "version": "1.0",
+      "doc": "Exactly the five F3 fields; a missing one is provenance_incomplete (ARCH1-R43).",
+      "domain": "fabric.provenance",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:26f6652d1254a5317b2ef70f6e222dc3f666e56de7f0cdc026a80e2e789a7ed8",
+      "cpp": "sl::fabric::gen::fabric_provenance::provenance",
+      "fields": [
+        {
+          "no": 1,
+          "name": "input_ids",
+          "cpp": "input_ids",
+          "type": "fabric.provenance.id_list",
+          "presence": "optional",
+          "doc": "Record ids of the inputs.",
+          "domain": "fabric.provenance",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 2,
+          "name": "input_revisions",
+          "cpp": "input_revisions",
+          "type": "fabric.provenance.digest_list",
+          "presence": "optional",
+          "doc": "Record content digests of the inputs, one per id.",
+          "domain": "fabric.provenance",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 3,
+          "name": "toolchain_id",
+          "cpp": "toolchain_id",
+          "type": "string",
+          "presence": "optional",
+          "doc": "Id of the toolchain that derived the record.",
+          "domain": "fabric.provenance",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 4,
+          "name": "parameters_digest",
+          "cpp": "parameters_digest",
+          "type": "digest",
+          "presence": "optional",
+          "doc": "Digest of the derivation parameters.",
+          "domain": "fabric.provenance",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 5,
+          "name": "environment_hash",
+          "cpp": "environment_hash",
+          "type": "digest",
+          "presence": "optional",
+          "doc": "Hash of the derivation environment.",
+          "domain": "fabric.provenance",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        }
+      ]
+    },
+    {
+      "name": "fabric.provenance.input_ref",
+      "kind": "struct",
+      "version": "1.0",
+      "doc": "One input of a derivation: record id and content digest.",
+      "domain": "fabric.provenance",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:5983b3c4c17137fde477a6aef1fc1cf52ee5b881c5cefda6203bab251e2497e6",
+      "cpp": "sl::fabric::gen::fabric_provenance::input_ref",
+      "fields": [
+        {
+          "no": 1,
+          "name": "id",
+          "cpp": "id",
+          "type": "id",
+          "presence": "required",
+          "doc": "Record id of the input.",
+          "domain": "fabric.provenance",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 2,
+          "name": "digest",
+          "cpp": "digest",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Content digest of the input record.",
+          "domain": "fabric.provenance",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        }
+      ]
+    }
+  ]
+}

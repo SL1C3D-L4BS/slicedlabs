@@ -1,0 +1,74 @@
+{
+  "format": "sl-type-def/1",
+  "module": "fabric.schema",
+  "domain": "fabric.schema",
+  "owner": "02",
+  "doc": "Schema-side records of the Fabric: domain claims of the domain registry (ARCH1-R36).",
+  "types": [
+    {
+      "name": "fabric.schema.state_class",
+      "kind": "enum",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "enumerators": [
+        {
+          "no": 1,
+          "name": "document",
+          "doc": "Authored state, edited through transactions."
+        },
+        {
+          "no": 2,
+          "name": "derived",
+          "doc": "Generated output with provenance."
+        },
+        {
+          "no": 3,
+          "name": "observation",
+          "doc": "Captured from a running system."
+        }
+      ],
+      "doc": "State class of a record type (ARCH1-R17)."
+    },
+    {
+      "name": "fabric.schema.state_classes",
+      "kind": "list",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "fabric.schema.state_class",
+      "doc": "State classes in order."
+    },
+    {
+      "name": "fabric.schema.domain_claim",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "domain",
+          "type": "string",
+          "presence": "required",
+          "doc": "Dotted domain name under a reserved prefix."
+        },
+        {
+          "no": 2,
+          "name": "owner",
+          "type": "string",
+          "presence": "required",
+          "doc": "Owner subsystem number, 01 to 12."
+        },
+        {
+          "no": 3,
+          "name": "state_classes",
+          "type": "fabric.schema.state_classes",
+          "presence": "required",
+          "doc": "State classes the domain admits."
+        }
+      ],
+      "doc": "One domain of the registry and its single owner (ARCH1-R36)."
+    }
+  ]
+}

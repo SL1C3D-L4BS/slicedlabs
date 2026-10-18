@@ -1,0 +1,27 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.manifest.package_pins",
+  "values": [
+    [],
+    [
+      {
+        "id": "elm_0C06125SK0FQRA3QAS0CYNTECR",
+        "order": "40",
+        "value": {
+          "package": "pkg_0B06NG9YXS8NA9J47692VMSK7Y",
+          "revision": "sha256:4bbe6aa8ade054ff84c6aecc8d3996f594d0b0f45910e71ffffb78dca1fc48e0",
+          "mount": "packages/core"
+        }
+      },
+      {
+        "id": "elm_0C066XQM2AWVHM48XR8FZBRE1B",
+        "order": "80",
+        "value": {
+          "package": "pkg_0B06649H21YZQ1R2JW9P0HAQDA",
+          "revision": "sha256:ab2f79a5b45ad3d46acef6237fe418ae1122746f10c101151b363c8c4eb336a0",
+          "mount": "packages/fx"
+        }
+      }
+    ]
+  ]
+}

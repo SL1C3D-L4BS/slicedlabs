@@ -1,0 +1,12 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.event.about",
+  "values": [
+    {
+      "subject": "ent_05055DXNF3G0PN956VNPRT0FAT"
+    },
+    {
+      "scope": "workspace"
+    }
+  ]
+}

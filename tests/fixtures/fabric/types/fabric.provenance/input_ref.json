@@ -1,0 +1,14 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.provenance.input_ref",
+  "values": [
+    {
+      "id": "ent_0504P1DBTNS9RH5X1EDM4V6A3C",
+      "digest": "sha256:2c16af55ca7112f42e6d09b3286ce36925a64c736f745fdb8ee4ebccffa6a967"
+    },
+    {
+      "id": "ast_0407DB0G9E3PSFACRK7DX4BQ1N",
+      "digest": "sha256:dab0412e1db2f533133b7a45dc3553ff6700806757e063c36f5f6a2471eb8c5d"
+    }
+  ]
+}

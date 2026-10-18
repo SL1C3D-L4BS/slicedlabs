@@ -1,0 +1,16 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.event.correlation",
+  "values": [
+    {
+      "id": 0,
+      "scope": "process",
+      "tick": 0
+    },
+    {
+      "id": 42,
+      "scope": "editor.viewport",
+      "tick": 9001
+    }
+  ]
+}

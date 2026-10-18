@@ -1,0 +1,85 @@
+{
+  "format": "sl-type-def/1",
+  "module": "fabric.identity",
+  "domain": "fabric.identity",
+  "owner": "02",
+  "doc": "Identity lifetime: tombstones of retired ids and import records (ARCH1-R05, ARCH1-R65).",
+  "types": [
+    {
+      "name": "fabric.identity.tombstone",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "id",
+          "type": "id",
+          "presence": "required",
+          "doc": "The retired record id."
+        },
+        {
+          "no": 2,
+          "name": "last_record",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Object id of the last record object written under the id."
+        },
+        {
+          "no": 3,
+          "name": "retired_by",
+          "type": "id",
+          "presence": "required",
+          "doc": "Tx id of the transaction that retired the id."
+        }
+      ],
+      "doc": "A tombstone leaf (kind 3): a retired id keeps its last record object id (ARCH1-R05)."
+    },
+    {
+      "name": "fabric.identity.import_record",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "import",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "system",
+          "type": "string",
+          "presence": "required",
+          "doc": "Name of the external system, such as a tool or a file format."
+        },
+        {
+          "no": 2,
+          "name": "external_id",
+          "type": "string",
+          "presence": "required",
+          "doc": "Identifier of the object inside the external system."
+        },
+        {
+          "no": 3,
+          "name": "locator",
+          "type": "string",
+          "presence": "required",
+          "doc": "Where the external object was read from."
+        },
+        {
+          "no": 4,
+          "name": "content",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Digest of the external content at import time."
+        },
+        {
+          "no": 5,
+          "name": "record",
+          "type": "id",
+          "presence": "required",
+          "doc": "Record id the import produced."
+        }
+      ],
+      "doc": "Maps an external object to a record id with an imported-scheme id (ARCH1-R65)."
+    }
+  ]
+}

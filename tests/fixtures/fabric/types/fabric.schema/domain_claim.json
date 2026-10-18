@@ -1,0 +1,21 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.schema.domain_claim",
+  "values": [
+    {
+      "domain": "fabric.history",
+      "owner": "02",
+      "state_classes": [
+        "document",
+        "derived"
+      ]
+    },
+    {
+      "domain": "runtime.capture",
+      "owner": "03",
+      "state_classes": [
+        "observation"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.event.time_us",
+  "values": [
+    0,
+    1760000000000000,
+    -5,
+    "9007199254740993"
+  ]
+}

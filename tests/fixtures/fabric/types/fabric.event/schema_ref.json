@@ -1,0 +1,16 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.event.schema_ref",
+  "values": [
+    {
+      "type": "typ_030ANBGPATNZSQQQMJVN4S2TKV",
+      "major": 1,
+      "minor": 0
+    },
+    {
+      "type": "typ_030ANVV860SY83ZEYF98NAMPQE",
+      "major": 3,
+      "minor": 4294967295
+    }
+  ]
+}

@@ -1,0 +1,416 @@
+{
+  "format": "sl-text-corpus/1",
+  "doc": "FAB-INV-GEN-05: the C++ validator (from_text, then schema_registry::check) and the generated text JSON Schema judge every case alike; every fixture value is an accept case too.",
+  "cases": [
+    {
+      "type": "fabric.edge.edge",
+      "value": {
+        "from": "ent_0504BX0M5DAA1SK72X2710RXX7",
+        "to": "ast_04069DDPS388PBW2T00K739338",
+        "kind": "sideways"
+      },
+      "accept": false,
+      "why": "unknown enumerator name"
+    },
+    {
+      "type": "fabric.edge.edge",
+      "value": {
+        "from": "ent_0504BX0M5DAA1SK72X2710RXX7",
+        "kind": "builds"
+      },
+      "accept": false,
+      "why": "required field absent"
+    },
+    {
+      "type": "fabric.edge.edge",
+      "value": {
+        "from": "ent_0504BX0M5DAA1SK72X2710RXX7",
+        "to": "ast_04069DDPS388PBW2T00K739338",
+        "kind": "builds",
+        "weight": 1
+      },
+      "accept": false,
+      "why": "undeclared field name"
+    },
+    {
+      "type": "fabric.edge.edge",
+      "value": {
+        "from": "ent_0504BX0M5DAA1SK72X2710RXX7",
+        "to": "ent_0104WSEHNY5H9ZPC4N252FCQ1A",
+        "kind": "builds"
+      },
+      "accept": false,
+      "why": "id prefix disagrees with its class byte"
+    },
+    {
+      "type": "fabric.edge.edge",
+      "value": {
+        "from": "ent_0504BX0M5DAA1SK72X2710RXX7",
+        "to": "ast_04069ddps388pbw2t00k739338",
+        "kind": "builds"
+      },
+      "accept": false,
+      "why": "id text in lower case"
+    },
+    {
+      "type": "fabric.event.about",
+      "value": {
+        "subject": "ent_0505TP2RW4FEQRW8B3NZS5X8NM",
+        "scope": "x"
+      },
+      "accept": false,
+      "why": "two cases"
+    },
+    {
+      "type": "fabric.event.about",
+      "value": {},
+      "accept": false,
+      "why": "no case"
+    },
+    {
+      "type": "fabric.event.about",
+      "value": {
+        "object": "x"
+      },
+      "accept": false,
+      "why": "unknown case"
+    },
+    {
+      "type": "fabric.manifest.format_version",
+      "value": {
+        "major": -1,
+        "minor": 0
+      },
+      "accept": false,
+      "why": "u32 below range"
+    },
+    {
+      "type": "fabric.manifest.format_version",
+      "value": {
+        "major": 4294967296,
+        "minor": 0
+      },
+      "accept": false,
+      "why": "u32 above range"
+    },
+    {
+      "type": "fabric.manifest.format_version",
+      "value": {
+        "major": 4294967295,
+        "minor": 0
+      },
+      "accept": true,
+      "why": "u32 maximum"
+    },
+    {
+      "type": "fabric.history.revision",
+      "value": {
+        "parents": [],
+        "root": "sha256:fcaebbac53a865184171ab86c907009924b058e5a3fb49320ff2e45db7679774",
+        "schema_set": "sha256:f3057ad372418e330c12dbc22c81eaa3ae65a0d020b8c017787a8e4a8a04a4eb",
+        "tx": "sha256:d12eb7fdd718e9758d3356a3fc1d2023ee1d1338fe5018a6dff5fd08edab9046",
+        "generation": "5"
+      },
+      "accept": false,
+      "why": "small integer spelled as a string"
+    },
+    {
+      "type": "fabric.history.revision",
+      "value": {
+        "parents": [],
+        "root": "sha256:fcaebbac53a865184171ab86c907009924b058e5a3fb49320ff2e45db7679774",
+        "schema_set": "sha256:f3057ad372418e330c12dbc22c81eaa3ae65a0d020b8c017787a8e4a8a04a4eb",
+        "tx": "sha256:d12eb7fdd718e9758d3356a3fc1d2023ee1d1338fe5018a6dff5fd08edab9046",
+        "generation": "18446744073709551616"
+      },
+      "accept": false,
+      "why": "u64 above range"
+    },
+    {
+      "type": "fabric.history.revision",
+      "value": {
+        "parents": [],
+        "root": "sha256:fcaebbac53a865184171ab86c907009924b058e5a3fb49320ff2e45db7679774",
+        "schema_set": "sha256:f3057ad372418e330c12dbc22c81eaa3ae65a0d020b8c017787a8e4a8a04a4eb",
+        "tx": "sha256:d12eb7fdd718e9758d3356a3fc1d2023ee1d1338fe5018a6dff5fd08edab9046",
+        "generation": "9007199254740992"
+      },
+      "accept": true,
+      "why": "smallest u64 spelled as a string"
+    },
+    {
+      "type": "fabric.history.revision",
+      "value": {
+        "parents": [],
+        "root": "sha256:fcaebbac53a865184171ab86c907009924b058e5a3fb49320ff2e45db7679774",
+        "schema_set": "sha256:f3057ad372418e330c12dbc22c81eaa3ae65a0d020b8c017787a8e4a8a04a4eb",
+        "tx": "sha256:d12eb7fdd718e9758d3356a3fc1d2023ee1d1338fe5018a6dff5fd08edab9046",
+        "generation": 9007199254740992
+      },
+      "accept": false,
+      "why": "2^53 spelled as a number"
+    },
+    {
+      "type": "fabric.history.revision",
+      "value": {
+        "parents": [
+          "sha256:00"
+        ],
+        "root": "sha256:fcaebbac53a865184171ab86c907009924b058e5a3fb49320ff2e45db7679774",
+        "schema_set": "sha256:f3057ad372418e330c12dbc22c81eaa3ae65a0d020b8c017787a8e4a8a04a4eb",
+        "tx": "sha256:d12eb7fdd718e9758d3356a3fc1d2023ee1d1338fe5018a6dff5fd08edab9046",
+        "generation": 0
+      },
+      "accept": false,
+      "why": "short digest"
+    },
+    {
+      "type": "fabric.history.revision",
+      "value": {
+        "parents": [],
+        "root": "md5:0000000000000000000000000000000000000000000000000000000000000000",
+        "schema_set": "sha256:f3057ad372418e330c12dbc22c81eaa3ae65a0d020b8c017787a8e4a8a04a4eb",
+        "tx": "sha256:d12eb7fdd718e9758d3356a3fc1d2023ee1d1338fe5018a6dff5fd08edab9046",
+        "generation": 0
+      },
+      "accept": false,
+      "why": "unknown digest algorithm"
+    },
+    {
+      "type": "fabric.manifest.package_pins",
+      "value": [
+        {
+          "id": "ent_0506125SK0FQRA3QAS0CYNTECR",
+          "order": "40",
+          "value": {
+            "package": "pkg_0B06NG9YXS8NA9J47692VMSK7Y",
+            "revision": "sha256:4bbe6aa8ade054ff84c6aecc8d3996f594d0b0f45910e71ffffb78dca1fc48e0",
+            "mount": "packages/core"
+          }
+        }
+      ],
+      "accept": false,
+      "why": "oset element id not of class element"
+    },
+    {
+      "type": "fabric.manifest.package_pins",
+      "value": [
+        {
+          "id": "elm_0C06125SK0FQRA3QAS0CYNTECR",
+          "order": "4000",
+          "value": {
+            "package": "pkg_0B06NG9YXS8NA9J47692VMSK7Y",
+            "revision": "sha256:4bbe6aa8ade054ff84c6aecc8d3996f594d0b0f45910e71ffffb78dca1fc48e0",
+            "mount": "packages/core"
+          }
+        }
+      ],
+      "accept": false,
+      "why": "order key ending in a zero byte"
+    },
+    {
+      "type": "fabric.manifest.package_pins",
+      "value": [
+        {
+          "id": "elm_0C06125SK0FQRA3QAS0CYNTECR",
+          "order": "",
+          "value": {
+            "package": "pkg_0B06NG9YXS8NA9J47692VMSK7Y",
+            "revision": "sha256:4bbe6aa8ade054ff84c6aecc8d3996f594d0b0f45910e71ffffb78dca1fc48e0",
+            "mount": "packages/core"
+          }
+        }
+      ],
+      "accept": false,
+      "why": "empty order key"
+    },
+    {
+      "type": "fabric.manifest.package_pins",
+      "value": [
+        {
+          "id": "elm_0C06125SK0FQRA3QAS0CYNTECR",
+          "order": "4001",
+          "value": {
+            "package": "pkg_0B06NG9YXS8NA9J47692VMSK7Y",
+            "revision": "sha256:4bbe6aa8ade054ff84c6aecc8d3996f594d0b0f45910e71ffffb78dca1fc48e0",
+            "mount": "packages/core"
+          }
+        }
+      ],
+      "accept": true,
+      "why": "two-byte order key"
+    },
+    {
+      "type": "fabric.schema.state_classes",
+      "value": [
+        "document",
+        "liquid"
+      ],
+      "accept": false,
+      "why": "unknown enumerator in a list"
+    },
+    {
+      "type": "fabric.manifest.module_ranges",
+      "value": [
+        [
+          "sim",
+          {
+            "at_least": {
+              "major": 1,
+              "minor": 0
+            },
+            "below": {
+              "major": 2,
+              "minor": 0
+            }
+          },
+          3
+        ]
+      ],
+      "accept": false,
+      "why": "map entry of three items"
+    },
+    {
+      "type": "fabric.manifest.module_ranges",
+      "value": [
+        [
+          "sim"
+        ]
+      ],
+      "accept": false,
+      "why": "map entry of one item"
+    },
+    {
+      "type": "fabric.event.time_us",
+      "value": 1.5,
+      "accept": false,
+      "why": "fraction for an integer"
+    },
+    {
+      "type": "fabric.event.time_us",
+      "value": "-9223372036854775808",
+      "accept": true,
+      "why": "i64 minimum"
+    },
+    {
+      "type": "fabric.event.time_us",
+      "value": "-9223372036854775809",
+      "accept": false,
+      "why": "i64 below range"
+    },
+    {
+      "type": "fabric.event.time_us",
+      "value": "9223372036854775808",
+      "accept": false,
+      "why": "i64 above range"
+    },
+    {
+      "type": "fabric.provenance.input_ref",
+      "value": {
+        "id": "ent_0504WSEHNY5H9ZPC4N252FCQ1A",
+        "digest": "sha256:399746be2c53fb30951144f65c2a5060bff78fdc7b02ab22139274fc0f951bef",
+        "extra": true
+      },
+      "accept": false,
+      "why": "extra field"
+    },
+    {
+      "type": "fabric.provenance.provenance",
+      "value": {
+        "toolchain_id": 7
+      },
+      "accept": false,
+      "why": "number for a string"
+    },
+    {
+      "type": "fabric.identity.tombstone",
+      "value": {
+        "id": "ent_0504NB7TTEP56XACXVKC9Q5MY7",
+        "last_record": "sha256:01dbc58850cb7660702c31f2a4d3d187d5a0c7f38c2d54e18a9234cea90cdaf3",
+        "retired_by": null
+      },
+      "accept": false,
+      "why": "null"
+    },
+    {
+      "type": "fabric.event.correlation",
+      "value": {
+        "id": true,
+        "scope": "p",
+        "tick": 0
+      },
+      "accept": false,
+      "why": "bool for an integer"
+    },
+    {
+      "type": "fabric.history.digest_list",
+      "value": {
+        "a": 1
+      },
+      "accept": false,
+      "why": "object for a list"
+    },
+    {
+      "type": "fabric.event.event_envelope",
+      "value": {
+        "id": "evt_0909CCTYAW5CEDVZTRAVVB7P1Z",
+        "schema": {
+          "type": "typ_0308WJPZS1E6XAGB989M2Q9GQ2",
+          "major": 2,
+          "minor": 1
+        },
+        "type": "fabric.ref.moved",
+        "time": 0,
+        "seq": "18446744073709551615",
+        "actor": "act_0A06HB5E6W0SVTWTFEQ9Z3BMDA",
+        "about": {
+          "scope": "branch:main"
+        },
+        "correlation": {
+          "id": 8,
+          "scope": "fabric.store",
+          "tick": 4
+        },
+        "causality": {
+          "cause": "evt_0909GSNTHX988GP8MK7K75RP7M",
+          "tx": "txn_0809BFRGN5T9VF5CQ2P6PJWGVD",
+          "revision": "sha256:1615f47b04dd5db21b6bb1ed8d96ed5506f08b49532a29d0475f512b476f6cd3"
+        },
+        "payload": "abc"
+      },
+      "accept": false,
+      "why": "odd hex"
+    },
+    {
+      "type": "fabric.event.event_envelope",
+      "value": {
+        "id": "evt_0909CCTYAW5CEDVZTRAVVB7P1Z",
+        "schema": {
+          "type": "typ_0308WJPZS1E6XAGB989M2Q9GQ2",
+          "major": 2,
+          "minor": 1
+        },
+        "type": "fabric.ref.moved",
+        "time": 0,
+        "seq": "18446744073709551615",
+        "actor": "act_0A06HB5E6W0SVTWTFEQ9Z3BMDA",
+        "about": {
+          "scope": "branch:main"
+        },
+        "correlation": {
+          "id": 8,
+          "scope": "fabric.store",
+          "tick": 4
+        },
+        "causality": {
+          "cause": "evt_0909GSNTHX988GP8MK7K75RP7M",
+          "tx": "txn_0809BFRGN5T9VF5CQ2P6PJWGVD",
+          "revision": "sha256:1615f47b04dd5db21b6bb1ed8d96ed5506f08b49532a29d0475f512b476f6cd3"
+        },
+        "payload": "0D00"
+      },
+      "accept": false,
+      "why": "upper-case hex"
+    }
+  ]
+}

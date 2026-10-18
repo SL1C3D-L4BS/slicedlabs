@@ -1,0 +1,9 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.provenance.epistemic_class",
+  "values": [
+    "observed",
+    "accepted",
+    "inferred"
+  ]
+}

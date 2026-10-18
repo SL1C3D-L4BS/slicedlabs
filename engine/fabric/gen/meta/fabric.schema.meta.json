@@ -1,0 +1,116 @@
+{
+  "format": "sl-gen-meta/1",
+  "module": "fabric.schema",
+  "domain": "fabric.schema",
+  "owner": "02",
+  "doc": "Schema-side records of the Fabric: domain claims of the domain registry (ARCH1-R36).",
+  "source": "schemas/fabric/fabric.schema.sltype.json",
+  "types": [
+    {
+      "name": "fabric.schema.state_class",
+      "kind": "enum",
+      "version": "1.0",
+      "doc": "State class of a record type (ARCH1-R17).",
+      "domain": "fabric.schema",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:3ee887ebefdedfdda17906809d08edd30ea202ae03b667190cddfefcc1ab6c32",
+      "cpp": "sl::fabric::gen::fabric_schema::state_class",
+      "fields": [],
+      "enumerators": [
+        {
+          "no": 1,
+          "name": "document",
+          "doc": "Authored state, edited through transactions.",
+          "since_minor": 0
+        },
+        {
+          "no": 2,
+          "name": "derived",
+          "doc": "Generated output with provenance.",
+          "since_minor": 0
+        },
+        {
+          "no": 3,
+          "name": "observation",
+          "doc": "Captured from a running system.",
+          "since_minor": 0
+        }
+      ]
+    },
+    {
+      "name": "fabric.schema.state_classes",
+      "kind": "list",
+      "version": "1.0",
+      "doc": "State classes in order.",
+      "domain": "fabric.schema",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:afbec0bd97bf3aa08fbe16871aac598e908fcedf3395538e386f518bceffc61b",
+      "cpp": "sl::fabric::gen::fabric_schema::state_classes",
+      "fields": [],
+      "element": "fabric.schema.state_class"
+    },
+    {
+      "name": "fabric.schema.domain_claim",
+      "kind": "struct",
+      "version": "1.0",
+      "doc": "One domain of the registry and its single owner (ARCH1-R36).",
+      "domain": "fabric.schema",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:43fd09b4d1759345567f1305026d9dc12c33510c3064fc7b093c95639c23177e",
+      "cpp": "sl::fabric::gen::fabric_schema::domain_claim",
+      "fields": [
+        {
+          "no": 1,
+          "name": "domain",
+          "cpp": "domain",
+          "type": "string",
+          "presence": "required",
+          "doc": "Dotted domain name under a reserved prefix.",
+          "domain": "fabric.schema",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 2,
+          "name": "owner",
+          "cpp": "owner",
+          "type": "string",
+          "presence": "required",
+          "doc": "Owner subsystem number, 01 to 12.",
+          "domain": "fabric.schema",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 3,
+          "name": "state_classes",
+          "cpp": "state_classes",
+          "type": "fabric.schema.state_classes",
+          "presence": "required",
+          "doc": "State classes the domain admits.",
+          "domain": "fabric.schema",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        }
+      ]
+    }
+  ]
+}

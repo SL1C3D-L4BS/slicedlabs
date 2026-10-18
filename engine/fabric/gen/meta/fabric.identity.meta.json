@@ -1,0 +1,152 @@
+{
+  "format": "sl-gen-meta/1",
+  "module": "fabric.identity",
+  "domain": "fabric.identity",
+  "owner": "02",
+  "doc": "Identity lifetime: tombstones of retired ids and import records (ARCH1-R05, ARCH1-R65).",
+  "source": "schemas/fabric/fabric.identity.sltype.json",
+  "types": [
+    {
+      "name": "fabric.identity.tombstone",
+      "kind": "struct",
+      "version": "1.0",
+      "doc": "A tombstone leaf (kind 3): a retired id keeps its last record object id (ARCH1-R05).",
+      "domain": "fabric.identity",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:6185fc766b7ddb4784441e1e64582ea9c6ca93ff9c3a4ca98b8062d9ac2526b9",
+      "cpp": "sl::fabric::gen::fabric_identity::tombstone",
+      "fields": [
+        {
+          "no": 1,
+          "name": "id",
+          "cpp": "id",
+          "type": "id",
+          "presence": "required",
+          "doc": "The retired record id.",
+          "domain": "fabric.identity",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 2,
+          "name": "last_record",
+          "cpp": "last_record",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Object id of the last record object written under the id.",
+          "domain": "fabric.identity",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 3,
+          "name": "retired_by",
+          "cpp": "retired_by",
+          "type": "id",
+          "presence": "required",
+          "doc": "Tx id of the transaction that retired the id.",
+          "domain": "fabric.identity",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        }
+      ]
+    },
+    {
+      "name": "fabric.identity.import_record",
+      "kind": "struct",
+      "version": "1.0",
+      "doc": "Maps an external object to a record id with an imported-scheme id (ARCH1-R65).",
+      "domain": "fabric.identity",
+      "owner": "02",
+      "record_class": "import",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:6da757bb0492e17ff5a12f929dd870733e19a1ec40cb9c5392d1f07688860ce7",
+      "cpp": "sl::fabric::gen::fabric_identity::import_record",
+      "fields": [
+        {
+          "no": 1,
+          "name": "system",
+          "cpp": "system",
+          "type": "string",
+          "presence": "required",
+          "doc": "Name of the external system, such as a tool or a file format.",
+          "domain": "fabric.identity",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 2,
+          "name": "external_id",
+          "cpp": "external_id",
+          "type": "string",
+          "presence": "required",
+          "doc": "Identifier of the object inside the external system.",
+          "domain": "fabric.identity",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 3,
+          "name": "locator",
+          "cpp": "locator",
+          "type": "string",
+          "presence": "required",
+          "doc": "Where the external object was read from.",
+          "domain": "fabric.identity",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 4,
+          "name": "content",
+          "cpp": "content",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Digest of the external content at import time.",
+          "domain": "fabric.identity",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 5,
+          "name": "record",
+          "cpp": "record",
+          "type": "id",
+          "presence": "required",
+          "doc": "Record id the import produced.",
+          "domain": "fabric.identity",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        }
+      ]
+    }
+  ]
+}

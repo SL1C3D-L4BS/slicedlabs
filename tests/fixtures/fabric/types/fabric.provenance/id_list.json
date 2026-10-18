@@ -1,0 +1,11 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.provenance.id_list",
+  "values": [
+    [],
+    [
+      "ent_0504P1DBTNS9RH5X1EDM4V6A3C",
+      "drv_0708HKHJ70H0T18YK4G53S7NHX"
+    ]
+  ]
+}

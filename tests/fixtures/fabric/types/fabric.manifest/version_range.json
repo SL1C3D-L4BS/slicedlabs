@@ -1,0 +1,26 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.manifest.version_range",
+  "values": [
+    {
+      "at_least": {
+        "major": 1,
+        "minor": 0
+      },
+      "below": {
+        "major": 2,
+        "minor": 0
+      }
+    },
+    {
+      "at_least": {
+        "major": 0,
+        "minor": 3
+      },
+      "below": {
+        "major": 0,
+        "minor": 4
+      }
+    }
+  ]
+}

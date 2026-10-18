@@ -1,0 +1,9 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.schema.state_class",
+  "values": [
+    "document",
+    "derived",
+    "observation"
+  ]
+}

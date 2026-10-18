@@ -1,0 +1,16 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.identity.tombstone",
+  "values": [
+    {
+      "id": "ent_0506EPSCK1V99G841X3XZXB5CF",
+      "last_record": "sha256:e40fb4b2fbf16cdf27b029f9e0dd3a0409128d84d97335b3132673153fc40821",
+      "retired_by": "txn_080926GWTMSQTFFJYF3Y0D5C0K"
+    },
+    {
+      "id": "ast_0407JYH1FNDNAA1X9T8ESDGTP2",
+      "last_record": "sha256:1e4c3f99413777646387823767da1501b9afb92eb89d4e7c5684815a556ce763",
+      "retired_by": "txn_080AJ9FV15WFTGZFNW49NRXT4A"
+    }
+  ]
+}

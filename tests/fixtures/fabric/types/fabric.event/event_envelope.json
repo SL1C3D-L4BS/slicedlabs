@@ -1,0 +1,55 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.event.event_envelope",
+  "values": [
+    {
+      "id": "evt_0909GSNTHX988GP8MK7K75RP7M",
+      "schema": {
+        "type": "typ_030ANBGPATNZSQQQMJVN4S2TKV",
+        "major": 1,
+        "minor": 0
+      },
+      "type": "fabric.tx.committed",
+      "time": 1760000000000000,
+      "seq": 1,
+      "actor": "act_0A061PM7YDJVJAF4ARMPTF9TEZ",
+      "about": {
+        "subject": "ent_05055DXNF3G0PN956VNPRT0FAT"
+      },
+      "correlation": {
+        "id": 7,
+        "scope": "process",
+        "tick": 3
+      },
+      "causality": {
+        "tx": "txn_080809QB4PZENYG7J4KT501268"
+      }
+    },
+    {
+      "id": "evt_0909CCTYAW5CEDVZTRAVVB7P1Z",
+      "schema": {
+        "type": "typ_0308WJPZS1E6XAGB989M2Q9GQ2",
+        "major": 2,
+        "minor": 1
+      },
+      "type": "fabric.ref.moved",
+      "time": 0,
+      "seq": "18446744073709551615",
+      "actor": "act_0A06HB5E6W0SVTWTFEQ9Z3BMDA",
+      "about": {
+        "scope": "branch:main"
+      },
+      "correlation": {
+        "id": 8,
+        "scope": "fabric.store",
+        "tick": 4
+      },
+      "causality": {
+        "cause": "evt_0909GSNTHX988GP8MK7K75RP7M",
+        "tx": "txn_0809BFRGN5T9VF5CQ2P6PJWGVD",
+        "revision": "sha256:1615f47b04dd5db21b6bb1ed8d96ed5506f08b49532a29d0475f512b476f6cd3"
+      },
+      "payload": "0d00"
+    }
+  ]
+}

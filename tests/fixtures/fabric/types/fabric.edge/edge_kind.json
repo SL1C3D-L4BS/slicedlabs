@@ -1,0 +1,9 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.edge.edge_kind",
+  "values": [
+    "reference",
+    "validates",
+    "builds"
+  ]
+}

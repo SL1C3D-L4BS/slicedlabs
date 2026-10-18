@@ -1,0 +1,23 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.history.revision",
+  "values": [
+    {
+      "parents": [],
+      "root": "sha256:fcaebbac53a865184171ab86c907009924b058e5a3fb49320ff2e45db7679774",
+      "schema_set": "sha256:f3057ad372418e330c12dbc22c81eaa3ae65a0d020b8c017787a8e4a8a04a4eb",
+      "tx": "sha256:d12eb7fdd718e9758d3356a3fc1d2023ee1d1338fe5018a6dff5fd08edab9046",
+      "generation": 0
+    },
+    {
+      "parents": [
+        "sha256:bd827f87e0bcc973c9c21921dc93217f4a90163ddced15f773ae1cf481235706",
+        "sha256:1615f47b04dd5db21b6bb1ed8d96ed5506f08b49532a29d0475f512b476f6cd3"
+      ],
+      "root": "sha256:bbceec5bdd314720957c6752af04d691ba371c08509ab1c13fa1161a4e529d90",
+      "schema_set": "sha256:f3057ad372418e330c12dbc22c81eaa3ae65a0d020b8c017787a8e4a8a04a4eb",
+      "tx": "sha256:3c380e9b4389efcdc6fe7aec5a8a1fb5f8e3a0e1e9ed95f9c7a0655b98bff2a0",
+      "generation": 12
+    }
+  ]
+}

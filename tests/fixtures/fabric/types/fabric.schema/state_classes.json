@@ -1,0 +1,11 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.schema.state_classes",
+  "values": [
+    [],
+    [
+      "document",
+      "derived"
+    ]
+  ]
+}

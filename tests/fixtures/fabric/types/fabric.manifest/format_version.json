@@ -1,0 +1,14 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.manifest.format_version",
+  "values": [
+    {
+      "major": 1,
+      "minor": 0
+    },
+    {
+      "major": 2,
+      "minor": 7
+    }
+  ]
+}

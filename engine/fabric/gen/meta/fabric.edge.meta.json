@@ -1,0 +1,113 @@
+{
+  "format": "sl-gen-meta/1",
+  "module": "fabric.edge",
+  "domain": "fabric.edge",
+  "owner": "02",
+  "doc": "Explicit dependency edge records (ARCH1-R55); the graph also takes edges from refs and provenance.",
+  "source": "schemas/fabric/fabric.edge.sltype.json",
+  "types": [
+    {
+      "name": "fabric.edge.edge_kind",
+      "kind": "enum",
+      "version": "1.0",
+      "doc": "Kind of a dependency edge (ARCH1-R55).",
+      "domain": "fabric.edge",
+      "owner": "02",
+      "record_class": "none",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:5897a8b00483a53c8fbd536e2c53cf9d58730d2b8f4d2e17444a36db5db58e72",
+      "cpp": "sl::fabric::gen::fabric_edge::edge_kind",
+      "fields": [],
+      "enumerators": [
+        {
+          "no": 1,
+          "name": "reference",
+          "doc": "A strong reference.",
+          "since_minor": 0
+        },
+        {
+          "no": 2,
+          "name": "containment",
+          "doc": "An owner and what it owns.",
+          "since_minor": 0
+        },
+        {
+          "no": 3,
+          "name": "derives_from",
+          "doc": "A derived record and one of its inputs.",
+          "since_minor": 0
+        },
+        {
+          "no": 4,
+          "name": "builds",
+          "doc": "A build target and what it builds from.",
+          "since_minor": 0
+        },
+        {
+          "no": 5,
+          "name": "validates",
+          "doc": "A test and what it validates.",
+          "since_minor": 0
+        }
+      ]
+    },
+    {
+      "name": "fabric.edge.edge",
+      "kind": "struct",
+      "version": "1.0",
+      "doc": "An explicit edge: from depends on to.",
+      "domain": "fabric.edge",
+      "owner": "02",
+      "record_class": "entity",
+      "state_class": "document",
+      "document_root": false,
+      "lock_hash": "sha256:6243672686dd4df9ac94bd6c1dd83889a230f41a7274f13ff886563d53e0a3da",
+      "cpp": "sl::fabric::gen::fabric_edge::edge",
+      "fields": [
+        {
+          "no": 1,
+          "name": "from",
+          "cpp": "from",
+          "type": "id",
+          "presence": "required",
+          "doc": "Record id of the dependent record.",
+          "domain": "fabric.edge",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 2,
+          "name": "to",
+          "cpp": "to",
+          "type": "id",
+          "presence": "required",
+          "doc": "Record id of the record it depends on.",
+          "domain": "fabric.edge",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        },
+        {
+          "no": 3,
+          "name": "kind",
+          "cpp": "kind",
+          "type": "fabric.edge.edge_kind",
+          "presence": "required",
+          "doc": "Kind of the edge.",
+          "domain": "fabric.edge",
+          "owner": "02",
+          "state_class": "document",
+          "since_minor": 0,
+          "ref_strength": null,
+          "ref_targets": []
+        }
+      ]
+    }
+  ]
+}

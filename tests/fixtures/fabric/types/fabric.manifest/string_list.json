@@ -1,0 +1,11 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.manifest.string_list",
+  "values": [
+    [],
+    [
+      "cap.render.vulkan",
+      "cap.audio"
+    ]
+  ]
+}

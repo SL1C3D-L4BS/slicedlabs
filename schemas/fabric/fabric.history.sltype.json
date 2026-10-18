@@ -1,0 +1,177 @@
+{
+  "format": "sl-type-def/1",
+  "module": "fabric.history",
+  "domain": "fabric.history",
+  "owner": "02",
+  "doc": "History objects: revisions, transaction records and ref updates (ARCH1-R50, ARCH1-R45). No hashed type here holds a time field.",
+  "types": [
+    {
+      "name": "fabric.history.digest_list",
+      "kind": "list",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "digest",
+      "doc": "Object ids in order."
+    },
+    {
+      "name": "fabric.history.revision",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "parents",
+          "type": "fabric.history.digest_list",
+          "presence": "required",
+          "doc": "Parent revision object ids; empty for the genesis revision."
+        },
+        {
+          "no": 2,
+          "name": "root",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Object id of the root object (records trie and membership map)."
+        },
+        {
+          "no": 3,
+          "name": "schema_set",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Digest of the schema set the revision was written with."
+        },
+        {
+          "no": 4,
+          "name": "tx",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Object id of the tx record that produced this revision."
+        },
+        {
+          "no": 5,
+          "name": "generation",
+          "type": "u64",
+          "presence": "required",
+          "doc": "Longest parent chain to the genesis revision (generation 0)."
+        }
+      ],
+      "doc": "A revision object (kind 6): parents, root, schema set, tx record and generation; no time field (ARCH1-R50)."
+    },
+    {
+      "name": "fabric.history.origin",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "subsystem",
+          "type": "string",
+          "presence": "required",
+          "doc": "Subsystem that made the edit, as its owner number 01 to 12."
+        },
+        {
+          "no": 2,
+          "name": "epistemic",
+          "type": "fabric.provenance.epistemic_class",
+          "presence": "required",
+          "doc": "Epistemic class of the facts it writes."
+        }
+      ],
+      "doc": "Where the facts of a transaction come from (ARCH1-R45)."
+    },
+    {
+      "name": "fabric.history.tx_record",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "actor",
+          "type": "id",
+          "presence": "required",
+          "doc": "Actor id of the actor that committed the transaction."
+        },
+        {
+          "no": 2,
+          "name": "origin",
+          "type": "fabric.history.origin",
+          "presence": "required",
+          "doc": "Subsystem and epistemic class of the transaction."
+        },
+        {
+          "no": 3,
+          "name": "provenance",
+          "type": "fabric.provenance.provenance",
+          "presence": "optional",
+          "doc": "Provenance of the derived records it writes."
+        },
+        {
+          "no": 4,
+          "name": "patch",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Object id of the patch object (kind 8) the transaction applied."
+        },
+        {
+          "no": 5,
+          "name": "idempotency_key",
+          "type": "string",
+          "presence": "optional",
+          "doc": "Client key that turns a retried commit into a no-op."
+        },
+        {
+          "no": 6,
+          "name": "label",
+          "type": "string",
+          "presence": "required",
+          "doc": "Human label shown in history and undo menus."
+        },
+        {
+          "no": 7,
+          "name": "undo_of",
+          "type": "id",
+          "presence": "optional",
+          "doc": "Tx id of the transaction this one undoes."
+        }
+      ],
+      "doc": "A transaction record (kind 7): who committed what and why; no time field."
+    },
+    {
+      "name": "fabric.history.ref_update",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "name",
+          "type": "string",
+          "presence": "required",
+          "doc": "Ref name: 1 to 255 bytes of 0x21 to 0x7E."
+        },
+        {
+          "no": 2,
+          "name": "expected",
+          "type": "digest",
+          "presence": "optional",
+          "doc": "Object id the ref holds now; absent when the ref must not exist."
+        },
+        {
+          "no": 3,
+          "name": "target",
+          "type": "digest",
+          "presence": "required",
+          "doc": "Object id the ref moves to."
+        }
+      ],
+      "doc": "One ref move of a commit batch: compare and set from expected to target."
+    }
+  ]
+}

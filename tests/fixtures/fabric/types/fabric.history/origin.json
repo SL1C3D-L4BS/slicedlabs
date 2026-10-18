@@ -1,0 +1,14 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.history.origin",
+  "values": [
+    {
+      "subsystem": "02",
+      "epistemic": "asserted"
+    },
+    {
+      "subsystem": "08",
+      "epistemic": "calculated"
+    }
+  ]
+}

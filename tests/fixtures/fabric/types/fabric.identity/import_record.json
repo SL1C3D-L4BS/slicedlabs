@@ -1,0 +1,20 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.identity.import_record",
+  "values": [
+    {
+      "system": "gltf",
+      "external_id": "meshes/0",
+      "locator": "assets/crate.gltf",
+      "content": "sha256:043becd3a0ba40098143342298fa9689db8ab47999b391533506989dbaa8a0fa",
+      "record": "ast_040G23QV6KM2X402C18CT2567T"
+    },
+    {
+      "system": "blender",
+      "external_id": "Cube.001",
+      "locator": "art/level.blend",
+      "content": "sha256:e0a75dad89d6e8e4f62f7605a71883e8a27b1cdbc2f0aede5da693c57ff8ed45",
+      "record": "ent_050GEA9BMAHHR6FZHDFHPP338B"
+    }
+  ]
+}

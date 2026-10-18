@@ -1,0 +1,15 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.history.ref_update",
+  "values": [
+    {
+      "name": "refs/heads/main",
+      "target": "sha256:bd827f87e0bcc973c9c21921dc93217f4a90163ddced15f773ae1cf481235706"
+    },
+    {
+      "name": "refs/heads/main",
+      "expected": "sha256:bd827f87e0bcc973c9c21921dc93217f4a90163ddced15f773ae1cf481235706",
+      "target": "sha256:1615f47b04dd5db21b6bb1ed8d96ed5506f08b49532a29d0475f512b476f6cd3"
+    }
+  ]
+}

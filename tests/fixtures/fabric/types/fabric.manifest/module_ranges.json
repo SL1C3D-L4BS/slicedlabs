@@ -1,0 +1,35 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.manifest.module_ranges",
+  "values": [
+    [],
+    [
+      [
+        "sim",
+        {
+          "at_least": {
+            "major": 1,
+            "minor": 0
+          },
+          "below": {
+            "major": 2,
+            "minor": 0
+          }
+        }
+      ],
+      [
+        "fabric",
+        {
+          "at_least": {
+            "major": 1,
+            "minor": 2
+          },
+          "below": {
+            "major": 2,
+            "minor": 0
+          }
+        }
+      ]
+    ]
+  ]
+}

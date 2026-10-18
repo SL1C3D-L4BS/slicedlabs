@@ -1,0 +1,16 @@
+{
+  "format": "sl-type-fixtures/1",
+  "type": "fabric.edge.edge",
+  "values": [
+    {
+      "from": "ent_0504BX0M5DAA1SK72X2710RXX7",
+      "to": "ast_04069DDPS388PBW2T00K739338",
+      "kind": "builds"
+    },
+    {
+      "from": "ent_0506D77SA2HE80HT2ZGP2XCC5V",
+      "to": "ent_05070S35T6FK23CKW0PPP4W8E8",
+      "kind": "validates"
+    }
+  ]
+}

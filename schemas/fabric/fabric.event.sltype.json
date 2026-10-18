@@ -1,0 +1,213 @@
+{
+  "format": "sl-type-def/1",
+  "module": "fabric.event",
+  "domain": "fabric.history.event",
+  "owner": "02",
+  "doc": "Event envelopes (ARCH1-R46 to ARCH1-R48). An envelope carries time and correlation, so it is never part of a hashed body (ARCH1-R47).",
+  "types": [
+    {
+      "name": "fabric.event.time_us",
+      "kind": "tagged",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "i64",
+      "doc": "Microseconds from the injected clock."
+    },
+    {
+      "name": "fabric.event.schema_ref",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "type",
+          "type": "id",
+          "presence": "required",
+          "doc": "Type id of the payload type."
+        },
+        {
+          "no": 2,
+          "name": "major",
+          "type": "u32",
+          "presence": "required",
+          "doc": "Major version of the payload type."
+        },
+        {
+          "no": 3,
+          "name": "minor",
+          "type": "u32",
+          "presence": "required",
+          "doc": "Minor version of the payload type."
+        }
+      ],
+      "doc": "Type and version of an event payload."
+    },
+    {
+      "name": "fabric.event.about",
+      "kind": "variant",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "cases": [
+        {
+          "no": 1,
+          "name": "subject",
+          "type": "id",
+          "doc": "Id of the record the event is about."
+        },
+        {
+          "no": 2,
+          "name": "scope",
+          "type": "string",
+          "doc": "Scope tag of an event about no single record."
+        }
+      ],
+      "doc": "What an event is about: exactly one of subject id or scope tag."
+    },
+    {
+      "name": "fabric.event.correlation",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "id",
+          "type": "u64",
+          "presence": "required",
+          "doc": "Correlation id."
+        },
+        {
+          "no": 2,
+          "name": "scope",
+          "type": "string",
+          "presence": "required",
+          "doc": "Correlation scope, owned."
+        },
+        {
+          "no": 3,
+          "name": "tick",
+          "type": "u64",
+          "presence": "required",
+          "doc": "Tick the event belongs to."
+        }
+      ],
+      "doc": "Correlation, field for field sl::log::correlation (ARCH1-R48)."
+    },
+    {
+      "name": "fabric.event.causality",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "cause",
+          "type": "id",
+          "presence": "optional",
+          "doc": "Event id of the event that caused this one."
+        },
+        {
+          "no": 2,
+          "name": "tx",
+          "type": "id",
+          "presence": "optional",
+          "doc": "Tx id of the transaction that caused it."
+        },
+        {
+          "no": 3,
+          "name": "revision",
+          "type": "digest",
+          "presence": "optional",
+          "doc": "Revision object id the event was observed at."
+        }
+      ],
+      "doc": "What caused an event."
+    },
+    {
+      "name": "fabric.event.event_envelope",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "fields": [
+        {
+          "no": 1,
+          "name": "id",
+          "type": "id",
+          "presence": "required",
+          "doc": "Event id derived from tx id, kind and seq (ARCH1-R47)."
+        },
+        {
+          "no": 2,
+          "name": "schema",
+          "type": "fabric.event.schema_ref",
+          "presence": "required",
+          "doc": "Type and version of the payload."
+        },
+        {
+          "no": 3,
+          "name": "type",
+          "type": "string",
+          "presence": "required",
+          "doc": "Event type string, such as fabric.tx.committed."
+        },
+        {
+          "no": 4,
+          "name": "time",
+          "type": "fabric.event.time_us",
+          "presence": "required",
+          "doc": "Time from the injected clock."
+        },
+        {
+          "no": 5,
+          "name": "seq",
+          "type": "u64",
+          "presence": "required",
+          "doc": "Sequence number per source."
+        },
+        {
+          "no": 6,
+          "name": "actor",
+          "type": "id",
+          "presence": "required",
+          "doc": "Actor id of the actor that caused the event."
+        },
+        {
+          "no": 7,
+          "name": "about",
+          "type": "fabric.event.about",
+          "presence": "required",
+          "doc": "Subject id or scope tag."
+        },
+        {
+          "no": 8,
+          "name": "correlation",
+          "type": "fabric.event.correlation",
+          "presence": "required",
+          "doc": "Correlation of the event."
+        },
+        {
+          "no": 9,
+          "name": "causality",
+          "type": "fabric.event.causality",
+          "presence": "required",
+          "doc": "Cause event, transaction and revision."
+        },
+        {
+          "no": 10,
+          "name": "payload",
+          "type": "bytes",
+          "presence": "optional",
+          "doc": "SLB/1 encoding of the payload value."
+        }
+      ],
+      "doc": "The envelope of every Fabric event (ARCH1-R46)."
+    }
+  ]
+}
