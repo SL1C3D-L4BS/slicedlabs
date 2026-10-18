@@ -77,6 +77,14 @@
       "sha256": "4dad935a1ae36a28f6b30050c546069486a7f35cd36cb4ceb1bec0236822b1d0",
       "bytes": 2015
     },
+    "fabric/tx/README.md": {
+      "sha256": "489c57816b8b505af3e9fcfad3560016ca5906972aba4947ea98887f84bc2a53",
+      "bytes": 719
+    },
+    "fabric/tx/golden_revision.json": {
+      "sha256": "2e13dcb2fa32de8d35a48d834b052c371d15a36f1326d91ab07488a3ad8e99c8",
+      "bytes": 424
+    },
     "fabric/types/README.md": {
       "sha256": "3096397c6193c72212b276f696f92df8aa1441d241a228a9d159ff27288aa537",
       "bytes": 984
