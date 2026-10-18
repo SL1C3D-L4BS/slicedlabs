@@ -595,13 +595,18 @@ fabric-gen-check *args:
 neg-fabric-gen *args:
     @bash tests/gates/neg_fabric_gen.sh
 
-# owner WO-047
+# fabric-event-schema-check (F6): build preset debug, run the CTest label fabric_events with SL_FABRIC_EVENT_JSON_PATH=build/fabric/events.jsonl (absolute: ctest runs in its own directory), then tools/fabric/event_schema_check.py validates every line against schemas/sl-fabric-event.schema.json; an empty or missing dump fails (R-EVT-*) (WO-047, FAB-INV-EVT-05)
 fabric-event-schema-check *args:
-    @{{just_executable()}} stub fabric-event-schema-check
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug
+    @mkdir -p build/fabric
+    @rm -f build/fabric/events.jsonl
+    @SL_FABRIC_EVENT_JSON_PATH={{justfile_directory()}}/build/fabric/events.jsonl ctest --preset debug -L '^fabric_events$' --no-tests=error --output-on-failure
+    @python3 -I tools/fabric/event_schema_check.py --file build/fabric/events.jsonl {{args}}
 
-# owner WO-047
+# negative test: an envelope of the real dump without correlation.scope fails the checker naming R-EVT-CORRELATION, /correlation/scope and its line, one with both subject and scope names R-EVT-ABOUT; the control run exits 0 (WO-047)
 neg-fabric-event-schema *args:
-    @{{just_executable()}} stub neg-fabric-event-schema
+    @bash tests/gates/neg_fabric_event_schema.sh
 
 # fabric-ownership-check (F2): build sl_fabric_dump_domains (preset debug), dump the engine's domain registry into build/fabric/domains.json, then tools/fabric/ownership_check.py compares it with schemas/fabric/*.sltype.json and the SL-ARCH-001 domain_registry, prints `f2 numerator N denominator D` and fails on any second owner or mismatch (R-F2-*) (WO-048, FAB-INV-OWN-08)
 fabric-ownership-check *args:
