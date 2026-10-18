@@ -5,9 +5,10 @@
   "license": "MIT",
   "upstream": "https://raw.githubusercontent.com/doctest/doctest/v2.5.3/doctest/doctest.h",
   "provenance": "arch-repackage",
-  "verified_upstream": false,
-  "tree_sha256": "53a3fa7d0f61592830146c5457e4f0b62717b8512ac1dc91f40c1930a9201ec9",
+  "verified_upstream": true,
+  "tree_sha256": "6e1c465d0f29ba884c3dc1d6ba40267934b6c6a26caa423cc39908172ed2268d",
   "files": {
+    "LICENSE.txt": "0fe0b331fa1513dcce8604ff1fa925f32d1cea17d8aeb1c2471fad40d291adc5",
     "doctest/doctest.h": "cfd518a3ef90f67e1f3ba514df23fb3627437de1a2feeba78cf5062a40021421"
   }
 }

@@ -55,9 +55,15 @@ expect_configure_failure() {
   out="$(cmake --preset debug -B "$dir" "${extra[@]}" 2>&1)"
   status=$?
   set -e
-  [ "$status" -ne 0 ] || { printf '%s\n' "$out" | tail -n 8; fail "${label}: configure exited 0, expected a failure"; }
+  [ "$status" -ne 0 ] || {
+    printf '%s\n' "$out" | tail -n 8
+    fail "${label}: configure exited 0, expected a failure"
+  }
   for pat in "$@"; do
-    printf '%s\n' "$out" | grep -qF -- "$pat" || { printf '%s\n' "$out" | tail -n 12; fail "${label}: configure failed (exit ${status}) but its output lacks '${pat}'"; }
+    printf '%s\n' "$out" | grep -qF -- "$pat" || {
+      printf '%s\n' "$out" | tail -n 12
+      fail "${label}: configure failed (exit ${status}) but its output lacks '${pat}'"
+    }
   done
   echo "deps-provider-test ${provider}: ${label}: rejected (exit ${status}), output names: $*"
 }
@@ -113,7 +119,8 @@ if [ ! -f "$resolved" ]; then
   echo "deps-provider-test ${provider}: FAIL: ${resolved} was not written"
   exit 1
 fi
-got="$(python3 -I - "$resolved" <<'PY'
+got="$(
+  python3 -I - "$resolved" <<'PY'
 import json, sys
 doc = json.load(open(sys.argv[1]))
 rows = [r for r in doc["resolved"] if r["package"] == "doctest"]

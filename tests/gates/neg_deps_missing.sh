@@ -68,6 +68,6 @@ expect_failure "deleted header, ci defaults" "$header" "via vendored" "missing"
 
 cp "$root/$header" "$header"
 configure -DSL_DEPS_PROVIDERS=cpm
-expect_failure "SL_DEPS_PROVIDERS=cpm" "Providers tried" "- cpm: " "cpm provider unpinned"
+expect_failure "SL_DEPS_PROVIDERS=cpm" "Providers tried" "- cpm: " "SL_OFFLINE"
 
 echo "neg-deps-missing: ok (control exit 0; corrupt and deleted vendored header fail naming ${header} and vendored without fall-through; cpm lists providers tried)"

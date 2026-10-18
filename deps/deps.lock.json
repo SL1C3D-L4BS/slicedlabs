@@ -1,6 +1,6 @@
 {
   "schema": "sl-deps-lock/1",
-  "manifest_sha256": "c05ec0ca195c206dbcf73f5ec9699ebc6c19a7c667ea8e8311450b6e7648e143",
+  "manifest_sha256": "c1ee57c6140faffac913eefff50a3a36ba7911e806c76b00bb3341c25aaee0f7",
   "policy": {
     "providers": [
       "vendored",
@@ -56,11 +56,12 @@
           "dir": "third_party/doctest",
           "upstream": "https://raw.githubusercontent.com/doctest/doctest/v2.5.3/doctest/doctest.h",
           "provenance": "arch-repackage",
-          "verified_upstream": false,
+          "verified_upstream": true,
           "files": {
+            "LICENSE.txt": "0fe0b331fa1513dcce8604ff1fa925f32d1cea17d8aeb1c2471fad40d291adc5",
             "doctest/doctest.h": "cfd518a3ef90f67e1f3ba514df23fb3627437de1a2feeba78cf5062a40021421"
           },
-          "tree_sha256": "53a3fa7d0f61592830146c5457e4f0b62717b8512ac1dc91f40c1930a9201ec9"
+          "tree_sha256": "6e1c465d0f29ba884c3dc1d6ba40267934b6c6a26caa423cc39908172ed2268d"
         },
         "system": {
           "header": "doctest/doctest.h",
@@ -72,7 +73,7 @@
         "cpm": {
           "git": "https://github.com/doctest/doctest.git",
           "tag": "v2.5.3",
-          "url_hash": null,
+          "url_hash": "174ebc4e769928959614789c5b4e9c3d0a0f81a62bb608756b127bfebfb21331",
           "git_commit": null
         },
         "vcpkg": {
@@ -158,11 +159,12 @@
           "file": "CPM.cmake",
           "upstream": "https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.43.2/CPM.cmake",
           "provenance": "local-cache",
-          "verified_upstream": false,
+          "verified_upstream": true,
           "files": {
-            "CPM.cmake": "49a3bef91ceb65bb66d57255e12d1ffd22abc2f6408fa9fe4534c544a2f232aa"
+            "CPM.cmake": "49a3bef91ceb65bb66d57255e12d1ffd22abc2f6408fa9fe4534c544a2f232aa",
+            "LICENSE.txt": "b5c01e4c8c9c4a6e7c52cf3a6de3571a8ae26b7436a5675082d1a767d285070d"
           },
-          "tree_sha256": "8846067407893cce14827a9bd345b12c41f73f167d8b4f64e05ab50a444a481d"
+          "tree_sha256": "6d2ace4bc077d6e6d62fa72557db590b2867ea80a28fea0376853afbfa49e767"
         }
       }
     }

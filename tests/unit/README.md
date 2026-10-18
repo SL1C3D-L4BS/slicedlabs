@@ -1,3 +1,3 @@
 # tests/unit
 
-C++ unit tests: the `sl_tests` executable (doctest, resolved by `sl_require(doctest)`), registered as ctest test `sl_tests`. `smoke.cpp` carries the `main`. Run all with `just test`, or one with `just test <name>`.
+Unit tier (ctest label `unit`, default timeout 10 s): the `sl_tests` executable (doctest, resolved by `sl_require(doctest)`; `sl_add_test` generates the `main`), registered as ctest test `sl_tests` from `smoke.cpp`, `build_info_test.cpp` and the WO-030 diagnostics tests `log_test.cpp`, `error_test.cpp`, `assert_test.cpp` and `log_fixture.cpp` (`json_check.hpp` is a tiny JSON syntax checker for them). `log_fixture.cpp` silences the default logger for the run and, when `SL_LOG_JSON_PATH` names a file, writes every default-logger event there as JSON Lines (`just log-schema-check`). Run all tests with `just test`, one with `just test <name>`, this tier with `just test-tiers`. See `docs/testing/README.md`.
