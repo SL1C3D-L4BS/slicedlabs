@@ -1,0 +1,13 @@
+{
+  "schema": "sl-third-party-manifest/1",
+  "package": "doctest",
+  "version": "2.5.3",
+  "license": "MIT",
+  "upstream": "https://raw.githubusercontent.com/doctest/doctest/v2.5.3/doctest/doctest.h",
+  "provenance": "arch-repackage",
+  "verified_upstream": false,
+  "tree_sha256": "53a3fa7d0f61592830146c5457e4f0b62717b8512ac1dc91f40c1930a9201ec9",
+  "files": {
+    "doctest/doctest.h": "cfd518a3ef90f67e1f3ba514df23fb3627437de1a2feeba78cf5062a40021421"
+  }
+}

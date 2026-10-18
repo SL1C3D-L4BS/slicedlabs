@@ -1,0 +1,65 @@
+# vcpkg provider (WO-019, ADR-0002). Available only under vcpkg's own toolchain: CMAKE_TOOLCHAIN_FILE ends in
+# vcpkg.cmake and VCPKG_TARGET_TRIPLET is defined (the vcpkg-* presets also set VCPKG_MANIFEST_DIR=deps/vcpkg, so the
+# manifest and baseline are the ones `sldeps sync-vcpkg` generates from the lock). The port is found with
+# find_package(<port> CONFIG); the version it reports must equal the lock's version, else UNAVAILABLE. The found imported
+# target is wrapped by OUR target sl_dep_<pkg> (the lock's `cmake_package` / `cmake_target` members override the port name
+# and the <port>::<port> target). The recorded hash is the lock's baseline when pinned, else the sha256 of the
+# <port>Config.cmake that was found.
+# Contract: see the header of cmake/SlDeps.cmake.
+function(sl_deps_provider_vcpkg pkg pjson out_status out_detail out_hash)
+  set(${out_hash} "" PARENT_SCOPE)
+  if(NOT CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg\\.cmake$" OR NOT DEFINED VCPKG_TARGET_TRIPLET)
+    set(${out_status} UNAVAILABLE PARENT_SCOPE)
+    set(${out_detail} "vcpkg toolchain not active (VCPKG_ROOT unset or preset not vcpkg-*); founder installs it with `sudo pacman -S vcpkg` (after a full -Syu) and exports VCPKG_ROOT, then configures `cmake --preset vcpkg-debug`" PARENT_SCOPE)
+    return()
+  endif()
+
+  _sl_deps_jget(port "${pjson}" providers vcpkg port)
+  _sl_deps_jget(want "${pjson}" providers vcpkg version)
+  _sl_deps_jget(baseline "${pjson}" providers vcpkg baseline)
+  _sl_deps_jget(cmake_package "${pjson}" providers vcpkg cmake_package)
+  _sl_deps_jget(cmake_target "${pjson}" providers vcpkg cmake_target)
+  if(NOT port)
+    set(${out_status} UNAVAILABLE PARENT_SCOPE)
+    set(${out_detail} "the lock names no vcpkg port for ${pkg}" PARENT_SCOPE)
+    return()
+  endif()
+  if(NOT cmake_package)
+    set(cmake_package "${port}")
+  endif()
+  if(NOT cmake_target)
+    set(cmake_target "${cmake_package}::${cmake_package}")
+  endif()
+
+  # imported targets must be visible from every directory that links sl::<pkg>
+  set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON)
+  find_package("${cmake_package}" CONFIG QUIET)
+  if(NOT ${cmake_package}_FOUND)
+    set(${out_status} UNAVAILABLE PARENT_SCOPE)
+    set(${out_detail} "find_package(${cmake_package} CONFIG) found nothing under ${CMAKE_TOOLCHAIN_FILE} (triplet ${VCPKG_TARGET_TRIPLET})" PARENT_SCOPE)
+    return()
+  endif()
+  set(have "${${cmake_package}_VERSION}")
+  if(want AND NOT have STREQUAL want)
+    set(${out_status} UNAVAILABLE PARENT_SCOPE)
+    set(${out_detail} "vcpkg port ${port} is version '${have}', the lock wants '${want}' (${${cmake_package}_DIR})" PARENT_SCOPE)
+    return()
+  endif()
+  if(NOT TARGET "${cmake_target}")
+    set(${out_status} UNAVAILABLE PARENT_SCOPE)
+    set(${out_detail} "find_package(${cmake_package}) did not define ${cmake_target}" PARENT_SCOPE)
+    return()
+  endif()
+
+  if(baseline)
+    set(hash "${baseline}")
+  elseif(${cmake_package}_CONFIG)
+    file(SHA256 "${${cmake_package}_CONFIG}" hash)
+  else()
+    set(hash "${have}")
+  endif()
+  add_library(sl_dep_${pkg} INTERFACE IMPORTED GLOBAL)
+  target_link_libraries(sl_dep_${pkg} INTERFACE "${cmake_target}")
+  set(${out_status} OK PARENT_SCOPE)
+  set(${out_hash} "${hash}" PARENT_SCOPE)
+endfunction()

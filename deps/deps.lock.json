@@ -1,0 +1,170 @@
+{
+  "schema": "sl-deps-lock/1",
+  "manifest_sha256": "c05ec0ca195c206dbcf73f5ec9699ebc6c19a7c667ea8e8311450b6e7648e143",
+  "policy": {
+    "providers": [
+      "vendored",
+      "system",
+      "cpm",
+      "vcpkg"
+    ],
+    "provider_order": {
+      "ci": [
+        "vendored",
+        "cpm",
+        "system",
+        "vcpkg"
+      ],
+      "dev": [
+        "system",
+        "vendored",
+        "cpm",
+        "vcpkg"
+      ]
+    },
+    "tiers": {
+      "A": "content-addressed: vendored sha256, cpm url_hash or git_commit, vcpkg baseline plus override, system header accept_sha256",
+      "B": "range-pinned: minimum and tested version (Vulkan, slangc, SDL3, compilers)"
+    },
+    "licenses_allowed": [
+      "MIT",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "Zlib",
+      "BSL-1.0",
+      "Apache-2.0",
+      "MPL-2.0",
+      "ISC",
+      "Unlicense"
+    ],
+    "network": "never at configure",
+    "agents_never_fetch": true,
+    "update_cadence": "monthly or on CVE"
+  },
+  "packages": {
+    "doctest": {
+      "version": "2.5.3",
+      "license": "MIT",
+      "role": "test",
+      "tier": "A",
+      "used_by": [
+        "sl_tests"
+      ],
+      "target": "sl::doctest",
+      "providers": {
+        "vendored": {
+          "dir": "third_party/doctest",
+          "upstream": "https://raw.githubusercontent.com/doctest/doctest/v2.5.3/doctest/doctest.h",
+          "provenance": "arch-repackage",
+          "verified_upstream": false,
+          "files": {
+            "doctest/doctest.h": "cfd518a3ef90f67e1f3ba514df23fb3627437de1a2feeba78cf5062a40021421"
+          },
+          "tree_sha256": "53a3fa7d0f61592830146c5457e4f0b62717b8512ac1dc91f40c1930a9201ec9"
+        },
+        "system": {
+          "header": "doctest/doctest.h",
+          "pacman": "doctest",
+          "min": "2.5.3",
+          "tested": "2.5.3",
+          "accept_sha256": "cfd518a3ef90f67e1f3ba514df23fb3627437de1a2feeba78cf5062a40021421"
+        },
+        "cpm": {
+          "git": "https://github.com/doctest/doctest.git",
+          "tag": "v2.5.3",
+          "url_hash": null,
+          "git_commit": null
+        },
+        "vcpkg": {
+          "port": "doctest",
+          "version": "2.5.3",
+          "baseline": null
+        }
+      }
+    },
+    "vulkan": {
+      "version": null,
+      "license": "Apache-2.0",
+      "role": "sdk",
+      "tier": "B",
+      "used_by": [
+        "sl_core"
+      ],
+      "target": "sl::vulkan",
+      "providers": {
+        "system": {
+          "find_package": "Vulkan",
+          "min": "1.4.350",
+          "pacman": [
+            "vulkan-headers",
+            "vulkan-icd-loader",
+            "vulkan-validation-layers"
+          ],
+          "tested": "1.4.363",
+          "accept_sha256": null
+        }
+      }
+    },
+    "slang": {
+      "version": null,
+      "license": "Apache-2.0",
+      "role": "tool",
+      "tier": "B",
+      "used_by": [
+        "sl_shaders"
+      ],
+      "target": null,
+      "providers": {
+        "system": {
+          "program": "slangc",
+          "min": "2026.18",
+          "pacman": "shader-slang",
+          "tested": "2026.18.2",
+          "accept_sha256": null
+        }
+      }
+    },
+    "spirv-val": {
+      "version": null,
+      "license": "Apache-2.0",
+      "role": "tool",
+      "tier": "B",
+      "used_by": [
+        "sl_shaders"
+      ],
+      "target": null,
+      "providers": {
+        "system": {
+          "program": "spirv-val",
+          "min": "2024.1",
+          "pacman": "spirv-tools",
+          "tested": "2026.4",
+          "accept_sha256": null
+        }
+      }
+    },
+    "cpm": {
+      "version": "0.43.2",
+      "license": "MIT",
+      "role": "tool",
+      "tier": "A",
+      "used_by": [
+        "sl_deps"
+      ],
+      "target": null,
+      "providers": {
+        "vendored": {
+          "dir": "third_party/cpm",
+          "file": "CPM.cmake",
+          "upstream": "https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.43.2/CPM.cmake",
+          "provenance": "local-cache",
+          "verified_upstream": false,
+          "files": {
+            "CPM.cmake": "49a3bef91ceb65bb66d57255e12d1ffd22abc2f6408fa9fe4534c544a2f232aa"
+          },
+          "tree_sha256": "8846067407893cce14827a9bd345b12c41f73f167d8b4f64e05ab50a444a481d"
+        }
+      }
+    }
+  }
+}
