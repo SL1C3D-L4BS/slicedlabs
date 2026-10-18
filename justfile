@@ -564,13 +564,13 @@ fabric-vectors-check *args:
 neg-fabric-golden *args:
     @bash tests/gates/neg_fabric_golden.sh
 
-# owner WO-040
+# fabric-schema-check: every schemas/fabric/*.sltype.json validates against sl-type-def.schema.json, the released-version lock holds, ownership against the SL-ARCH-001 domain_registry; rules R-SCH-* and R-OWN-*; zero modules passes; `python3 -I tools/fabric/schema_check.py lock` pins unreleased versions (WO-040)
 fabric-schema-check *args:
-    @{{just_executable()}} stub fabric-schema-check
+    @python3 -I tools/fabric/schema_check.py check {{args}}
 
-# owner WO-040
+# negative test: editing a released field type fails fabric-schema-check naming R-SCH-RELEASED and the type, reusing a reserved field number names R-SCH-REUSE; the locked control copy passes (WO-040)
 neg-fabric-schema *args:
-    @{{just_executable()}} stub neg-fabric-schema
+    @bash tests/gates/neg_fabric_schema.sh
 
 # owner WO-041
 fabric-determinism *args:
