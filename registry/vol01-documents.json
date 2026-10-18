@@ -1,0 +1,188 @@
+{
+  "schema": "sl-vol01-documents/1",
+  "note": "Governed. The exact 20 Volume 01 documents, one authoring work order each, and the primary document and closing work order of each episode 001-020 (WO-005).",
+  "documents": [
+    {
+      "id": "SL-GOV-001",
+      "authoring_wo": "WO-006"
+    },
+    {
+      "id": "SL-GOV-002",
+      "authoring_wo": "WO-007"
+    },
+    {
+      "id": "SL-GOV-003",
+      "authoring_wo": "WO-008"
+    },
+    {
+      "id": "SL-GOV-004",
+      "authoring_wo": "WO-003"
+    },
+    {
+      "id": "SL-GOV-005",
+      "authoring_wo": "WO-009"
+    },
+    {
+      "id": "SL-GOV-006",
+      "authoring_wo": "WO-006"
+    },
+    {
+      "id": "SL-GOV-007",
+      "authoring_wo": "WO-009"
+    },
+    {
+      "id": "SL-GOV-008",
+      "authoring_wo": "WO-010"
+    },
+    {
+      "id": "SL-GOV-009",
+      "authoring_wo": "WO-010"
+    },
+    {
+      "id": "SL-GOV-010",
+      "authoring_wo": "WO-008"
+    },
+    {
+      "id": "SL-PLAN-001",
+      "authoring_wo": "WO-000"
+    },
+    {
+      "id": "SL-PLAN-002",
+      "authoring_wo": "WO-011"
+    },
+    {
+      "id": "SL-PLAN-004",
+      "authoring_wo": "WO-011"
+    },
+    {
+      "id": "SL-PLAN-005",
+      "authoring_wo": "WO-011"
+    },
+    {
+      "id": "SL-REG-001",
+      "authoring_wo": "WO-005"
+    },
+    {
+      "id": "SL-REG-002",
+      "authoring_wo": "WO-004"
+    },
+    {
+      "id": "SL-REG-003",
+      "authoring_wo": "WO-007"
+    },
+    {
+      "id": "SL-REG-004",
+      "authoring_wo": "WO-008"
+    },
+    {
+      "id": "SL-REG-006",
+      "authoring_wo": "WO-009"
+    },
+    {
+      "id": "SL-VOL-01-SPEC",
+      "authoring_wo": "WO-006"
+    }
+  ],
+  "episodes": [
+    {
+      "episode": "SL-EP-001",
+      "document": "SL-GOV-001",
+      "wo": "WO-006"
+    },
+    {
+      "episode": "SL-EP-002",
+      "document": "SL-GOV-010",
+      "wo": "WO-008"
+    },
+    {
+      "episode": "SL-EP-003",
+      "document": "SL-GOV-006",
+      "wo": "WO-006"
+    },
+    {
+      "episode": "SL-EP-004",
+      "document": "SL-GOV-002",
+      "wo": "WO-007"
+    },
+    {
+      "episode": "SL-EP-005",
+      "document": "SL-GOV-003",
+      "wo": "WO-008"
+    },
+    {
+      "episode": "SL-EP-006",
+      "document": "SL-GOV-003",
+      "wo": "WO-008"
+    },
+    {
+      "episode": "SL-EP-007",
+      "document": "SL-GOV-009",
+      "wo": "WO-010"
+    },
+    {
+      "episode": "SL-EP-008",
+      "document": "SL-GOV-007",
+      "wo": "WO-009"
+    },
+    {
+      "episode": "SL-EP-009",
+      "document": "SL-GOV-007",
+      "wo": "WO-009"
+    },
+    {
+      "episode": "SL-EP-010",
+      "document": "SL-PLAN-004",
+      "wo": "WO-011"
+    },
+    {
+      "episode": "SL-EP-011",
+      "document": "SL-GOV-002",
+      "wo": "WO-007"
+    },
+    {
+      "episode": "SL-EP-012",
+      "document": "SL-GOV-004",
+      "wo": "WO-003"
+    },
+    {
+      "episode": "SL-EP-013",
+      "document": "SL-GOV-005",
+      "wo": "WO-009"
+    },
+    {
+      "episode": "SL-EP-014",
+      "document": "SL-GOV-008",
+      "wo": "WO-010"
+    },
+    {
+      "episode": "SL-EP-015",
+      "document": "SL-GOV-008",
+      "wo": "WO-010"
+    },
+    {
+      "episode": "SL-EP-016",
+      "document": "SL-GOV-009",
+      "wo": "WO-010"
+    },
+    {
+      "episode": "SL-EP-017",
+      "document": "SL-GOV-003",
+      "wo": "WO-008"
+    },
+    {
+      "episode": "SL-EP-018",
+      "document": "SL-PLAN-002",
+      "wo": "WO-011"
+    },
+    {
+      "episode": "SL-EP-019",
+      "document": "SL-REG-003",
+      "wo": "WO-007"
+    },
+    {
+      "episode": "SL-EP-020",
+      "document": "SL-GOV-001",
+      "wo": "WO-023"
+    }
+  ]
+}
