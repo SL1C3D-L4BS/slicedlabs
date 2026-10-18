@@ -572,13 +572,20 @@ fabric-schema-check *args:
 neg-fabric-schema *args:
     @bash tests/gates/neg_fabric_schema.sh
 
-# owner WO-041
+# fabric-determinism: build sl_fabric_corpus with presets debug (clang) and gcc-debug, encode tests/fixtures/fabric/slb/accept.json with each into build/fabric/corpus-{clang,gcc}.json, then tools/fabric/determinism.py requires the two byte-identical and equal to accept.json (hex, oid, text), naming the first differing vector (R-DET-*) (WO-041, FAB-INV-SER-04)
 fabric-determinism *args:
-    @{{just_executable()}} stub fabric-determinism
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug --target sl_fabric_corpus
+    @cmake --preset gcc-debug >/dev/null
+    @cmake --build --preset gcc-debug --target sl_fabric_corpus
+    @mkdir -p build/fabric
+    @build/debug/engine/fabric/tools/sl_fabric_corpus tests/fixtures/fabric/slb/accept.json build/fabric/corpus-clang.json
+    @build/gcc-debug/engine/fabric/tools/sl_fabric_corpus tests/fixtures/fabric/slb/accept.json build/fabric/corpus-gcc.json
+    @python3 -I tools/fabric/determinism.py build/fabric/corpus-clang.json build/fabric/corpus-gcc.json tests/fixtures/fabric/slb/accept.json
 
-# owner WO-041
+# negative test: a copy of the corpus output with one vector's hex changed in the gcc copy fails fabric-determinism naming R-DET-COMPILER and the vector, a text changed in both copies names R-DET-CORPUS and the vector; the identical control copies pass (WO-041)
 neg-fabric-determinism *args:
-    @{{just_executable()}} stub neg-fabric-determinism
+    @bash tests/gates/neg_fabric_determinism.sh
 
 # owner WO-045
 fabric-gen-check *args:
