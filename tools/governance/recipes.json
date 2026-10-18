@@ -500,11 +500,11 @@
     },
     "fabric-event-schema-check": {
       "owner": "WO-047",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-event-schema": {
       "owner": "WO-047",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-ownership-check": {
       "owner": "WO-048",
