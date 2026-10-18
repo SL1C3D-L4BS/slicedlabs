@@ -536,11 +536,11 @@
     },
     "fabric-fsck": {
       "owner": "WO-059",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-fsck": {
       "owner": "WO-059",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-conformance": {
       "owner": "WO-062",

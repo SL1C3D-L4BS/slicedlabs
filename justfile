@@ -644,13 +644,17 @@ fabric-soak iters='5':
     @cmake --build --preset debug --target fabric_recovery_crash_sweep_test
     @for i in $(seq 1 {{iters}}); do seed=$(od -An -N4 -tu4 /dev/urandom | tr -d ' '); echo "fabric-soak: iteration $i seed $seed"; SL_FABRIC_SOAK_SEED=$seed ctest --preset debug -R '^fabric_recovery_crash_sweep_test$' --no-tests=error --output-on-failure || { echo "fabric-soak: FAIL seed $seed (rerun: SL_FABRIC_SOAK_SEED=$seed ctest --preset debug -R '^fabric_recovery_crash_sweep_test$')"; exit 1; }; done; echo "fabric-soak: ok, {{iters}} random seeds"
 
-# owner WO-059
+# fabric-fsck: build preset debug, write the deterministic sample store build/fabric/fsck-store with sl_fabric_mkstore (replacing an old one) and check it with sl_fabric_fsck, which must exit 0 (no finding); args go to sl_fabric_fsck (WO-059, FAB-INV-COR-06)
 fabric-fsck *args:
-    @{{just_executable()}} stub fabric-fsck
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug --target sl_fabric_mkstore sl_fabric_fsck >/dev/null
+    @rm -rf build/fabric/fsck-store
+    @build/debug/engine/fabric/tools/sl_fabric_mkstore build/fabric/fsck-store
+    @build/debug/engine/fabric/tools/sl_fabric_fsck {{args}} build/fabric/fsck-store
 
-# owner WO-059
+# negative test: one byte flipped inside an object frame of a fresh sample store makes sl_fabric_fsck exit 1 naming that object id; the unflipped control store exits 0 (WO-059, FAB-INV-COR-06)
 neg-fabric-fsck *args:
-    @{{just_executable()}} stub neg-fabric-fsck
+    @bash tests/gates/neg_fabric_fsck.sh
 
 # owner WO-062
 fabric-conformance *args:
