@@ -153,7 +153,9 @@ def check_document(text, label, filename):
         limit = int(meta["max_lines"])
     count = len(text.splitlines())
     if count > limit:
-        errors.append("%s:1: R-DOC-LENGTH: %d lines exceed the limit of %d (set max_lines to change it)" % (label, count, limit))
+        errors.append(
+            "%s:1: R-DOC-LENGTH: %d lines exceed the limit of %d (set max_lines to change it)" % (label, count, limit)
+        )
     return errors
 
 

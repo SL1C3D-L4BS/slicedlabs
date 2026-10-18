@@ -90,12 +90,15 @@ def render(root):
         "## Normative text",
         "",
         "- GOV4-R01: An ADR MUST be added when a change alters a locked decision (master plan section 6.3 rule 3).",
-        "- GOV4-R02: This file MUST be regenerated, not hand-edited, and `adr-check` MUST fail when it is stale (ADR-0004).",
-        "- GOV4-R03: An ADR id MUST NOT be reused or renumbered; a replacement supersedes the old ADR (master plan section 6.3 rule 2).",
+        "- GOV4-R02: This file MUST be regenerated, not hand-edited, and `adr-check` MUST fail when it is stale "
+        "(ADR-0004).",
+        "- GOV4-R03: An ADR id MUST NOT be reused or renumbered; a replacement supersedes the old ADR (master plan "
+        "section 6.3 rule 2).",
         "",
         "## Measures and enforcement points",
         "",
-        "- GOV4-R01 to GOV4-R03: `just adr-check` validates every ADR file and compares this file with the generator output.",
+        "- GOV4-R01 to GOV4-R03: `just adr-check` validates every ADR file and compares this file with the generator "
+        "output.",
         "- Regenerate with `python3 -I tools/governance/cmd_gen_adr_log.py`.",
         "",
         "## Traceability",

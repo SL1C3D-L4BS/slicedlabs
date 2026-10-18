@@ -37,10 +37,17 @@ CITATION_RE = re.compile(
 
 
 def sections_error(text, label):
-    names = [line[3:].strip() for _, line, in_fence in cmd_check_docs.body_lines(text) if not in_fence and line.startswith("## ")]
+    names = [
+        line[3:].strip()
+        for _, line, in_fence in cmd_check_docs.body_lines(text)
+        if not in_fence and line.startswith("## ")
+    ]
     if names == list(SECTIONS):
         return []
-    return ["%s:1: R-ADR-SECTION: sections must be %s, in order; found %s" % (label, " / ".join(SECTIONS), ", ".join(names) or "none")]
+    return [
+        "%s:1: R-ADR-SECTION: sections must be %s, in order; found %s"
+        % (label, " / ".join(SECTIONS), ", ".join(names) or "none")
+    ]
 
 
 def check_one(name, text):
@@ -76,7 +83,9 @@ def check_one(name, text):
         elif key == "decision_refs":
             for ref in value:
                 if not REF_RE.match(ref):
-                    errors.append("%s:1: R-ADR-FRONT: decision_refs entry %r must look like D-126 or ADR-0001" % (label, ref))
+                    errors.append(
+                        "%s:1: R-ADR-FRONT: decision_refs entry %r must look like D-126 or ADR-0001" % (label, ref)
+                    )
     errors += sections_error(text, label)
     errors += cmd_check_docs.citation_errors(text, label, CITATION_RE, "R-ADR-CITE")
     count = len(text.splitlines())
@@ -112,7 +121,10 @@ def adr_errors(root):
             elif target not in ids:
                 errors.append("%s: supersedes %s, which does not exist in docs/adr" % (label, target))
             elif ids[target]["status"] != "Superseded":
-                errors.append("%s: %s is superseded by %s but its status is %s" % (label, target, meta["id"], ids[target]["status"]))
+                errors.append(
+                    "%s: %s is superseded by %s but its status is %s"
+                    % (label, target, meta["id"], ids[target]["status"])
+                )
     if "ADR-0001" not in ids:
         errors.append("docs/adr:1: R-ADR-0001: ADR-0001 (repository layout) is missing")
     log_path = os.path.join(root, *cmd_gen_adr_log.LOG_REL.split("/"))

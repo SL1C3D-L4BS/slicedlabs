@@ -9,7 +9,7 @@ owner: founder
 episodes: []
 depends_on: []
 supersedes: []
-decisions: [ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008]
+decisions: [ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009]
 max_lines: 400
 ---
 # SL-GOV-004: Architecture Decision Record log
@@ -31,6 +31,7 @@ and registries). It is generated from `docs/adr/`; edit an ADR, then regenerate.
 | [ADR-0006](../adr/ADR-0006-windows-parity.md) | Windows parity is verified structurally on Linux | Proposed | 2026-10-17 | none | none |
 | [ADR-0007](../adr/ADR-0007-factory-manual-mode.md) | Factory manual mode until wo-pipeline and land exist | Proposed | 2026-10-17 | none | none |
 | [ADR-0008](../adr/ADR-0008-conditional-decisions.md) | Conditional decisions: ADR seeds from the Engine Constitution | Proposed | 2026-10-17 | none | none |
+| [ADR-0009](../adr/ADR-0009-error-handling.md) | Errors are values: std::expected in engine code, assertions abort | Proposed | 2026-10-17 | none | none |
 
 ## Normative text
 
