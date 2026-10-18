@@ -1,0 +1,419 @@
+{
+  "schema": "sl-reg-004/1",
+  "capabilities": [
+    {
+      "id": "CAP-01-SHELL",
+      "subsystem": "01",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-004",
+      "introduced_in": "SL-EP-101",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-02-FABRIC",
+      "subsystem": "02",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-001",
+      "introduced_in": "SL-EP-061",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-03-RUNTIME-CORE",
+      "subsystem": "03",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-003",
+      "introduced_in": "SL-EP-081",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-04-GRAPHICS-COMPUTE",
+      "subsystem": "04",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-005",
+      "introduced_in": "SL-EP-121",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-05-CONTENT-PRODUCTION",
+      "subsystem": "05",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-009",
+      "introduced_in": "SL-EP-201",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-06-SIMULATION-GAMEPLAY",
+      "subsystem": "06",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-010",
+      "introduced_in": "SL-EP-281",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-07-CODE-GRAPH-TOOLCHAIN",
+      "subsystem": "07",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-014",
+      "introduced_in": "SL-EP-361",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-08-ASSET-BUILD-GRAPH",
+      "subsystem": "08",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-008",
+      "introduced_in": "SL-EP-181",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-09-OBSERVABILITY-REPLAY",
+      "subsystem": "09",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-011",
+      "introduced_in": "SL-EP-301",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-10-COLLABORATION-HISTORY",
+      "subsystem": "10",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-013",
+      "introduced_in": "SL-EP-341",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-11-VERIFICATION-DELIVERY",
+      "subsystem": "11",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-008",
+      "introduced_in": "SL-EP-401",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-12-GOVERNED-AUTOMATION",
+      "subsystem": "12",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-015",
+      "introduced_in": "SL-EP-381",
+      "unreal_counterpart": null,
+      "src": "SL-PLAN-001 §2.2"
+    },
+    {
+      "id": "CAP-04-CLUSTER-GEOMETRY",
+      "subsystem": "04",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-018",
+      "introduced_in": "SL-EP-521",
+      "unreal_counterpart": "Nanite virtualized geometry",
+      "src": "SL-PLAN-001 §2.7 row 1"
+    },
+    {
+      "id": "CAP-04-RADIANCE",
+      "subsystem": "04",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-018",
+      "introduced_in": "SL-EP-521",
+      "unreal_counterpart": "Lumen dynamic GI and reflections",
+      "src": "SL-PLAN-001 §2.7 row 2"
+    },
+    {
+      "id": "CAP-04-VIRTUAL-SHADOWS",
+      "subsystem": "04",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-018",
+      "introduced_in": "SL-EP-521",
+      "unreal_counterpart": "Virtual Shadow Maps",
+      "src": "SL-PLAN-001 §2.7 row 3"
+    },
+    {
+      "id": "CAP-04-TEMPORAL-UPSCALER",
+      "subsystem": "04",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-019",
+      "introduced_in": "SL-EP-541",
+      "unreal_counterpart": "Temporal Super Resolution",
+      "src": "SL-PLAN-001 §2.7 row 4"
+    },
+    {
+      "id": "CAP-04-LAYERED-MATERIALS",
+      "subsystem": "04",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-007",
+      "introduced_in": "SL-EP-161",
+      "unreal_counterpart": "Substrate materials",
+      "src": "SL-PLAN-001 §2.7 row 5"
+    },
+    {
+      "id": "CAP-04-PATH-TRACER",
+      "subsystem": "04",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-019",
+      "introduced_in": "SL-EP-541",
+      "unreal_counterpart": "Path tracer, Movie Render Queue",
+      "src": "SL-PLAN-001 §2.7 row 6"
+    },
+    {
+      "id": "CAP-05-TERRAIN-WATER",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-020",
+      "introduced_in": "SL-EP-561",
+      "unreal_counterpart": "Landscape, Water",
+      "src": "SL-PLAN-001 §2.7 row 7"
+    },
+    {
+      "id": "CAP-03-WORLD-STREAMING",
+      "subsystem": "03",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-020",
+      "introduced_in": "SL-EP-561",
+      "unreal_counterpart": "World Partition, One File Per Actor",
+      "src": "SL-PLAN-001 §2.7 row 8"
+    },
+    {
+      "id": "CAP-05-PROCEDURAL-GRAPHS",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-020",
+      "introduced_in": "SL-EP-561",
+      "unreal_counterpart": "PCG framework",
+      "src": "SL-PLAN-001 §2.7 row 9"
+    },
+    {
+      "id": "CAP-05-VFX-GRAPH",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-009",
+      "introduced_in": "SL-EP-261",
+      "unreal_counterpart": "Niagara",
+      "src": "SL-PLAN-001 §2.7 row 10"
+    },
+    {
+      "id": "CAP-06-PHYSICS-DESTRUCTION",
+      "subsystem": "06",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-010",
+      "introduced_in": "SL-EP-281",
+      "unreal_counterpart": "Chaos physics, destruction, cloth",
+      "src": "SL-PLAN-001 §2.7 row 11"
+    },
+    {
+      "id": "CAP-05-STRANDS",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-021",
+      "introduced_in": "SL-EP-581",
+      "unreal_counterpart": "Groom hair",
+      "src": "SL-PLAN-001 §2.7 row 12"
+    },
+    {
+      "id": "CAP-05-DIGITAL-HUMANS",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-021",
+      "introduced_in": "SL-EP-581",
+      "unreal_counterpart": "MetaHuman",
+      "src": "SL-PLAN-001 §2.7 row 13"
+    },
+    {
+      "id": "CAP-05-RIG-GRAPH",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-009",
+      "introduced_in": "SL-EP-241",
+      "unreal_counterpart": "Control Rig, IK Retargeter",
+      "src": "SL-PLAN-001 §2.7 row 14"
+    },
+    {
+      "id": "CAP-05-MOTION-MATCHING",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-021",
+      "introduced_in": "SL-EP-581",
+      "unreal_counterpart": "Motion Matching, Pose Search",
+      "src": "SL-PLAN-001 §2.7 row 15"
+    },
+    {
+      "id": "CAP-05-CUSTOMIZATION-GRAPHS",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-021",
+      "introduced_in": "SL-EP-581",
+      "unreal_counterpart": "Mutable character customization",
+      "src": "SL-PLAN-001 §2.7 row 16"
+    },
+    {
+      "id": "CAP-05-SEQUENCER",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-009",
+      "introduced_in": "SL-EP-241",
+      "unreal_counterpart": "Sequencer",
+      "src": "SL-PLAN-001 §2.7 row 17"
+    },
+    {
+      "id": "CAP-07-TYPED-GRAPHS",
+      "subsystem": "07",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-014",
+      "introduced_in": "SL-EP-361",
+      "unreal_counterpart": "Blueprints",
+      "src": "SL-PLAN-001 §2.7 row 18"
+    },
+    {
+      "id": "CAP-07-LUAU-CREATOR-RUNTIME",
+      "subsystem": "07",
+      "boundary": "plugin",
+      "interface_doc": "SL-ARCH-014",
+      "introduced_in": "SL-EP-361",
+      "unreal_counterpart": "Verse / UEFN",
+      "src": "SL-PLAN-001 §2.7 row 19"
+    },
+    {
+      "id": "CAP-01-UI-FRAMEWORK",
+      "subsystem": "01",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-004",
+      "introduced_in": "SL-EP-101",
+      "unreal_counterpart": "UMG / Slate",
+      "src": "SL-PLAN-001 §2.7 row 20"
+    },
+    {
+      "id": "CAP-05-SOUND-GRAPHS",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-009",
+      "introduced_in": "SL-EP-261",
+      "unreal_counterpart": "MetaSounds",
+      "src": "SL-PLAN-001 §2.7 row 21"
+    },
+    {
+      "id": "CAP-03-ARCHETYPE-ECS",
+      "subsystem": "03",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-003",
+      "introduced_in": "SL-EP-081",
+      "unreal_counterpart": "Mass Entity",
+      "src": "SL-PLAN-001 §2.7 row 22"
+    },
+    {
+      "id": "CAP-06-ABILITIES",
+      "subsystem": "06",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-023",
+      "introduced_in": "SL-EP-621",
+      "unreal_counterpart": "Gameplay Ability System",
+      "src": "SL-PLAN-001 §2.7 row 23"
+    },
+    {
+      "id": "CAP-06-REPLICATION-ONLINE",
+      "subsystem": "06",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-010",
+      "introduced_in": "SL-EP-281",
+      "unreal_counterpart": "Iris replication, Online Subsystem, EOS",
+      "src": "SL-PLAN-001 §2.7 row 24"
+    },
+    {
+      "id": "CAP-07-HOT-RELOAD",
+      "subsystem": "07",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-014",
+      "introduced_in": "SL-EP-361",
+      "unreal_counterpart": "Live Coding",
+      "src": "SL-PLAN-001 §2.7 row 25"
+    },
+    {
+      "id": "CAP-09-INSIGHTS",
+      "subsystem": "09",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-011",
+      "introduced_in": "SL-EP-301",
+      "unreal_counterpart": "Unreal Insights",
+      "src": "SL-PLAN-001 §2.7 row 26"
+    },
+    {
+      "id": "CAP-10-NATIVE-COLLABORATION",
+      "subsystem": "10",
+      "boundary": "core",
+      "interface_doc": "SL-ARCH-013",
+      "introduced_in": "SL-EP-341",
+      "unreal_counterpart": "Multi-User Editing, Concert",
+      "src": "SL-PLAN-001 §2.7 row 27"
+    },
+    {
+      "id": "CAP-08-BUILD-FARM-CAS",
+      "subsystem": "08",
+      "boundary": "hosted",
+      "interface_doc": "SL-ARCH-008",
+      "introduced_in": "SL-EP-181",
+      "unreal_counterpart": "Horde, Zen storage",
+      "src": "SL-PLAN-001 §2.7 row 28"
+    },
+    {
+      "id": "CAP-08-INTERCHANGE",
+      "subsystem": "08",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-028",
+      "introduced_in": "SL-EP-761",
+      "unreal_counterpart": "Datasmith, USD",
+      "src": "SL-PLAN-001 §2.7 row 29"
+    },
+    {
+      "id": "CAP-05-LIVE-LINK",
+      "subsystem": "05",
+      "boundary": "plugin",
+      "interface_doc": "SL-ARCH-028",
+      "introduced_in": "SL-EP-761",
+      "unreal_counterpart": "Live Link",
+      "src": "SL-PLAN-001 §2.7 row 30"
+    },
+    {
+      "id": "CAP-05-STAGE",
+      "subsystem": "05",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-029",
+      "introduced_in": "SL-EP-781",
+      "unreal_counterpart": "nDisplay, virtual production",
+      "src": "SL-PLAN-001 §2.7 row 31"
+    },
+    {
+      "id": "CAP-11-STREAM",
+      "subsystem": "11",
+      "boundary": "hosted",
+      "interface_doc": "SL-ARCH-025",
+      "introduced_in": "SL-EP-701",
+      "unreal_counterpart": "Pixel Streaming",
+      "src": "SL-PLAN-001 §2.7 row 32"
+    },
+    {
+      "id": "CAP-11-MARKETPLACE",
+      "subsystem": "11",
+      "boundary": "hosted",
+      "interface_doc": "SL-ARCH-027",
+      "introduced_in": "SL-EP-741",
+      "unreal_counterpart": "Fab marketplace, Quixel library",
+      "src": "SL-PLAN-001 §2.7 row 33"
+    },
+    {
+      "id": "CAP-11-REFERENCE-GAMES",
+      "subsystem": "11",
+      "boundary": "module",
+      "interface_doc": "SL-ARCH-023",
+      "introduced_in": "SL-EP-481",
+      "unreal_counterpart": "Lyra sample game",
+      "src": "SL-PLAN-001 §2.7 row 34"
+    }
+  ]
+}
