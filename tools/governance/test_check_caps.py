@@ -22,7 +22,9 @@ PARITY = read(caps.PARITY_REL)
 REG = slib.load_json(os.path.join(slgov.ROOT, *caps.REGISTER_REL.split("/")))
 SUBS = caps.plan_subsystems(PLAN)
 ROWS = caps.plan_parity(PLAN)
-DOC_IDS = {d["id"] for d in slib.load_json(os.path.join(slgov.ROOT, "registry", "SL-REG-001-documents.json"))["documents"]}
+DOC_IDS = {
+    d["id"] for d in slib.load_json(os.path.join(slgov.ROOT, "registry", "SL-REG-001-documents.json"))["documents"]
+}
 EP_IDS = {e["id"] for e in slib.load_json(os.path.join(slgov.ROOT, "registry", "SL-REG-002-episodes.json"))["episodes"]}
 
 
@@ -107,7 +109,9 @@ class CoverageTests(unittest.TestCase):
         self.assertTrue(any("no sl-data block" in e for e in caps.ontology_errors("# none\n")))
 
     def test_boundary_classes_must_match_episode_006(self):
-        text = ONTOLOGY.replace('{"class": "hosted", "plan_words": "hosted services"}', '{"class": "cloud", "plan_words": "x"}')
+        text = ONTOLOGY.replace(
+            '{"class": "hosted", "plan_words": "hosted services"}', '{"class": "cloud", "plan_words": "x"}'
+        )
         self.assertTrue(any("R-CAP-ONTOLOGY" in e for e in caps.ontology_errors(text)))
 
 

@@ -100,7 +100,9 @@ def shape_errors(reg, label=REGISTER_REL):
         missing = [k for k in KEYS if k not in cap]
         extra = [k for k in cap if k not in KEYS]
         if missing or extra:
-            errors.append("%s: %s: %s keys: missing %s, unexpected %s" % (label, rule, where, missing or "none", extra or "none"))
+            errors.append(
+                "%s: %s: %s keys: missing %s, unexpected %s" % (label, rule, where, missing or "none", extra or "none")
+            )
             continue
         cid = cap["id"]
         where = str(cid)
@@ -108,12 +110,18 @@ def shape_errors(reg, label=REGISTER_REL):
         if not m:
             errors.append("%s: %s: %s: id must look like CAP-04-NAME" % (label, rule, where))
         elif m.group(1) != cap["subsystem"]:
-            errors.append("%s: %s: %s: id subsystem %s differs from subsystem %r" % (label, rule, where, m.group(1), cap["subsystem"]))
+            errors.append(
+                "%s: %s: %s: id subsystem %s differs from subsystem %r"
+                % (label, rule, where, m.group(1), cap["subsystem"])
+            )
         if cid in seen:
             errors.append("%s: %s: duplicate id %s" % (label, rule, cid))
         seen.add(cid)
         if cap["boundary"] not in BOUNDARIES:
-            errors.append("%s: %s: %s: boundary %r must be one of %s" % (label, rule, where, cap["boundary"], "|".join(BOUNDARIES)))
+            errors.append(
+                "%s: %s: %s: boundary %r must be one of %s"
+                % (label, rule, where, cap["boundary"], "|".join(BOUNDARIES))
+            )
         for k in ("subsystem", "interface_doc", "introduced_in", "src"):
             if not _is_str(cap[k]):
                 errors.append("%s: %s: %s: %s must be a non-empty string" % (label, rule, where, k))
@@ -131,7 +139,10 @@ def ref_errors(reg, doc_ids, episode_ids, label=REGISTER_REL):
             errors.append("%s: R-CAP-SUBSYS: %s: subsystem %r is not 01-12" % (label, cid, cap["subsystem"]))
         doc = cap["interface_doc"]
         if not ARCH_RE.match(str(doc)) or doc not in doc_ids:
-            errors.append("%s: R-CAP-DOC: %s: interface_doc %r is not an SL-ARCH document registered in SL-REG-001" % (label, cid, doc))
+            errors.append(
+                "%s: R-CAP-DOC: %s: interface_doc %r is not an SL-ARCH document registered in SL-REG-001"
+                % (label, cid, doc)
+            )
         ep = cap["introduced_in"]
         if not EP_RE.match(str(ep)) or ep not in episode_ids:
             errors.append("%s: R-CAP-EP: %s: introduced_in %r is not an episode of SL-REG-002" % (label, cid, ep))
@@ -150,7 +161,10 @@ def subsystem_errors(reg, plan_subs, doc_text, label=REGISTER_REL, doc_rel=ONTOL
     for row in plan_subs:
         found = by_src.get(row["n"], [])
         if len(found) != 1:
-            errors.append("%s: %s: subsystem %s (%s) needs exactly one capability with src '%s', has %d" % (label, rule, row["n"], row["name"], SRC_SUBSYS, len(found)))
+            errors.append(
+                "%s: %s: subsystem %s (%s) needs exactly one capability with src '%s', has %d"
+                % (label, rule, row["n"], row["name"], SRC_SUBSYS, len(found))
+            )
     block, errs = cc._block_with(doc_text, doc_rel, rule, "subsystems")
     errors += errs
     if block is None:
@@ -159,14 +173,22 @@ def subsystem_errors(reg, plan_subs, doc_text, label=REGISTER_REL, doc_rel=ONTOL
     if not isinstance(have, list) or not all(isinstance(r, dict) for r in have):
         return errors + ["%s: %s: 'subsystems' must be a list of objects" % (doc_rel, rule)]
     if len(have) != len(plan_subs):
-        errors.append("%s: %s: %d subsystems, master plan section 2.2 has %d" % (doc_rel, rule, len(have), len(plan_subs)))
+        errors.append(
+            "%s: %s: %d subsystems, master plan section 2.2 has %d" % (doc_rel, rule, len(have), len(plan_subs))
+        )
     ids = {c["id"] for c in reg["capabilities"]}
     for row, got in zip(plan_subs, have):
         for key in ("n", "name", "owns", "derives"):
             if not isinstance(got.get(key), str) or cc.norm(got[key]) != row[key]:
-                errors.append("%s: %s: subsystem %s.%s is %r, plan has %r" % (doc_rel, rule, row["n"], key, got.get(key), row[key]))
+                errors.append(
+                    "%s: %s: subsystem %s.%s is %r, plan has %r"
+                    % (doc_rel, rule, row["n"], key, got.get(key), row[key])
+                )
         if got.get("capability") not in ids:
-            errors.append("%s: %s: subsystem %s names capability %r, which is not in the register" % (doc_rel, rule, row["n"], got.get("capability")))
+            errors.append(
+                "%s: %s: subsystem %s names capability %r, which is not in the register"
+                % (doc_rel, rule, row["n"], got.get("capability"))
+            )
     return errors
 
 
@@ -182,7 +204,10 @@ def parity_errors(reg, plan_rows, doc_text, label=REGISTER_REL, doc_rel=PARITY_R
     for row in plan_rows:
         found = by_counterpart.get(row["unreal"], [])
         if len(found) != 1:
-            errors.append("%s: %s: section 2.7 row %d (%s) needs exactly one capability, has %d" % (label, rule, row["n"], row["unreal"], len(found)))
+            errors.append(
+                "%s: %s: section 2.7 row %d (%s) needs exactly one capability, has %d"
+                % (label, rule, row["n"], row["unreal"], len(found))
+            )
             continue
         want = "SL-PLAN-001 §2.7 row %d" % row["n"]
         if found[0]["src"] != want:
@@ -194,7 +219,10 @@ def parity_errors(reg, plan_rows, doc_text, label=REGISTER_REL, doc_rel=PARITY_R
     for cap in reg["capabilities"]:
         m = SRC_ROW_RE.match(cap["src"])
         if m and (cap["unreal_counterpart"] is None or not 1 <= int(m.group(1)) <= len(plan_rows)):
-            errors.append("%s: %s: %s: src %r does not point at a section 2.7 row with a counterpart" % (label, rule, cap["id"], cap["src"]))
+            errors.append(
+                "%s: %s: %s: src %r does not point at a section 2.7 row with a counterpart"
+                % (label, rule, cap["id"], cap["src"])
+            )
     block, errs = cc._block_with(doc_text, doc_rel, rule, "rows")
     errors += errs
     if block is None:
@@ -210,12 +238,20 @@ def parity_errors(reg, plan_rows, doc_text, label=REGISTER_REL, doc_rel=PARITY_R
     for want, got in zip(plan_rows, rows):
         for key in ("unreal", "sliced", "obligation"):
             if not isinstance(got.get(key), str) or cc.norm(got[key]) != want[key]:
-                errors.append("%s: %s: row %d.%s is %r, plan has %r" % (doc_rel, rule, want["n"], key, got.get(key), want[key]))
+                errors.append(
+                    "%s: %s: row %d.%s is %r, plan has %r" % (doc_rel, rule, want["n"], key, got.get(key), want[key])
+                )
         if got.get("n") != want["n"] or got.get("volumes") != want["volumes"]:
-            errors.append("%s: %s: row %d n/volumes are %r/%r, plan has %r/%r" % (doc_rel, rule, want["n"], got.get("n"), got.get("volumes"), want["n"], want["volumes"]))
+            errors.append(
+                "%s: %s: row %d n/volumes are %r/%r, plan has %r/%r"
+                % (doc_rel, rule, want["n"], got.get("n"), got.get("volumes"), want["n"], want["volumes"])
+            )
         cap = (by_counterpart.get(want["unreal"]) or [None])[0]
         if cap is None or got.get("capability") != cap["id"]:
-            errors.append("%s: %s: row %d capability is %r, register has %r" % (doc_rel, rule, want["n"], got.get("capability"), cap and cap["id"]))
+            errors.append(
+                "%s: %s: row %d capability is %r, register has %r"
+                % (doc_rel, rule, want["n"], got.get("capability"), cap and cap["id"])
+            )
     return errors
 
 
@@ -224,9 +260,15 @@ def ontology_errors(doc_text, doc_rel=ONTOLOGY_REL):
     block, errors = cc._block_with(doc_text, doc_rel, rule, "boundaries")
     if block is None:
         return errors
-    classes = [b.get("class") for b in block["boundaries"] if isinstance(b, dict)] if isinstance(block["boundaries"], list) else None
+    classes = (
+        [b.get("class") for b in block["boundaries"] if isinstance(b, dict)]
+        if isinstance(block["boundaries"], list)
+        else None
+    )
     if classes != list(BOUNDARIES):
-        errors.append("%s: %s: 'boundaries' must list %s in order, has %r" % (doc_rel, rule, "|".join(BOUNDARIES), classes))
+        errors.append(
+            "%s: %s: 'boundaries' must list %s in order, has %r" % (doc_rel, rule, "|".join(BOUNDARIES), classes)
+        )
     ext = block.get("extensibility")
     if not isinstance(ext, list) or not ext or not all(_is_str(x) for x in ext):
         errors.append("%s: %s: 'extensibility' must be a non-empty list of strings" % (doc_rel, rule))
@@ -249,7 +291,10 @@ def claim_errors(text, label, obligations=(), strip_quotes=True):
             scan = QUOTED_RE.sub("", scan)
         m = CLAIM_RE.search(scan)
         if m:
-            errors.append("%s:%d: R-CAP-CLAIM: %r is a parity claim; record an obligation to measure (Volume 41) instead" % (label, n, m.group(0)))
+            errors.append(
+                "%s:%d: R-CAP-CLAIM: %r is a parity claim; record an obligation to measure (Volume 41) instead"
+                % (label, n, m.group(0))
+            )
     return errors
 
 
@@ -266,7 +311,11 @@ def _strings(node):
 
 
 def register_claim_errors(reg, label=REGISTER_REL):
-    return ["%s: R-CAP-CLAIM: %r is a parity claim" % (label, CLAIM_RE.search(s).group(0)) for s in _strings(reg) if CLAIM_RE.search(s)]
+    return [
+        "%s: R-CAP-CLAIM: %r is a parity claim" % (label, CLAIM_RE.search(s).group(0))
+        for s in _strings(reg)
+        if CLAIM_RE.search(s)
+    ]
 
 
 def _id_set(path, key):
