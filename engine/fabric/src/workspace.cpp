@@ -1,5 +1,6 @@
-// The workspace (WO-050, SL-ARCH-002 ARCH2-R11 and ARCH2-R18, ADR-0016): registries frozen when
-// it opens, the store, and the transaction manager.
+// The workspace (WO-050, WO-055; SL-ARCH-002 ARCH2-R11 and ARCH2-R18, ADR-0016): registries
+// frozen when it opens, the store, and the transaction manager. The durable create and open with
+// recovery live in workspace_open.cpp.
 
 #include <memory>
 #include <utility>
@@ -9,19 +10,37 @@
 #include "sl/fabric/digest.hpp"
 #include "sl/fabric/id.hpp"
 #include "sl/fabric/memory_backend.hpp"
+#include "sl/fabric/recovery.hpp"
 #include "sl/fabric/snapshot.hpp"
 #include "sl/fabric/store.hpp"
 #include "sl/fabric/transaction.hpp"
+#include "sl/fabric/vfs.hpp"
 #include "sl/fabric/workspace.hpp"
 
 namespace sl::fabric {
+
+namespace {
+
+// A cleanup whose failure changes nothing a caller can act on.
+void best_effort(const result<void> &r) noexcept { static_cast<void>(r); }
+
+} // namespace
 
 workspace::workspace(open_key /*key*/, std::shared_ptr<store_backend> store,
                      workspace_options &options) noexcept
     : store_(std::move(store)), schemas_(std::move(options.schemas)),
       domains_(std::move(options.domains)), actors_(std::move(options.actors)) {}
 
-workspace::~workspace() = default;
+workspace::~workspace() {
+  manager_.reset();
+  store_.reset();
+  if (lock_.is_open()) {
+    // A clean close leaves an empty lock file: the next writer finds no stale holder.
+    best_effort(lock_.truncate(0));
+    best_effort(lock_.unlock());
+    lock_.close();
+  }
+}
 
 result<std::unique_ptr<workspace>> workspace::create_memory(workspace_options options) {
   return create_with(std::make_shared<memory_backend>(), std::move(options));
@@ -32,6 +51,14 @@ result<std::unique_ptr<workspace>> workspace::create_with(std::shared_ptr<store_
   if (!store) {
     return make_error(errc::invalid_argument, "a workspace needs a store");
   }
+  return assemble(std::move(store), options, nullptr, vfs_file{}, recovery_report{},
+                  open_mode::write);
+}
+
+result<std::unique_ptr<workspace>> workspace::assemble(std::shared_ptr<store_backend> store,
+                                                       workspace_options &options,
+                                                       std::shared_ptr<vfs> fs, vfs_file lock,
+                                                       recovery_report report, open_mode mode) {
   std::shared_ptr<const fabric::clock> time = options.clock;
   if (!time) {
     time = std::make_shared<system_clock_source>();
@@ -52,6 +79,10 @@ result<std::unique_ptr<workspace>> workspace::create_with(std::shared_ptr<store_
     return std::unexpected(ok.error());
   }
   auto ws = std::make_unique<workspace>(open_key{}, std::move(store), options);
+  ws->fs_ = std::move(fs);
+  ws->lock_ = std::move(lock);
+  ws->recovery_ = std::move(report);
+  ws->mode_ = mode;
   manager_config config;
   config.store = ws->store_.get();
   config.schemas = &ws->schemas_;
