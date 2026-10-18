@@ -27,7 +27,9 @@ class PlanParseTests(unittest.TestCase):
     def test_locked_table_has_19_rows(self):
         rows = cc.plan_locked(PLAN)
         self.assertEqual(len(rows), 19)
-        self.assertEqual(rows[1], ("Build system", "CMake + Ninja for native code; Sliced build graph for content and cooking"))
+        self.assertEqual(
+            rows[1], ("Build system", "CMake + Ninja for native code; Sliced build graph for content and cooking")
+        )
         self.assertIn("(Vol 31)", rows[8][1])
 
     def test_fragmentation_table_is_f1_to_f8(self):
@@ -55,7 +57,9 @@ class MutationTests(unittest.TestCase):
         self.assertTrue(errors and all("R-CONST-LOCKED" in e for e in errors))
 
     def test_dropped_row_fails_locked(self):
-        text = CONSTITUTION.replace('{"area": "Audio", "decision": "Native mixer and DSP graph; native procedural audio graph"},\n', "")
+        text = CONSTITUTION.replace(
+            '{"area": "Audio", "decision": "Native mixer and DSP graph; native procedural audio graph"},\n', ""
+        )
         self.assertNotEqual(text, CONSTITUTION)
         errors = cc.locked_errors(text, PLAN)
         self.assertTrue(any("18 locked rows" in e for e in errors))
@@ -70,7 +74,9 @@ class MutationTests(unittest.TestCase):
         self.assertEqual(cc.locked_errors(text, PLAN), [])
 
     def test_changed_threshold_fails_frag(self):
-        text = BUDGET.replace('"threshold": "0", "enforcement": "Currency check', '"threshold": "1", "enforcement": "Currency check')
+        text = BUDGET.replace(
+            '"threshold": "0", "enforcement": "Currency check', '"threshold": "1", "enforcement": "Currency check'
+        )
         self.assertNotEqual(text, BUDGET)
         errors = cc.frag_errors(text, PLAN)
         self.assertTrue(errors and all("R-CONST-FRAG" in e for e in errors))
@@ -108,7 +114,9 @@ class ContractsPendingTests(unittest.TestCase):
     def test_real_repo_lists_the_f_rows_and_exits_zero(self):
         found, warnings = cp.pending_contracts(slgov.ROOT)
         self.assertEqual(warnings, [])
-        self.assertEqual(sum("SL-GOV-006" in loc for loc, _ in found), 8)
+        # F1..F8 start pending; each enforcement episode flips its row (F3 -> just provenance-check, WO-029)
+        self.assertLessEqual(sum("SL-GOV-006" in loc for loc, _ in found), 8)
+        self.assertGreaterEqual(sum("SL-GOV-006" in loc for loc, _ in found), 1)
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(cp.main(["cmd_contracts_pending.py"]), 0)
 
@@ -116,7 +124,10 @@ class ContractsPendingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             os.makedirs(os.path.join(root, "docs", "gov"))
             with open(os.path.join(root, "docs", "gov", "SL-GOV-900-x.md"), "w", encoding="utf-8") as fh:
-                fh.write('```sl-data\n{broken\n```\n```sl-data\n{"c": [{"id": "C1", "verified_by": "just rtm-check"}]}\n```\n')
+                fh.write(
+                    '```sl-data\n{broken\n```\n```sl-data\n{"c": [{"id": "C1", "verified_by": "just '
+                    'rtm-check"}]}\n```\n'
+                )
             found, warnings = cp.pending_contracts(root)
             self.assertEqual(len(warnings), 1)
             self.assertEqual(len(found), 1)  # no justfile in the temp root: the recipe is unknown

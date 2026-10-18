@@ -178,7 +178,9 @@ def locked_errors(doc_text, plan_text, rel=CONSTITUTION_REL):
         return ["%s: %s" % (rule, exc)]
     errors = []
     if len(expected) != LOCKED_COUNT:
-        errors.append("%s: %s: master plan section 1.5 has %d rows, expected %d" % (PLAN_REL, rule, len(expected), LOCKED_COUNT))
+        errors.append(
+            "%s: %s: master plan section 1.5 has %d rows, expected %d" % (PLAN_REL, rule, len(expected), LOCKED_COUNT)
+        )
     block, errs = _block_with(doc_text, rel, rule, "locked")
     errors += errs
     if block is None:
@@ -196,7 +198,9 @@ def locked_errors(doc_text, plan_text, rel=CONSTITUTION_REL):
             continue
         same_area = [d for a, d in have if a == area]
         if same_area:
-            errors.append("%s: %s: row '%s' differs from the plan: have %r, plan %r" % (rel, rule, area, same_area[0], decision))
+            errors.append(
+                "%s: %s: row '%s' differs from the plan: have %r, plan %r" % (rel, rule, area, same_area[0], decision)
+            )
         else:
             errors.append("%s: %s: plan row '%s' is missing" % (rel, rule, area))
     plan_areas = [a for a, _ in expected]
@@ -214,9 +218,14 @@ def locked_errors(doc_text, plan_text, rel=CONSTITUTION_REL):
             if not (isinstance(r, dict) and isinstance(r.get("item"), str) and isinstance(r.get("source_row"), str)):
                 errors.append("%s: %s: rejected entries must be {item, source_row} strings" % (rel, rule))
             elif r["source_row"] not in by_area:
-                errors.append("%s: %s: rejected '%s': source_row '%s' is not a locked row" % (rel, rule, r["item"], r["source_row"]))
+                errors.append(
+                    "%s: %s: rejected '%s': source_row '%s' is not a locked row"
+                    % (rel, rule, r["item"], r["source_row"])
+                )
             elif norm(r["item"]).lower() not in by_area[r["source_row"]].lower():
-                errors.append("%s: %s: rejected '%s' does not appear in row '%s'" % (rel, rule, r["item"], r["source_row"]))
+                errors.append(
+                    "%s: %s: rejected '%s' does not appear in row '%s'" % (rel, rule, r["item"], r["source_row"])
+                )
     if not isinstance(block.get("conditional"), list):
         errors.append("%s: %s: 'conditional' must be a list" % (rel, rule))
     return errors
@@ -252,16 +261,26 @@ def frag_errors(doc_text, plan_text, rel=BUDGET_REL):
             continue
         for key in ("invariant", "numerator", "denominator", "threshold", "enforcement"):
             if not isinstance(have.get(key), str) or norm(have[key]) != want[key]:
-                errors.append("%s: %s: %s.%s is %r, plan has %r" % (rel, rule, want["id"], key, have.get(key), want[key]))
+                errors.append(
+                    "%s: %s: %s.%s is %r, plan has %r" % (rel, rule, want["id"], key, have.get(key), want[key])
+                )
         if have.get("episodes") != want["episodes"]:
-            errors.append("%s: %s: %s.episodes is %r, plan has %r" % (rel, rule, want["id"], have.get("episodes"), want["episodes"]))
+            errors.append(
+                "%s: %s: %s.episodes is %r, plan has %r"
+                % (rel, rule, want["id"], have.get("episodes"), want["episodes"])
+            )
     for r in rows:
         if r.get("id") not in [w["id"] for w in expected]:
             errors.append("%s: %s: %r is not an F-id of the plan" % (rel, rule, r.get("id")))
     if block.get("exemptions") != exemptions:
-        errors.append("%s: %s: 'exemptions' is %r, master plan section 3.1 has %r" % (rel, rule, block.get("exemptions"), exemptions))
+        errors.append(
+            "%s: %s: 'exemptions' is %r, master plan section 3.1 has %r"
+            % (rel, rule, block.get("exemptions"), exemptions)
+        )
     if block.get("scorecard") != scorecard:
-        errors.append("%s: %s: 'scorecard' differs from master plan section 3.3 (%d items)" % (rel, rule, len(scorecard)))
+        errors.append(
+            "%s: %s: 'scorecard' differs from master plan section 3.3 (%d items)" % (rel, rule, len(scorecard))
+        )
     flow = block.get("flow")
     if not isinstance(flow, list) or not flow:
         errors.append("%s: %s: 'flow' (master plan section 3.2) must be a non-empty list" % (rel, rule))
