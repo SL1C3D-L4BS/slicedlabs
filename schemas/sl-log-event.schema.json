@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/sl-log-event.schema.json",
+  "title": "One line of the sl::log json_sink (JSON Lines): a structured log event with typed fields and correlation fields (SL-EP-056, SL-GOV-006 F6, WO-030)",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "sl-log-event/1"
+    },
+    "level": {
+      "enum": [
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error",
+        "fatal"
+      ]
+    },
+    "system": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Subsystem that emitted the event (core, render, assert, ...)"
+    },
+    "message": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "object",
+      "description": "Typed fields: int64, double (non-finite as null), bool or string",
+      "additionalProperties": {
+        "type": [
+          "integer",
+          "number",
+          "boolean",
+          "string",
+          "null"
+        ]
+      }
+    },
+    "correlation": {
+      "type": "object",
+      "description": "F6: every event carries correlation fields; process-wide events carry the process scope tag and id 0",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tick": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "scope",
+        "tick"
+      ],
+      "additionalProperties": false
+    },
+    "where": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "function": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "line"
+      ],
+      "additionalProperties": false
+    },
+    "ts": {
+      "type": "string",
+      "description": "ISO-8601 UTC with milliseconds",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    }
+  },
+  "required": [
+    "schema",
+    "level",
+    "system",
+    "message",
+    "fields",
+    "correlation",
+    "where",
+    "ts"
+  ],
+  "additionalProperties": false
+}
