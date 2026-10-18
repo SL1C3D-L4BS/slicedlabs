@@ -1,0 +1,60 @@
+{
+  "format": "sl-type-def/1",
+  "module": "runtime.capture",
+  "domain": "runtime.capture",
+  "owner": "03",
+  "doc": "Fixture module: observation records only (runtime.* never holds document records).",
+  "types": [
+    {
+      "name": "runtime.capture.frame_capture",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "event",
+      "state_class": "observation",
+      "fields": [
+        {
+          "no": 1,
+          "name": "tick",
+          "type": "u64",
+          "presence": "required"
+        },
+        {
+          "no": 2,
+          "name": "frame_ms",
+          "type": "f32",
+          "presence": "required"
+        },
+        {
+          "no": 3,
+          "name": "digest",
+          "type": "digest",
+          "presence": "optional"
+        },
+        {
+          "no": 4,
+          "name": "blob",
+          "type": "blob_ref",
+          "presence": "optional"
+        },
+        {
+          "no": 5,
+          "name": "source",
+          "type": "external_ref",
+          "presence": "optional"
+        },
+        {
+          "no": 6,
+          "name": "scene",
+          "type": "ref",
+          "presence": "optional",
+          "ref": {
+            "strength": "owned",
+            "targets": [
+              "content.shapes.scene"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

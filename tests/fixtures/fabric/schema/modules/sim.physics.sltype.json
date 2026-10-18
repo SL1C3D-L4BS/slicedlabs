@@ -1,0 +1,95 @@
+{
+  "format": "sl-type-def/1",
+  "module": "sim.physics",
+  "domain": "sim.physics",
+  "owner": "06",
+  "doc": "Fixture module: a component owned by sim inside a content record, and a derived record.",
+  "types": [
+    {
+      "name": "sim.physics.body_kind",
+      "kind": "enum",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "enumerators": [
+        {
+          "no": 0,
+          "name": "static"
+        },
+        {
+          "no": 1,
+          "name": "dynamic"
+        },
+        {
+          "no": 2,
+          "name": "kinematic"
+        }
+      ]
+    },
+    {
+      "name": "sim.physics.body",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "doc": "Physics component nested in a scene.",
+      "fields": [
+        {
+          "no": 1,
+          "name": "mass",
+          "type": "f32",
+          "presence": "required"
+        },
+        {
+          "no": 2,
+          "name": "kind",
+          "type": "sim.physics.body_kind",
+          "presence": "optional",
+          "default": 0
+        },
+        {
+          "no": 3,
+          "name": "drag",
+          "type": "f64",
+          "presence": "optional",
+          "deprecated_in": 0,
+          "doc": "Deprecated field still decodes."
+        }
+      ]
+    },
+    {
+      "name": "sim.physics.contact_cache",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "derived",
+      "state_class": "derived",
+      "fields": [
+        {
+          "no": 1,
+          "name": "scene",
+          "type": "ref",
+          "presence": "required",
+          "ref": {
+            "strength": "strong",
+            "targets": [
+              "content.shapes.scene"
+            ]
+          }
+        },
+        {
+          "no": 2,
+          "name": "contacts",
+          "type": "u32",
+          "presence": "required"
+        },
+        {
+          "no": 3,
+          "name": "delta",
+          "type": "i16",
+          "presence": "optional",
+          "default": -5
+        }
+      ]
+    }
+  ]
+}

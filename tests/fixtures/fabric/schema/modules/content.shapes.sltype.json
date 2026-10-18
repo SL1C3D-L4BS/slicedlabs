@@ -1,0 +1,199 @@
+{
+  "format": "sl-type-def/1",
+  "module": "content.shapes",
+  "domain": "content.shapes",
+  "owner": "05",
+  "doc": "Fixture module: every type kind, a record type with a weak self reference and a reserved number.",
+  "types": [
+    {
+      "name": "content.shapes.color",
+      "kind": "enum",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "doc": "Palette.",
+      "enumerators": [
+        {
+          "no": 0,
+          "name": "red"
+        },
+        {
+          "no": 1,
+          "name": "green"
+        },
+        {
+          "no": 2,
+          "name": "blue",
+          "since_minor": 0
+        }
+      ]
+    },
+    {
+      "name": "content.shapes.point",
+      "kind": "struct",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "doc": "A 2D point.",
+      "fields": [
+        {
+          "no": 1,
+          "name": "x",
+          "type": "f64",
+          "presence": "required"
+        },
+        {
+          "no": 2,
+          "name": "y",
+          "type": "f64",
+          "presence": "required"
+        }
+      ]
+    },
+    {
+      "name": "content.shapes.points",
+      "kind": "list",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "content.shapes.point"
+    },
+    {
+      "name": "content.shapes.tags",
+      "kind": "map",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "key": "string",
+      "element": "string"
+    },
+    {
+      "name": "content.shapes.meters",
+      "kind": "tagged",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "f64",
+      "doc": "Length in meters."
+    },
+    {
+      "name": "content.shapes.shape",
+      "kind": "variant",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "cases": [
+        {
+          "no": 1,
+          "name": "circle",
+          "type": "f64"
+        },
+        {
+          "no": 2,
+          "name": "poly",
+          "type": "content.shapes.points"
+        }
+      ]
+    },
+    {
+      "name": "content.shapes.layers",
+      "kind": "oset",
+      "version": "1.0",
+      "record_class": "none",
+      "state_class": "document",
+      "element": "content.shapes.shape"
+    },
+    {
+      "name": "content.shapes.scene",
+      "kind": "struct",
+      "version": "1.1",
+      "record_class": "entity",
+      "state_class": "document",
+      "document_root": true,
+      "doc": "A scene document root.",
+      "reserved": [
+        4
+      ],
+      "fields": [
+        {
+          "no": 1,
+          "name": "name",
+          "type": "string",
+          "presence": "required",
+          "doc": "Display label."
+        },
+        {
+          "no": 2,
+          "name": "origin",
+          "type": "content.shapes.point",
+          "presence": "required"
+        },
+        {
+          "no": 3,
+          "name": "color",
+          "type": "content.shapes.color",
+          "presence": "optional",
+          "default": 1
+        },
+        {
+          "no": 5,
+          "name": "parent",
+          "type": "ref",
+          "presence": "optional",
+          "ref": {
+            "strength": "weak",
+            "targets": [
+              "content.shapes.scene"
+            ]
+          }
+        },
+        {
+          "no": 6,
+          "name": "layers",
+          "type": "content.shapes.layers",
+          "presence": "optional"
+        },
+        {
+          "no": 7,
+          "name": "tags",
+          "type": "content.shapes.tags",
+          "presence": "optional"
+        },
+        {
+          "no": 8,
+          "name": "body",
+          "type": "sim.physics.body",
+          "presence": "optional"
+        },
+        {
+          "no": 9,
+          "name": "radius",
+          "type": "content.shapes.meters",
+          "presence": "optional",
+          "since_minor": 1
+        },
+        {
+          "no": 10,
+          "name": "retries",
+          "type": "u32",
+          "presence": "optional",
+          "default": 3
+        },
+        {
+          "no": 11,
+          "name": "scale",
+          "type": "f32",
+          "presence": "optional",
+          "default": 1.5
+        },
+        {
+          "no": 12,
+          "name": "visible",
+          "type": "bool",
+          "presence": "optional",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

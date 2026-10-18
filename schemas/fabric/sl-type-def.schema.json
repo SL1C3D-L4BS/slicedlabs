@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/fabric/sl-type-def.schema.json",
+  "title": "Fabric schema module file sl-type-def/1 (ADR-0013, SL-ARCH-001 Schemas and versioning)",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "sl-type-def/1"
+    },
+    "module": {
+      "$ref": "#/$defs/dotted"
+    },
+    "domain": {
+      "$ref": "#/$defs/domain"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^(0[1-9]|1[0-2])$"
+    },
+    "doc": {
+      "type": "string"
+    },
+    "types": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/type"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "format",
+    "module",
+    "domain",
+    "owner",
+    "types"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "dotted": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$"
+    },
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+    },
+    "ident": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "number": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "minor": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "type": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/dotted"
+        },
+        "kind": {
+          "enum": [
+            "struct",
+            "enum",
+            "variant",
+            "list",
+            "map",
+            "oset",
+            "tagged"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,8})\\.(0|[1-9][0-9]{0,8})$"
+        },
+        "domain": {
+          "$ref": "#/$defs/domain"
+        },
+        "record_class": {
+          "$ref": "#/$defs/ident"
+        },
+        "state_class": {
+          "$ref": "#/$defs/ident"
+        },
+        "document_root": {
+          "type": "boolean"
+        },
+        "doc": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/field"
+          }
+        },
+        "reserved": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/number"
+          }
+        },
+        "enumerators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/enumerator"
+          }
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/case"
+          }
+        },
+        "element": {
+          "$ref": "#/$defs/dotted"
+        },
+        "key": {
+          "$ref": "#/$defs/dotted"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "version",
+        "record_class",
+        "state_class"
+      ],
+      "additionalProperties": false
+    },
+    "field": {
+      "type": "object",
+      "properties": {
+        "no": {
+          "$ref": "#/$defs/number"
+        },
+        "name": {
+          "$ref": "#/$defs/ident"
+        },
+        "type": {
+          "$ref": "#/$defs/dotted"
+        },
+        "presence": {
+          "enum": [
+            "required",
+            "optional"
+          ]
+        },
+        "default": {},
+        "since_minor": {
+          "$ref": "#/$defs/minor"
+        },
+        "deprecated_in": {
+          "$ref": "#/$defs/minor"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "doc": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "no",
+        "name",
+        "type",
+        "presence"
+      ],
+      "additionalProperties": false
+    },
+    "ref": {
+      "type": "object",
+      "properties": {
+        "strength": {
+          "enum": [
+            "weak",
+            "strong",
+            "owned"
+          ]
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dotted"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "strength",
+        "targets"
+      ],
+      "additionalProperties": false
+    },
+    "enumerator": {
+      "type": "object",
+      "properties": {
+        "no": {
+          "$ref": "#/$defs/number"
+        },
+        "name": {
+          "$ref": "#/$defs/ident"
+        },
+        "since_minor": {
+          "$ref": "#/$defs/minor"
+        },
+        "deprecated_in": {
+          "$ref": "#/$defs/minor"
+        },
+        "doc": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "no",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "case": {
+      "type": "object",
+      "properties": {
+        "no": {
+          "$ref": "#/$defs/number"
+        },
+        "name": {
+          "$ref": "#/$defs/ident"
+        },
+        "type": {
+          "$ref": "#/$defs/dotted"
+        },
+        "since_minor": {
+          "$ref": "#/$defs/minor"
+        },
+        "deprecated_in": {
+          "$ref": "#/$defs/minor"
+        },
+        "doc": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "no",
+        "name",
+        "type"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
