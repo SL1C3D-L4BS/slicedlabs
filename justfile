@@ -587,13 +587,13 @@ fabric-determinism *args:
 neg-fabric-determinism *args:
     @bash tests/gates/neg_fabric_determinism.sh
 
-# owner WO-045
+# fabric-gen-check: tools/fabric/slgen.py regenerates engine/fabric/gen (descriptors, typed structs, validator tables, inspector metadata, text schemas) and tests/fixtures/fabric/types/lock_hashes.json in memory from schemas/fabric/*.sltype.json and fails naming each stale, missing or extra file (R-GEN-*), and each type without two canonical fixtures; `python3 -I tools/fabric/slgen.py generate` rewrites them (WO-045, FAB-INV-GEN-01)
 fabric-gen-check *args:
-    @{{just_executable()}} stub fabric-gen-check
+    @python3 -I tools/fabric/slgen.py check {{args}}
 
-# owner WO-045
+# negative test: editing one generated header in a copy fails fabric-gen-check naming R-GEN-STALE and the header, deleting a generated source names R-GEN-MISSING and the source; the unchanged control copy passes (WO-045)
 neg-fabric-gen *args:
-    @{{just_executable()}} stub neg-fabric-gen
+    @bash tests/gates/neg_fabric_gen.sh
 
 # owner WO-047
 fabric-event-schema-check *args:
@@ -603,13 +603,17 @@ fabric-event-schema-check *args:
 neg-fabric-event-schema *args:
     @{{just_executable()}} stub neg-fabric-event-schema
 
-# owner WO-048
+# fabric-ownership-check (F2): build sl_fabric_dump_domains (preset debug), dump the engine's domain registry into build/fabric/domains.json, then tools/fabric/ownership_check.py compares it with schemas/fabric/*.sltype.json and the SL-ARCH-001 domain_registry, prints `f2 numerator N denominator D` and fails on any second owner or mismatch (R-F2-*) (WO-048, FAB-INV-OWN-08)
 fabric-ownership-check *args:
-    @{{just_executable()}} stub fabric-ownership-check
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug --target sl_fabric_dump_domains
+    @mkdir -p build/fabric
+    @build/debug/engine/fabric/tools/sl_fabric_dump_domains build/fabric/domains.json
+    @python3 -I tools/fabric/ownership_check.py build/fabric/domains.json {{args}}
 
-# owner WO-048
+# negative test: a second claim of fabric.history by owner 05 is refused by sl_fabric_dump_domains (ownership_conflict naming 02 and 05) and fails fabric-ownership-check (R-F2-REJECTED); a schema module claiming it with owner 05 in a copy fails naming R-F2-DUP and both owners; the control copy passes (WO-048)
 neg-fabric-f2 *args:
-    @{{just_executable()}} stub neg-fabric-f2
+    @bash tests/gates/neg_fabric_f2.sh
 
 # owner WO-051
 fabric-surface-check *args:
