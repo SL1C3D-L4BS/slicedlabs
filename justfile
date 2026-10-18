@@ -532,37 +532,37 @@ fabric-test area:
     @cmake --build --preset debug
     @ctest --preset debug -L {{quote("^fabric_" + area + "$")}} --no-tests=error --output-on-failure
 
-# owner WO-036
+# every FAB-INV id of SL-ARCH-001/002 has one owning WO and one test, both ways (R-FAB-*); missing tests and stub recipes are printed as pending; ends with `invariants N bound B pending P` (WO-036)
 fabric-contracts-check *args:
-    @{{just_executable()}} stub fabric-contracts-check
+    @python3 -I tools/fabric/contracts_check.py {{args}}
 
-# owner WO-036
+# fabric-contracts-check with pending turned into errors: every test exists and every `test: just` entry is an implemented recipe; in no gate until WO-062 (WO-036)
 fabric-contracts-strict *args:
-    @{{just_executable()}} stub fabric-contracts-strict
+    @python3 -I tools/fabric/contracts_check.py --strict {{args}}
 
-# owner WO-036
+# negative test: a TEST_CASE naming FAB-INV-ZZ-99, a duplicate id and an invariant owned by WO-999 each fail the contracts checker naming the rule and the id; the control copy passes (WO-036)
 neg-fabric-contracts *args:
-    @{{just_executable()}} stub neg-fabric-contracts
+    @bash tests/gates/neg_fabric_contracts.sh
 
-# owner WO-036
+# nothrow lint of engine/fabric/{src,include,gen}: N-THROW, N-TRY, N-AT, N-STO, N-FS, N-UNORDERED, N-NEW, allow-list tools/fabric/nothrow-allow.txt (ADR-0009, ADR-0016); passes while engine/fabric is absent (WO-036)
 fabric-nothrow-check *args:
-    @{{just_executable()}} stub fabric-nothrow-check
+    @python3 -I tools/fabric/nothrow_lint.py {{args}}
 
-# owner WO-036
+# negative test: a planted throw in a copy of engine/fabric/src fails the nothrow lint naming N-THROW with file:line, and a reasonless allow entry fails naming N-ALLOW; the control copy passes (WO-036)
 neg-fabric-nothrow *args:
-    @{{just_executable()}} stub neg-fabric-nothrow
+    @bash tests/gates/neg_fabric_nothrow.sh
 
-# owner WO-038
+# fabric-golden-check: regenerate the SLB/1 corpus in memory with the Python reference and compare it with tests/fixtures/fabric/slb (schemas, accept, must-reject); drift names the file and the vector (R-GOLD-*); `python3 -I tools/fabric/corpus.py write` regenerates (WO-038)
 fabric-golden-check *args:
-    @{{just_executable()}} stub fabric-golden-check
+    @python3 -I tools/fabric/corpus.py check {{args}}
 
-# owner WO-038
+# fabric-vectors-check: hashlib SHA-256, derived/well-known/imported ids, drbg blocks and object ids against tests/fixtures/fabric/hash/vectors.json (R-VEC-*); `python3 -I tools/fabric/vectors.py write` regenerates (WO-038)
 fabric-vectors-check *args:
-    @{{just_executable()}} stub fabric-vectors-check
+    @python3 -I tools/fabric/vectors.py check {{args}}
 
-# owner WO-038
+# negative test: a flipped hex digit in an accept vector and a changed reject offset in a copy of the corpus fail fabric-golden-check naming the file and the vector; the control copy passes (WO-038)
 neg-fabric-golden *args:
-    @{{just_executable()}} stub neg-fabric-golden
+    @bash tests/gates/neg_fabric_golden.sh
 
 # owner WO-040
 fabric-schema-check *args:
