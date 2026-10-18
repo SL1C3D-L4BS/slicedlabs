@@ -76,7 +76,9 @@ class TransitionTests(Base):
         self.assertEqual(code, 0)
         ep = self.episode("SL-EP-003")
         self.assertEqual(ep["status"], "Verifying")
-        self.assertEqual(ep["history"][-1], {"from": "InProgress", "to": "Verifying", "date": "2026-10-18", "note": "WO-901"})
+        self.assertEqual(
+            ep["history"][-1], {"from": "InProgress", "to": "Verifying", "date": "2026-10-18", "note": "WO-901"}
+        )
         self.assertEqual(slib.check_registry(json.loads(self.registry_text())), [])
 
     def test_illegal_transition_is_refused_and_registry_untouched(self):
@@ -205,9 +207,15 @@ class ArgumentTests(unittest.TestCase):
     def test_parse_args(self):
         ok = adv.parse_args(["x", "SL-EP-012", "Accepted", "WO-012", "--adr", "ADR-0003", "--date", "2026-10-17"])
         self.assertEqual(ok[:5], ("SL-EP-012", "Accepted", "WO-012", "2026-10-17", "ADR-0003"))
-        for bad in (["SL-EP-12", "Accepted", "WO-012"], ["SL-EP-012", "Accepted", "WO-12"], ["SL-EP-012", "Accepted"],
-                    ["SL-EP-012", "Accepted", "WO-012", "--adr", "ADR-3"], ["SL-EP-012", "Accepted", "WO-012", "--date", "2026-13-40"],
-                    ["SL-EP-012", "Accepted", "WO-012", "--force"], ["SL-EP-012", "Accepted", "WO-012", "--adr"]):
+        for bad in (
+            ["SL-EP-12", "Accepted", "WO-012"],
+            ["SL-EP-012", "Accepted", "WO-12"],
+            ["SL-EP-012", "Accepted"],
+            ["SL-EP-012", "Accepted", "WO-012", "--adr", "ADR-3"],
+            ["SL-EP-012", "Accepted", "WO-012", "--date", "2026-13-40"],
+            ["SL-EP-012", "Accepted", "WO-012", "--force"],
+            ["SL-EP-012", "Accepted", "WO-012", "--adr"],
+        ):
             with self.subTest(bad):
                 self.assertIsInstance(adv.parse_args(["x"] + bad), str)
 

@@ -66,7 +66,11 @@ def load_evidence(root, wo):
     if not isinstance(recorded, str) or not SHA_RE.match(recorded):
         raise Refused("R-NO-EVIDENCE: %s has no valid wo_sha256" % rel)
     if recorded != sha256_file(wo_path):
-        raise Refused("R-NO-EVIDENCE: %s wo_sha256 differs from sha256(work-orders/%s.md): the work order changed after the evidence was recorded" % (rel, wo))
+        raise Refused(
+            "R-NO-EVIDENCE: %s wo_sha256 differs from sha256(work-orders/%s.md): the work order changed after the "
+            "evidence was recorded"
+            % (rel, wo)
+        )
     return data
 
 
@@ -86,7 +90,9 @@ def check_dependencies(reg, ep, state, adr):
     if state not in slib.STARTED or waiver:
         return waiver
     index = {e["id"]: e for e in reg["episodes"]}
-    pending = ["%s (%s)" % (d, index[d]["status"]) for d in ep["depends_on"] if d in index and index[d]["status"] != "Accepted"]
+    pending = [
+        "%s (%s)" % (d, index[d]["status"]) for d in ep["depends_on"] if d in index and index[d]["status"] != "Accepted"
+    ]
     if pending:
         raise Refused(
             "R-DEP-ACCEPTED: %s cannot be %s while dependencies are not Accepted: %s (waiver: pass --adr)"
@@ -105,7 +111,10 @@ def advance(reg, root, ep_id, state, wo, date, adr=None):
     old = ep["status"]
     if not slib.can_transition(old, state):
         nxt = ", ".join(slib.next_states(old)) or "none"
-        raise Refused("R-LIFECYCLE: %s > %s is not a legal transition (master plan 6.2); from %s the next states are: %s" % (old, state, old, nxt))
+        raise Refused(
+            "R-LIFECYCLE: %s > %s is not a legal transition (master plan 6.2); from %s the next states are: %s"
+            % (old, state, old, nxt)
+        )
     wo_path = os.path.join(root, "work-orders", wo + ".md")
     if not os.path.isfile(wo_path):
         raise Refused("work-orders/%s.md does not exist" % wo)
@@ -129,7 +138,13 @@ def advance(reg, root, ep_id, state, wo, date, adr=None):
         rel = "evidence/%s.json" % wo
         comp = ep["completion"]
         if comp is None:
-            comp = {"revision": str(evidence.get("merge_commit") or wo), "evidence": [], "benchmarks": [], "open_defects": [], "exceptions": []}
+            comp = {
+                "revision": str(evidence.get("merge_commit") or wo),
+                "evidence": [],
+                "benchmarks": [],
+                "open_defects": [],
+                "exceptions": [],
+            }
             ep["completion"] = comp
         if rel not in comp["evidence"]:
             comp["evidence"].append(rel)
@@ -172,7 +187,10 @@ def run(root, ep_id, state, wo, date, adr):
         fh.write(out)
     print("ep-advance: %s %s -> %s (%s, %s)" % (ep_id, entry["from"], entry["to"], entry["date"], entry["note"]))
     if dump_registry(slib.loads_json(text, REGISTRY)) != text:
-        print("ep-advance: note: the registry file was re-laid out (indent 1, sorted keys); it differed from that layout before")
+        print(
+            "ep-advance: note: the registry file was re-laid out (indent 1, sorted keys); it differed from that layout "
+            "before"
+        )
     return 0
 
 

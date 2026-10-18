@@ -73,7 +73,9 @@ class CheckTests(unittest.TestCase):
         cases = (("S", 300000, 3, True), ("S", 300001, 3, False), ("S", 300000, 4, False), ("M", 1000000, 8, True),
                  ("M", 1000000, 9, False), ("L", 1500000, 20, True), ("L", 1500001, 20, False))
         for cls, tokens, usd, ok in cases:
-            text = read("good.md").replace("class: M", "class: " + cls).replace("tokens: 1000000", "tokens: %d" % tokens)
+            text = (
+                read("good.md").replace("class: M", "class: " + cls).replace("tokens: 1000000", "tokens: %d" % tokens)
+            )
             text = text.replace("usd: 8", "usd: %d" % usd)
             with self.subTest((cls, tokens, usd)):
                 self.assertEqual("R-WO-BUDGET" not in rules(check(text)), ok)
@@ -84,7 +86,14 @@ class CheckTests(unittest.TestCase):
 
     def test_acceptance_command_forms(self):
         good = read("good.md")
-        for cmd in ("just doc-check; rm -rf x", "make test", "just", "just doc-check && just test", "just $(x)", "just test 'a b'"):
+        for cmd in (
+            "just doc-check; rm -rf x",
+            "make test",
+            "just",
+            "just doc-check && just test",
+            "just $(x)",
+            "just test 'a b'",
+        ):
             text = good.replace('cmd: "just doc-check"', 'cmd: "%s"' % cmd)
             with self.subTest(cmd):
                 self.assertIn("R-WO-ACCEPT", rules(check(text)))
@@ -95,7 +104,13 @@ class CheckTests(unittest.TestCase):
 
     def test_traces_line_variants(self):
         good = read("good.md")
-        for body in ("", "Traces:\n", "Traces: SL-EP-002 SL-EP-002\n", "Traces: EP-002\n", "Traces: SL-EP-002\nTraces: SL-EP-003\n"):
+        for body in (
+            "",
+            "Traces:\n",
+            "Traces: SL-EP-002 SL-EP-002\n",
+            "Traces: EP-002\n",
+            "Traces: SL-EP-002\nTraces: SL-EP-003\n",
+        ):
             text = good.split("---\n")[0] + "---\n" + good.split("---\n")[1] + "---\n" + body
             with self.subTest(body):
                 self.assertIn("R-WO-TRACES", rules(check(text)))
@@ -116,7 +131,9 @@ class RunTests(unittest.TestCase):
         shutil.copy(os.path.join(FIXTURES, "good.md"), os.path.join(root, "work-orders", "WO-901.md"))
         if with_registry:
             os.makedirs(os.path.join(root, "registry"))
-            shutil.copy(os.path.join(FIXTURES, "registry.json"), os.path.join(root, "registry", "SL-REG-002-episodes.json"))
+            shutil.copy(
+                os.path.join(FIXTURES, "registry.json"), os.path.join(root, "registry", "SL-REG-002-episodes.json")
+            )
         return root
 
     def run_check(self, root):
