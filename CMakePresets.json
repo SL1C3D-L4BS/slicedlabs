@@ -20,7 +20,8 @@
     {"name": "ci-asan", "description": "clang, AddressSanitizer, warnings as errors", "inherits": ["clang", "ci"], "cacheVariables": {"CMAKE_BUILD_TYPE": "Debug", "SL_SANITIZE": "address"}},
     {"name": "ci-ubsan", "description": "clang, UndefinedBehaviorSanitizer, warnings as errors", "inherits": ["clang", "ci"], "cacheVariables": {"CMAKE_BUILD_TYPE": "Debug", "SL_SANITIZE": "undefined"}},
     {"name": "ci-tsan", "description": "clang, ThreadSanitizer, warnings as errors", "inherits": ["clang", "ci"], "cacheVariables": {"CMAKE_BUILD_TYPE": "Debug", "SL_SANITIZE": "thread"}},
-    {"name": "ci-release", "description": "clang, Release, warnings as errors", "inherits": ["clang", "ci"], "cacheVariables": {"CMAKE_BUILD_TYPE": "Release"}},
+    {"name": "ci-release", "description": "clang, Release, hardened (SL_HARDEN), warnings as errors", "inherits": ["clang", "ci"], "cacheVariables": {"CMAKE_BUILD_TYPE": "Release", "SL_HARDEN": "ON"}},
+    {"name": "ci-gcc-release", "description": "gcc, Release, hardened (SL_HARDEN), warnings as errors", "inherits": ["gcc", "ci"], "cacheVariables": {"CMAKE_BUILD_TYPE": "Release", "SL_HARDEN": "ON"}},
     {"name": "cxx26", "description": "clang, Debug, C++26 (opt-in standard)", "inherits": "clang", "cacheVariables": {"CMAKE_BUILD_TYPE": "Debug", "SL_CXX_STANDARD": "26"}},
     {"name": "win-msvc-debug", "description": "MSVC cl, Debug (Windows hosts only; unverified here)", "inherits": "msvc", "condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"}, "cacheVariables": {"CMAKE_BUILD_TYPE": "Debug"}},
     {"name": "win-clangcl-debug", "description": "clang-cl, Debug (Windows hosts only; unverified here)", "inherits": "clangcl", "condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"}, "cacheVariables": {"CMAKE_BUILD_TYPE": "Debug"}},
@@ -41,6 +42,7 @@
     {"name": "ci-ubsan", "configurePreset": "ci-ubsan"},
     {"name": "ci-tsan", "configurePreset": "ci-tsan"},
     {"name": "ci-release", "configurePreset": "ci-release"},
+    {"name": "ci-gcc-release", "configurePreset": "ci-gcc-release"},
     {"name": "cxx26", "configurePreset": "cxx26"},
     {"name": "win-msvc-debug", "configurePreset": "win-msvc-debug", "condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"}},
     {"name": "win-clangcl-debug", "configurePreset": "win-clangcl-debug", "condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"}},
@@ -61,6 +63,7 @@
     {"name": "ci-ubsan", "configurePreset": "ci-ubsan", "output": {"outputOnFailure": true}, "execution": {"noTestsAction": "error"}},
     {"name": "ci-tsan", "configurePreset": "ci-tsan", "output": {"outputOnFailure": true}, "execution": {"noTestsAction": "error"}},
     {"name": "ci-release", "configurePreset": "ci-release", "output": {"outputOnFailure": true}, "execution": {"noTestsAction": "error"}},
+    {"name": "ci-gcc-release", "configurePreset": "ci-gcc-release", "output": {"outputOnFailure": true}, "execution": {"noTestsAction": "error"}},
     {"name": "cxx26", "configurePreset": "cxx26", "output": {"outputOnFailure": true}, "execution": {"noTestsAction": "error"}},
     {"name": "win-msvc-debug", "configurePreset": "win-msvc-debug", "output": {"outputOnFailure": true}, "execution": {"noTestsAction": "error"}, "condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"}},
     {"name": "win-clangcl-debug", "configurePreset": "win-clangcl-debug", "output": {"outputOnFailure": true}, "execution": {"noTestsAction": "error"}, "condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"}},
@@ -72,6 +75,10 @@
     {"name": "gcc-debug", "steps": [{"type": "configure", "name": "gcc-debug"}, {"type": "build", "name": "gcc-debug"}, {"type": "test", "name": "gcc-debug"}]},
     {"name": "ci-clang", "steps": [{"type": "configure", "name": "ci-clang"}, {"type": "build", "name": "ci-clang"}, {"type": "test", "name": "ci-clang"}]},
     {"name": "ci-gcc", "steps": [{"type": "configure", "name": "ci-gcc"}, {"type": "build", "name": "ci-gcc"}, {"type": "test", "name": "ci-gcc"}]},
-    {"name": "ci-asan", "steps": [{"type": "configure", "name": "ci-asan"}, {"type": "build", "name": "ci-asan"}, {"type": "test", "name": "ci-asan"}]}
+    {"name": "ci-asan", "steps": [{"type": "configure", "name": "ci-asan"}, {"type": "build", "name": "ci-asan"}, {"type": "test", "name": "ci-asan"}]},
+    {"name": "ci-ubsan", "steps": [{"type": "configure", "name": "ci-ubsan"}, {"type": "build", "name": "ci-ubsan"}, {"type": "test", "name": "ci-ubsan"}]},
+    {"name": "ci-tsan", "steps": [{"type": "configure", "name": "ci-tsan"}, {"type": "build", "name": "ci-tsan"}, {"type": "test", "name": "ci-tsan"}]},
+    {"name": "ci-release", "steps": [{"type": "configure", "name": "ci-release"}, {"type": "build", "name": "ci-release"}, {"type": "test", "name": "ci-release"}]},
+    {"name": "ci-gcc-release", "steps": [{"type": "configure", "name": "ci-gcc-release"}, {"type": "build", "name": "ci-gcc-release"}, {"type": "test", "name": "ci-gcc-release"}]}
   ]
 }

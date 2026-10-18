@@ -1,4 +1,6 @@
 #include <cstddef>
+#include <cstdio>
+#include <exception>
 #include <print>
 #include <span>
 #include <string_view>
@@ -14,10 +16,9 @@ bool build_info_complete(const sl::core::BuildInfo &info) {
          !info.linker.empty() && !info.revision.empty();
 }
 
-} // namespace
-
-int main(int argc, char **argv) {
-  const std::span<char *const> args{argv, static_cast<std::size_t>(argc)};
+// The banner on stdout, then the same build information as one structured info event on the
+// default logger (stderr). std::println throws std::system_error when stdout cannot be written.
+int run(std::span<char *const> args) {
   const sl::core::BuildInfo info = sl::core::build_info();
 
   if (args.size() > 1) {
@@ -36,5 +37,23 @@ int main(int argc, char **argv) {
   std::println("  preset     {}", info.preset);
   std::println("  linker     {}", info.linker);
   std::println("  revision   {}", info.revision);
+  // The banner is complete on stdout before the event reaches stderr.
+  std::fflush(stdout);
+  sl::core::log_build_info();
   return 0;
+}
+
+} // namespace
+
+int main(int argc, char **argv) {
+  try {
+    return run(std::span<char *const>{argv, static_cast<std::size_t>(argc)});
+  } catch (const std::exception &e) {
+    std::fputs("sl_sandbox: ", stderr);
+    std::fputs(e.what(), stderr);
+    std::fputs("\n", stderr);
+  } catch (...) {
+    std::fputs("sl_sandbox: unknown error\n", stderr);
+  }
+  return 1;
 }
