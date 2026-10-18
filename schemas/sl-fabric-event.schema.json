@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/sl-fabric-event.schema.json",
+  "title": "One line of the Fabric event JSON Lines dump: an event envelope with correlation and causality (SL-ARCH-001 ARCH1-R46 to ARCH1-R49, SL-EP-069, SL-GOV-006 F6, WO-047)",
+  "description": "Exactly one of subject and scope is present; the schema subset has no oneOf, so tools/fabric/event_schema_check.py enforces it as R-EVT-ABOUT. Payload is the hex of the SLB/1 payload bytes.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "sl-fabric-event/1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^evt_[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+      "description": "Event id derived from (tx id or source id, type, seq), ARCH1-R47"
+    },
+    "schema": {
+      "type": "object",
+      "description": "Type and version of the payload",
+      "properties": {
+        "type": {
+          "type": "string",
+          "pattern": "^typ_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "major": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "minor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "type",
+        "major",
+        "minor"
+      ],
+      "additionalProperties": false
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[!-~]{1,255}$",
+      "description": "Event type string such as fabric.tx.committed"
+    },
+    "time_us": {
+      "type": "integer",
+      "description": "Microseconds from the injected clock"
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Sequence number per source"
+    },
+    "actor": {
+      "type": "string",
+      "pattern": "^act_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "subject": {
+      "type": "string",
+      "pattern": "^[a-z]{3}_[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+      "description": "Id of the record the event is about (exclusive with scope)"
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Scope tag of an event about no single record (exclusive with subject)"
+    },
+    "correlation": {
+      "type": "object",
+      "description": "F6: every event carries correlation fields, field for field sl::log::correlation",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tick": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "scope",
+        "tick"
+      ],
+      "additionalProperties": false
+    },
+    "causality": {
+      "type": "object",
+      "description": "Cause event, transaction and revision, each optional",
+      "properties": {
+        "cause": {
+          "type": "string",
+          "pattern": "^evt_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "tx": {
+          "type": "string",
+          "pattern": "^txn_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^(sha256|blake3):[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "payload": {
+      "type": "string",
+      "pattern": "^([0-9a-f]{2})*$"
+    }
+  },
+  "required": [
+    "format",
+    "id",
+    "schema",
+    "type",
+    "time_us",
+    "seq",
+    "actor",
+    "correlation",
+    "causality"
+  ],
+  "additionalProperties": false
+}
