@@ -1,0 +1,3 @@
+# tools/format/allow.txt (WO-024): paths whose owners have not yet fixed a format finding.
+# One rule per line: `<kind> <path-or-glob>`; kind is cmake|python|shell|json|frontmatter|shfmt or `*`.
+# The gate stays green for these paths only; remove a line when its owner fixes the file.
