@@ -121,6 +121,34 @@ class TreeTests(unittest.TestCase):
             self.assertEqual(len(errors), 1)
             self.assertIn("docs/vol/SL-VOL-01-SPEC.md", errors[0])
 
+    def test_arch_is_scanned_and_its_fixtures_fail_with_their_rule(self):
+        arch = os.path.join(FIXTURES, "arch")
+        names = sorted(n for n in os.listdir(arch) if n.startswith("bad-"))
+        self.assertEqual(names, ["bad-r-doc-cite.md", "bad-r-doc-section.md"])
+        with tempfile.TemporaryDirectory() as root:
+            self.write(root, "docs/arch/README.md", "# arch\nMUST nothing\n")
+            self.write(root, "docs/arch/SL-ARCH-900-fixture.md", fixture("arch/good.md"))
+            self.assertEqual(cmd_check_docs.doc_errors(root), [])
+            for name in names:
+                with self.subTest(name):
+                    self.write(root, "docs/arch/SL-ARCH-900-fixture.md", fixture("arch/" + name))
+                    errors = cmd_check_docs.doc_errors(root)
+                    self.assertIn(name[len("bad-") : -len(".md")].upper(), rules(errors))
+                    self.assertTrue(all(e.startswith("docs/arch/SL-ARCH-900-fixture.md:") for e in errors))
+
+    def test_arch_kind_must_match_directory_id(self):
+        with tempfile.TemporaryDirectory() as root:
+            text = fixture("arch/good.md").replace("kind: ARCH", "kind: GOV")
+            self.write(root, "docs/arch/SL-ARCH-900-fixture.md", text)
+            self.assertIn("R-DOC-NAME", rules(cmd_check_docs.doc_errors(root)))
+
+    def test_repository_arch_documents_are_scanned(self):
+        self.assertIn("docs/arch", cmd_check_docs.DOC_DIRS)
+        for name in ("SL-ARCH-001-canonical-project-model.md", "SL-ARCH-002-transaction-undo-recovery.md"):
+            with self.subTest(name):
+                with open(os.path.join(slgov.ROOT, "docs", "arch", name), encoding="utf-8") as fh:
+                    self.assertEqual(cmd_check_docs.check_document(fh.read(), "docs/arch/" + name, name), [])
+
     def test_repository_documents_pass(self):
         self.assertEqual(cmd_check_docs.doc_errors(slgov.ROOT), [])
 

@@ -38,6 +38,7 @@
     "tools",
     "tools/deps",
     "tools/docs",
+    "tools/fabric",
     "tools/format",
     "tools/governance",
     "tools/presets"

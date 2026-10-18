@@ -1,19 +1,21 @@
 # docs/arch
 
-Architecture references `SL-ARCH-001` to `SL-ARCH-030` (master plan, Required documents and registries). None is
-written yet: all thirty are Planned in SL-REG-001 (`registry/SL-REG-001-documents.json`), and no `SL-ARCH-*.md` file
-exists in this directory. The authoring-order waiver in
-[ADR-0003](../adr/ADR-0003-authoring-order-waivers.md) lets the Volume 03 code of episodes 041-048 start before
-SL-ARCH-001, SL-ARCH-002, SL-ARCH-003, SL-ARCH-005 and SL-ARCH-008 exist; it does not authorise skipping them for later
-volumes. Until a document is written and registered with a path and a status above Planned, nothing here is normative.
+Architecture references `SL-ARCH-001` to `SL-ARCH-030` (master plan, Required documents and registries). Two are
+written as Draft (WO-035): SL-ARCH-001 and SL-ARCH-002, registered in SL-REG-001
+(`registry/SL-REG-001-documents.json`) with their paths in this directory; `just doc-check` and
+`just registry-docs-check` scan `docs/arch`. The other twenty-eight are Planned and have no file yet. The
+authoring-order waiver in [ADR-0003](../adr/ADR-0003-authoring-order-waivers.md) lets the Volume 03 code of
+episodes 041-048 start before SL-ARCH-001, SL-ARCH-002, SL-ARCH-003, SL-ARCH-005 and SL-ARCH-008 exist; it does not
+authorise skipping them for later volumes. A document is normative only once it is registered with a path and
+Approved; a Draft is the design under review.
 
 Each document is written in the volume that first needs it (the volumes of its registered episodes). Titles and target
 volumes are read from SL-REG-001 and SL-REG-002; the registry stays authoritative (master plan 6.3 rule 1).
 
 | Id | Title | Target volume(s) | Status |
 | :---- | :---- | :---- | :---- |
-| SL-ARCH-001 | Canonical Project Model (Fabric) | 04 | Planned |
-| SL-ARCH-002 | Transaction, Undo and Recovery Protocol | 04 | Planned |
+| SL-ARCH-001 | [Canonical Project Model (Fabric)](SL-ARCH-001-canonical-project-model.md) | 04 | Draft |
+| SL-ARCH-002 | [Transaction, Undo and Recovery Protocol](SL-ARCH-002-transaction-undo-recovery.md) | 04 | Draft |
 | SL-ARCH-003 | Runtime and Execution Architecture | 05 | Planned |
 | SL-ARCH-004 | Editor Shell and UI Framework | 06 | Planned |
 | SL-ARCH-005 | Graphics Backend Contract (Vulkan, Metal, WebGPU, consoles) | 07, 26 | Planned |
@@ -44,4 +46,4 @@ volumes are read from SL-REG-001 and SL-REG-002; the registry stays authoritativ
 | SL-ARCH-030 | Enterprise Deployment | 41 | Planned |
 
 `just docs` links this directory from `build/docs/index.md`; `just docs-check` verifies that every id cited here exists in
-SL-REG-001. Work order: WO-031 (this index only).
+SL-REG-001. Work orders: WO-031 (this index), WO-035 (SL-ARCH-001 and SL-ARCH-002).
