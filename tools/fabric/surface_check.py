@@ -15,6 +15,12 @@ data that is not behind the mutation_capability passkey, and reports `path:line:
   R-F5-INCLUDE  a public header including an internal/ header
   R-F5-ALLOW    a malformed allow-list line, or an entry that matches nothing (stale)
 
+and, over the consumers of Fabric rather than its headers (WO-061, SL-ARCH-001 ARCH1-R61, FAB-INV-BND-03):
+
+  R-BND-INCLUDE a file under engine/runtime/ or engine/render/ that includes sl/fabric/internal/** or a header that
+                declares the mutation capability (sl/fabric/store.hpp) or scopes it (sl/fabric/f5.hpp); reported
+                with file:line, no allow-list entry can excuse it
+
 Comments and string literals are blanked before matching. The allow-list (tools/fabric/surface-allow.txt) holds
 `<path>:<rule>:<symbol> <reason>` lines, `#` starts a comment, and an entry without a reason is an error. The symbol of
 a friend is `<class>:<friend as written>` (store.hpp:R-F5-FRIEND:mutation_capability:transaction_manager), of any
@@ -23,6 +29,7 @@ subprocess (ADR-0004): `python3 -I tools/fabric/surface_check.py [--root DIR] [-
 """
 
 import os
+import posixpath
 import re
 import sys
 
@@ -35,6 +42,13 @@ CAPABILITY = "mutation_capability"
 SYNC_TYPES = re.compile(
     r"\bstd::(?:mutex|shared_mutex|recursive_mutex|timed_mutex|shared_timed_mutex|condition_variable(?:_any)?|"
     r"once_flag|atomic(?:_flag)?\b)")
+
+BND_DIRS = ("engine/runtime", "engine/render")
+BND_EXTENSIONS = (".hpp", ".h", ".hh", ".hxx", ".inl", ".ipp", ".cpp", ".cc", ".cxx", ".c", ".mm", ".cppm", ".ixx")
+_BND_DIRECTIVE = re.compile(r"^\s*#\s*(?:include|import)\b")
+_BND_PATH = re.compile(r'^\s*#\s*(?:include|import)\s*[<"]([^>"]+)[>"]')
+_BND_INTERNAL = re.compile(r"(?:^|/)fabric/internal/")
+_BND_CAPABILITY = re.compile(r"(?:^|/)fabric/(?:store|f5)\.hpp$")
 
 _INCLUDE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
 _CLASS = re.compile(r"\b(class|struct)\s+(?:\[\[[^\]]*\]\]\s*)?(\w+)\s*(?:final\b\s*)?(?::[^;{()]*)?\{")
@@ -359,6 +373,51 @@ def check_tree(root, allow_path=None):
     return errors, len(files), len(used)
 
 
+def bnd_lint_text(text):
+    """Return a sorted list of (line, included path, reason) for the forbidden includes of one runtime or render file."""
+    found = []
+    raw_lines = text.splitlines()
+    # blank() keeps offsets, so the same line numbers locate a directive in the blanked text (a directive inside a
+    # comment or a string is blanked away) and its path in the raw text.
+    for n, blanked in enumerate(blank(text).splitlines(), start=1):
+        if not _BND_DIRECTIVE.match(blanked):
+            continue
+        m = _BND_PATH.match(raw_lines[n - 1])
+        if not m:
+            continue
+        path = posixpath.normpath(m.group(1).replace("\\", "/"))
+        if _BND_INTERNAL.search(path):
+            found.append((n, m.group(1), "an internal Fabric header"))
+        elif _BND_CAPABILITY.search(path):
+            found.append((n, m.group(1), "a header of the mutation capability"))
+    return found
+
+
+def check_boundary(root):
+    """Return (error lines, files scanned): R-BND-INCLUDE over engine/runtime and engine/render under `root`."""
+    found, scanned = [], 0
+    for top in BND_DIRS:
+        for dirpath, dirnames, filenames in os.walk(os.path.join(root, *top.split("/"))):
+            dirnames.sort()
+            for name in sorted(filenames):
+                if not name.endswith(BND_EXTENSIONS):
+                    continue
+                full = os.path.join(dirpath, name)
+                rel = os.path.relpath(full, root).replace(os.sep, "/")
+                try:
+                    with open(full, encoding="utf-8", errors="replace") as fh:
+                        text = fh.read()
+                except OSError as exc:
+                    found.append((rel, 1, "unreadable: %s" % exc))
+                    continue
+                scanned += 1
+                for line, path, why in bnd_lint_text(text):
+                    found.append((rel, line, "includes %s, %s (ARCH1-R61: runtime and render read snapshots "
+                                  "through boundary.hpp and propose patches through the transaction manager)"
+                                  % (path, why)))
+    return ["%s:%d: R-BND-INCLUDE: %s" % item for item in sorted(found)], scanned
+
+
 def main(argv):
     root, allow, args = ROOT, None, argv[1:]
     while args:
@@ -371,12 +430,16 @@ def main(argv):
             return 2
         args = args[2:]
     errors, files, allowed = check_tree(root, allow)
+    bnd_errors, scanned = check_boundary(root)
+    errors = errors + bnd_errors
     for e in errors:
         print(e)
     if errors:
-        print("fabric-surface-check: FAIL (%d finding(s) in %d public header(s))" % (len(errors), files))
+        print("fabric-surface-check: FAIL (%d finding(s) in %d public header(s) and %d runtime/render file(s))"
+              % (len(errors), files, scanned))
         return 1
-    print("fabric-surface-check: ok (%d public header(s), %d allowed friend(s) or exception(s))" % (files, allowed))
+    print("fabric-surface-check: ok (%d public header(s), %d allowed friend(s) or exception(s), %d runtime/render "
+          "file(s) scanned)" % (files, allowed, scanned))
     return 0
 
 
