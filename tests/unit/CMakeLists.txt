@@ -6,3 +6,5 @@ sl_add_test(NAME sl_tests TIER unit
   LIBS sl::core)
 target_compile_definitions(sl_tests PRIVATE SL_EXPECTED_CXX_STANDARD="${SL_CXX_STANDARD}")
 sl_provenance(sl_tests)
+# Fabric unit tests (WO-037): one executable per tests/unit/fabric/*_test.cpp.
+add_subdirectory(fabric)
