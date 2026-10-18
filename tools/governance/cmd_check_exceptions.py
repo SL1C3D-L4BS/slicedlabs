@@ -65,7 +65,8 @@ def class_errors(register, doc_exemptions=None):
     names = [c.get("name") if isinstance(c, dict) else None for c in classes]
     if names != list(CLASSES):
         errors.append(
-            "%s: R-EXC-CLASSES: classes are %r, master plan section 3.1 allows exactly %r" % (REGISTER_REL, names, list(CLASSES))
+            "%s: R-EXC-CLASSES: classes are %r, master plan section 3.1 allows exactly %r"
+            % (REGISTER_REL, names, list(CLASSES))
         )
     if doc_exemptions is not None and list(doc_exemptions) != list(CLASSES):
         errors.append(
@@ -116,7 +117,9 @@ def exception_errors(register):
 
 def register_errors(register, schema, doc_exemptions=None):
     """All errors for a loaded register against the schema (and the SL-GOV-006 list when given)."""
-    errors = ["%s: R-EXC-SCHEMA: %s: %s" % (REGISTER_REL, ptr or "/", msg) for ptr, msg in slib.validate(register, schema)]
+    errors = [
+        "%s: R-EXC-SCHEMA: %s: %s" % (REGISTER_REL, ptr or "/", msg) for ptr, msg in slib.validate(register, schema)
+    ]
     if isinstance(register, dict):
         errors += class_errors(register, doc_exemptions)
         errors += exception_errors(register)
