@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# fresh-clone-check (WO-020): the repository must build and pass ci-local from nothing, with a clean environment.
+# Usage: scripts/fresh-clone-check [ci-local args, e.g. --quick]   (run via `just fresh-clone-check`)
+#   1. build/fresh is recreated from scratch:
+#        clone mode  when HEAD's tree has CMakeLists.txt: `git clone --no-hardlinks` of HEAD (committed state only;
+#                    uncommitted changes are NOT tested and a note says so)
+#        copy mode   otherwise (HEAD does not hold the tree yet): the WORKING TREE (tracked and untracked, not
+#                    ignored, not build/ or .git) is copied with rsync, then `git init && git add -A` so that
+#                    `git ls-files` works there
+#      SL_FRESH_MODE=clone|copy forces a mode.
+#   2. `env -i PATH=/usr/bin:/bin HOME=build/fresh-home SL_DEPS_PROVIDERS=vendored bash scripts/ci-local.sh`
+#      runs inside it (cold ccache, no inherited variables, offline providers only).
+#      HOME sits beside build/fresh (not inside it) so the copy stays free of stray untracked files.
+#   3. no file outside build/ may be modified by the run: the original tree (minus build/ and .git) is
+#      fingerprinted (path, size, mtime) before and after and the two must be equal.
+# Exit 0 only when ci-local passes and the fingerprints match. Nothing is fetched from the network.
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+
+start=$SECONDS
+fresh="$root/build/fresh"
+home="$root/build/fresh-home"
+
+fingerprint() {
+  find "$root" \( -path "$root/build" -o -path "$root/.git" \) -prune -o -type f -printf '%P %s %T@\n' | LC_ALL=C sort
+}
+
+mode="${SL_FRESH_MODE:-}"
+if [ -z "$mode" ]; then
+  if git cat-file -e HEAD:CMakeLists.txt 2>/dev/null; then
+    mode=clone
+  else
+    mode=copy
+  fi
+fi
+
+before="$(mktemp)"
+after="$(mktemp)"
+trap 'rm -f "$before" "$after"' EXIT
+fingerprint >"$before"
+
+rm -rf "$fresh" "$home"
+mkdir -p "$home"
+
+case "$mode" in
+  clone)
+    echo "fresh-clone-check: clone mode (git clone --no-hardlinks HEAD $(git rev-parse --short HEAD))"
+    if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+      echo "fresh-clone-check: note: uncommitted changes exist and are not part of the clone"
+    fi
+    git clone -q --no-hardlinks "$root" "$fresh"
+    ;;
+  copy)
+    echo "fresh-clone-check: copy mode (HEAD does not hold the tree; copying the working tree)"
+    mkdir -p "$fresh"
+    git ls-files -z --cached --others --exclude-standard |
+      rsync -a --from0 --files-from=- --ignore-missing-args "$root"/ "$fresh"/
+    (cd "$fresh" && git init -q && git add -A)
+    ;;
+  *)
+    echo "fresh-clone-check: SL_FRESH_MODE must be clone or copy, got '$mode'" >&2
+    exit 2
+    ;;
+esac
+
+echo "fresh-clone-check: ci-local in $fresh (env -i, HOME=$home, SL_DEPS_PROVIDERS=vendored)"
+rc=0
+(cd "$fresh" && env -i PATH=/usr/bin:/bin HOME="$home" SL_DEPS_PROVIDERS=vendored bash scripts/ci-local.sh "$@") || rc=$?
+if [ "$rc" -ne 0 ]; then
+  echo "fresh-clone-check: FAIL: ci-local exited $rc in the fresh $mode ($((SECONDS - start)) s wall)"
+  exit 1
+fi
+
+fingerprint >"$after"
+if ! diff -u "$before" "$after" >/dev/null; then
+  echo "fresh-clone-check: FAIL: files outside build/ changed during the run (path size mtime):"
+  diff -u "$before" "$after" | grep -E '^[+-][^+-]' | head -n 20
+  exit 1
+fi
+
+echo "fresh-clone-check: ok ($mode mode, ci-local exit 0, no file outside build/ modified, $((SECONDS - start)) s wall)"
