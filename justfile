@@ -519,3 +519,149 @@ devimage-check *args:
 # installed tools vs toolchain/lock.json: required drift is an error unless toolchain/drift-allow.json lists it with a reason and an until-date; optional drift warns (WO-033)
 doctor-strict *args:
     @bash scripts/doctor --strict {{args}}
+
+# ---- stubs declared for Volume 04 (WO-035..WO-063); each owner replaces its body ----
+
+# owner WO-035
+neg-plan *args:
+    @{{just_executable()}} stub neg-plan
+
+# owner WO-035
+fabric-test *args:
+    @{{just_executable()}} stub fabric-test
+
+# owner WO-036
+fabric-contracts-check *args:
+    @{{just_executable()}} stub fabric-contracts-check
+
+# owner WO-036
+fabric-contracts-strict *args:
+    @{{just_executable()}} stub fabric-contracts-strict
+
+# owner WO-036
+neg-fabric-contracts *args:
+    @{{just_executable()}} stub neg-fabric-contracts
+
+# owner WO-036
+fabric-nothrow-check *args:
+    @{{just_executable()}} stub fabric-nothrow-check
+
+# owner WO-036
+neg-fabric-nothrow *args:
+    @{{just_executable()}} stub neg-fabric-nothrow
+
+# owner WO-038
+fabric-golden-check *args:
+    @{{just_executable()}} stub fabric-golden-check
+
+# owner WO-038
+fabric-vectors-check *args:
+    @{{just_executable()}} stub fabric-vectors-check
+
+# owner WO-038
+neg-fabric-golden *args:
+    @{{just_executable()}} stub neg-fabric-golden
+
+# owner WO-040
+fabric-schema-check *args:
+    @{{just_executable()}} stub fabric-schema-check
+
+# owner WO-040
+neg-fabric-schema *args:
+    @{{just_executable()}} stub neg-fabric-schema
+
+# owner WO-041
+fabric-determinism *args:
+    @{{just_executable()}} stub fabric-determinism
+
+# owner WO-041
+neg-fabric-determinism *args:
+    @{{just_executable()}} stub neg-fabric-determinism
+
+# owner WO-045
+fabric-gen-check *args:
+    @{{just_executable()}} stub fabric-gen-check
+
+# owner WO-045
+neg-fabric-gen *args:
+    @{{just_executable()}} stub neg-fabric-gen
+
+# owner WO-047
+fabric-event-schema-check *args:
+    @{{just_executable()}} stub fabric-event-schema-check
+
+# owner WO-047
+neg-fabric-event-schema *args:
+    @{{just_executable()}} stub neg-fabric-event-schema
+
+# owner WO-048
+fabric-ownership-check *args:
+    @{{just_executable()}} stub fabric-ownership-check
+
+# owner WO-048
+neg-fabric-f2 *args:
+    @{{just_executable()}} stub neg-fabric-f2
+
+# owner WO-051
+fabric-surface-check *args:
+    @{{just_executable()}} stub fabric-surface-check
+
+# owner WO-051
+neg-fabric-f5 *args:
+    @{{just_executable()}} stub neg-fabric-f5
+
+# owner WO-055
+fabric-crash-sweep *args:
+    @{{just_executable()}} stub fabric-crash-sweep
+
+# owner WO-055
+neg-fabric-crash-sweep *args:
+    @{{just_executable()}} stub neg-fabric-crash-sweep
+
+# owner WO-055
+fabric-soak *args:
+    @{{just_executable()}} stub fabric-soak
+
+# owner WO-059
+fabric-fsck *args:
+    @{{just_executable()}} stub fabric-fsck
+
+# owner WO-059
+neg-fabric-fsck *args:
+    @{{just_executable()}} stub neg-fabric-fsck
+
+# owner WO-062
+fabric-conformance *args:
+    @{{just_executable()}} stub fabric-conformance
+
+# owner WO-062
+neg-fabric-conformance *args:
+    @{{just_executable()}} stub neg-fabric-conformance
+
+# owner WO-062
+fabric-contract-lock *args:
+    @{{just_executable()}} stub fabric-contract-lock
+
+# owner WO-062
+neg-fabric-contract-lock *args:
+    @{{just_executable()}} stub neg-fabric-contract-lock
+
+# owner WO-062
+fabric-scorecard *args:
+    @{{just_executable()}} stub fabric-scorecard
+
+# owner WO-062
+neg-fabric-scorecard *args:
+    @{{just_executable()}} stub neg-fabric-scorecard
+
+# owner WO-062
+fabric-demo *args:
+    @{{just_executable()}} stub fabric-demo
+
+# owner WO-063
+fabric-gate *args:
+    @{{just_executable()}} stub fabric-gate
+
+# owner WO-063
+acceptance-061-080 *args:
+    @{{just_executable()}} stub acceptance-061-080

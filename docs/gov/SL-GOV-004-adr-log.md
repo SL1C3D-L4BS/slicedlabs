@@ -9,7 +9,7 @@ owner: founder
 episodes: []
 depends_on: []
 supersedes: []
-decisions: [ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009]
+decisions: [ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0011, ADR-0012, ADR-0013, ADR-0014, ADR-0015, ADR-0016, ADR-0017, ADR-0018, ADR-0019, ADR-0020]
 max_lines: 400
 ---
 # SL-GOV-004: Architecture Decision Record log
@@ -32,6 +32,17 @@ and registries). It is generated from `docs/adr/`; edit an ADR, then regenerate.
 | [ADR-0007](../adr/ADR-0007-factory-manual-mode.md) | Factory manual mode until wo-pipeline and land exist | Proposed | 2026-10-17 | none | none |
 | [ADR-0008](../adr/ADR-0008-conditional-decisions.md) | Conditional decisions: ADR seeds from the Engine Constitution | Proposed | 2026-10-17 | none | none |
 | [ADR-0009](../adr/ADR-0009-error-handling.md) | Errors are values: std::expected in engine code, assertions abort | Proposed | 2026-10-17 | none | none |
+| [ADR-0010](../adr/ADR-0010-fabric-error-domain.md) | Fabric error domain: sl::errc 5000-5999, every code reserved up front | Proposed | 2026-10-18 | none | none |
+| [ADR-0011](../adr/ADR-0011-fabric-identity-layout.md) | Fabric identity: 128-bit record ids minted at authoring time, SHA-256 object ids | Proposed | 2026-10-18 | none | none |
+| [ADR-0012](../adr/ADR-0012-value-model-and-slb1.md) | Canonical value model and the SLB/1 encoding, proven by two implementations | Proposed | 2026-10-18 | none | none |
+| [ADR-0013](../adr/ADR-0013-schema-source-lock-and-generation.md) | Schema source of truth, released-version lock and committed generated code | Proposed | 2026-10-18 | none | none |
+| [ADR-0014](../adr/ADR-0014-revision-store-and-single-cas.md) | Immutable Merkle revision store; the Fabric object store is the one content-addressed store | Proposed | 2026-10-18 | none | none |
+| [ADR-0015](../adr/ADR-0015-commit-log-durability-and-recovery.md) | Durability: one CRC-framed commit log, intact commit frame is the commit point, rollback-and-quarantine | Proposed | 2026-10-18 | none | none |
+| [ADR-0016](../adr/ADR-0016-f5-sole-mutation-path.md) | F5 enforcement: immutable snapshots, a passkey on the only mutator, a debug ledger and a surface lint | Proposed | 2026-10-18 | none | none |
+| [ADR-0017](../adr/ADR-0017-ownership-and-authority.md) | Ownership and authority: one owner per domain, twelve reserved domains, innermost-domain authority | Proposed | 2026-10-18 | none | none |
+| [ADR-0018](../adr/ADR-0018-undo-and-compensation.md) | Undo is a new transaction applying the stored inverse; per-actor stacks; barriers and compensations | Proposed | 2026-10-18 | none | none |
+| [ADR-0019](../adr/ADR-0019-collaboration-and-replay-seams.md) | Collaboration and replay seams frozen into patch v1 and the revision format | Proposed | 2026-10-18 | none | none |
+| [ADR-0020](../adr/ADR-0020-volume-04-acceptance-state.md) | Volume 04 acceptance state: Demonstrated cap, intra-volume order, founder-only status changes | Proposed | 2026-10-18 | none | none |
 
 ## Normative text
 

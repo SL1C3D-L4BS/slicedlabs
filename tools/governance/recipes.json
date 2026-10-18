@@ -433,6 +433,150 @@
     "doctor-strict": {
       "owner": "WO-033",
       "status": "implemented"
+    },
+    "neg-plan": {
+      "owner": "WO-035",
+      "status": "stub"
+    },
+    "fabric-test": {
+      "owner": "WO-035",
+      "status": "stub"
+    },
+    "fabric-contracts-check": {
+      "owner": "WO-036",
+      "status": "stub"
+    },
+    "fabric-contracts-strict": {
+      "owner": "WO-036",
+      "status": "stub"
+    },
+    "neg-fabric-contracts": {
+      "owner": "WO-036",
+      "status": "stub"
+    },
+    "fabric-nothrow-check": {
+      "owner": "WO-036",
+      "status": "stub"
+    },
+    "neg-fabric-nothrow": {
+      "owner": "WO-036",
+      "status": "stub"
+    },
+    "fabric-golden-check": {
+      "owner": "WO-038",
+      "status": "stub"
+    },
+    "fabric-vectors-check": {
+      "owner": "WO-038",
+      "status": "stub"
+    },
+    "neg-fabric-golden": {
+      "owner": "WO-038",
+      "status": "stub"
+    },
+    "fabric-schema-check": {
+      "owner": "WO-040",
+      "status": "stub"
+    },
+    "neg-fabric-schema": {
+      "owner": "WO-040",
+      "status": "stub"
+    },
+    "fabric-determinism": {
+      "owner": "WO-041",
+      "status": "stub"
+    },
+    "neg-fabric-determinism": {
+      "owner": "WO-041",
+      "status": "stub"
+    },
+    "fabric-gen-check": {
+      "owner": "WO-045",
+      "status": "stub"
+    },
+    "neg-fabric-gen": {
+      "owner": "WO-045",
+      "status": "stub"
+    },
+    "fabric-event-schema-check": {
+      "owner": "WO-047",
+      "status": "stub"
+    },
+    "neg-fabric-event-schema": {
+      "owner": "WO-047",
+      "status": "stub"
+    },
+    "fabric-ownership-check": {
+      "owner": "WO-048",
+      "status": "stub"
+    },
+    "neg-fabric-f2": {
+      "owner": "WO-048",
+      "status": "stub"
+    },
+    "fabric-surface-check": {
+      "owner": "WO-051",
+      "status": "stub"
+    },
+    "neg-fabric-f5": {
+      "owner": "WO-051",
+      "status": "stub"
+    },
+    "fabric-crash-sweep": {
+      "owner": "WO-055",
+      "status": "stub"
+    },
+    "neg-fabric-crash-sweep": {
+      "owner": "WO-055",
+      "status": "stub"
+    },
+    "fabric-soak": {
+      "owner": "WO-055",
+      "status": "stub"
+    },
+    "fabric-fsck": {
+      "owner": "WO-059",
+      "status": "stub"
+    },
+    "neg-fabric-fsck": {
+      "owner": "WO-059",
+      "status": "stub"
+    },
+    "fabric-conformance": {
+      "owner": "WO-062",
+      "status": "stub"
+    },
+    "neg-fabric-conformance": {
+      "owner": "WO-062",
+      "status": "stub"
+    },
+    "fabric-contract-lock": {
+      "owner": "WO-062",
+      "status": "stub"
+    },
+    "neg-fabric-contract-lock": {
+      "owner": "WO-062",
+      "status": "stub"
+    },
+    "fabric-scorecard": {
+      "owner": "WO-062",
+      "status": "stub"
+    },
+    "neg-fabric-scorecard": {
+      "owner": "WO-062",
+      "status": "stub"
+    },
+    "fabric-demo": {
+      "owner": "WO-062",
+      "status": "stub"
+    },
+    "fabric-gate": {
+      "owner": "WO-063",
+      "status": "stub"
+    },
+    "acceptance-061-080": {
+      "owner": "WO-063",
+      "status": "stub"
     }
   }
 }
