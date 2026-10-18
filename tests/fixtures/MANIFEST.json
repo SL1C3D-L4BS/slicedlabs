@@ -33,6 +33,30 @@
       "sha256": "0bc72ad7248daa607d263331d21d12d56758bb8f51d2496936b05acc036b3761",
       "bytes": 23642
     },
+    "fabric/schema/README.md": {
+      "sha256": "209632f8fc8cd602064a2d2749d20bcf49e2845547fac0c2776ec6b380a48a33",
+      "bytes": 1170
+    },
+    "fabric/schema/compat_table.json": {
+      "sha256": "400b5beeee5000aea509b038070096d9dfadd6ca45b456cbc1e9bfd51eedfa1d",
+      "bytes": 32107
+    },
+    "fabric/schema/lock_vectors.json": {
+      "sha256": "26593d05154dc939c43261270b455ef3ca329a08acf0420a9e0017d030feb085",
+      "bytes": 6900
+    },
+    "fabric/schema/modules/content.shapes.sltype.json": {
+      "sha256": "7efb953564043d07955c0065eaddfe40ae4e1529ee87e9ce6f6c5e397479d4b4",
+      "bytes": 4432
+    },
+    "fabric/schema/modules/runtime.capture.sltype.json": {
+      "sha256": "cc723fe1bc837e8176cc1720d36cf7d8a097010a8707e0de908648d58fc885b7",
+      "bytes": 1334
+    },
+    "fabric/schema/modules/sim.physics.sltype.json": {
+      "sha256": "1e4b5df541ad8d61199091428d45bfda2fcf72d83b05edd03a66f7d1f5a8dd9e",
+      "bytes": 2087
+    },
     "fabric/slb/accept.json": {
       "sha256": "c5375d7c8b1ec1114599b8f7c483087da28b7ba9d723b256dc63151a90877ee9",
       "bytes": 143132
