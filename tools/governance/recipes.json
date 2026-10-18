@@ -516,23 +516,23 @@
     },
     "fabric-surface-check": {
       "owner": "WO-051",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-f5": {
       "owner": "WO-051",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-crash-sweep": {
       "owner": "WO-055",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-crash-sweep": {
       "owner": "WO-055",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-soak": {
       "owner": "WO-055",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-fsck": {
       "owner": "WO-059",
