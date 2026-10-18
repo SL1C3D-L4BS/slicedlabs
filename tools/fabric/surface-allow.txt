@@ -1,0 +1,19 @@
+# surface-allow.txt (WO-051, ADR-0016): audited exceptions to the F5 public-surface lint (fabric-surface-check).
+# One entry per line: <path>:<rule>:<symbol> <reason>. An entry without a reason, or one that matches no finding,
+# is an error (R-F5-ALLOW). A friend's symbol is <class>:<friend as written>. A new friend of mutation_capability
+# needs ADR-0016 amended first. Paths are relative to the repository root.
+#
+# mutation_capability: the manager makes the passkey at commit step C4 (ARCH2-R01); the backdoor is test-only,
+# defined only in sl_fabric_testing, and its commits count as F5 bypasses.
+engine/fabric/include/sl/fabric/store.hpp:R-F5-FRIEND:mutation_capability:transaction_manager C4 (ADR-0016)
+engine/fabric/include/sl/fabric/store.hpp:R-F5-FRIEND:mutation_capability:testing::backdoor tests (ADR-0016)
+# transaction <-> manager: the manager builds transactions; commit() enters the manager's C1-C7, which opens the
+# F5 scope. Neither grants store access.
+engine/fabric/include/sl/fabric/transaction.hpp:R-F5-FRIEND:transaction:transaction_manager builds transactions
+engine/fabric/include/sl/fabric/transaction.hpp:R-F5-FRIEND:transaction_manager:transaction commit() enters C1-C7
+# Neither stores nor changes stored data.
+engine/fabric/include/sl/fabric/failpoints.hpp:R-F5-FRIEND:failpoint_set:testing::tx_failpoints test-only arming
+engine/fabric/include/sl/fabric/events.hpp:R-F5-FRIEND:subscription:event_bus the bus makes subscription handles
+# Constructors of immutable values from checked parts (the codec and the value builders).
+engine/fabric/include/sl/fabric/id.hpp:R-F5-FRIEND:record_id:detail::id_access ids from checked bytes
+engine/fabric/include/sl/fabric/value.hpp:R-F5-FRIEND:value:detail::value_access builds const value nodes

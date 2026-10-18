@@ -28,6 +28,7 @@
 #include "sl/fabric/deps.hpp"
 #include "sl/fabric/digest.hpp"
 #include "sl/fabric/events.hpp"
+#include "sl/fabric/f5.hpp"
 #include "sl/fabric/failpoints.hpp"
 #include "sl/fabric/gen/fabric.history.gen.hpp"
 #include "sl/fabric/id.hpp"
@@ -760,6 +761,9 @@ struct transaction::impl : tx_detail::tx_core {
 
 struct transaction_manager::state : tx_detail::manager_core {
   using manager_core::manager_core;
+
+  // F5 ledger (WO-051): a bypassing write to this store asserts while the manager lives.
+  f5::governed_store governed{store};
 };
 
 transaction::transaction(std::unique_ptr<impl> p) noexcept : impl_(std::move(p)) {}
@@ -1095,6 +1099,7 @@ result<commit_receipt> transaction_manager::reset_ref(std::string_view name, con
 
 result<commit_ack> transaction_manager::write_batch(commit_batch batch) noexcept {
   const mutation_capability cap{};
+  const f5::authorized_scope authorized{cap}; // F5 ledger: this commit is not a bypass (WO-051)
   return state_->store->commit(cap, std::move(batch));
 }
 

@@ -22,6 +22,7 @@
 #include "sl/core/error.hpp"
 #include "sl/fabric/bytes.hpp"
 #include "sl/fabric/digest.hpp"
+#include "sl/fabric/f5.hpp"
 #include "sl/fabric/id.hpp"
 #include "sl/fabric/journal.hpp"
 #include "sl/fabric/log_backend.hpp"
@@ -579,6 +580,11 @@ result<std::vector<ref_entry>> log_backend::list_refs() const noexcept {
 
 result<commit_ack> log_backend::commit(const mutation_capability & /*cap*/,
                                        commit_batch batch) noexcept {
+  // F5 ledger (WO-051): every call is a backend mutation; outside the manager it is a bypass.
+  f5::note_mutation("log_backend::commit", this);
+  if (!batch.intents.empty()) {
+    f5::note_mutation("log_backend::commit intents", this);
+  }
   if (result<void> checked = check_batch(batch); !checked) {
     return std::unexpected(checked.error());
   }
