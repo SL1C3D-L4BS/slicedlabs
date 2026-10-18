@@ -1,0 +1,9 @@
+# clangd reads build/debug/compile_commands.json (cmake --preset debug, arrives with WO-014).
+CompileFlags:
+  CompilationDatabase: build/debug
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    FastCheckFilter: Loose
+Index:
+  Background: Build

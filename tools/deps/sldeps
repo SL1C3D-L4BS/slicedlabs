@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""sldeps: the dependency lock tool (WO-017, ADR-0002). Run as `python3 -I tools/deps/sldeps <command>`.
+
+  check [--strict]            validate manifest and lock, hashes, third_party coverage, generated files
+  lock [--tested PKG=VER ...] recompute the lock offline (manifest hash, policy copy, vendored hashes) and
+                              write third_party/<dir>/MANIFEST.json
+  sync-vcpkg                  write deps/vcpkg/vcpkg.json and vcpkg-configuration.json from the lock
+  cpm-url PKG                 print the archive URL the cpm provider fetches for PKG (no network)
+  lock-refresh PKG --file F   founder only: set PKG's cpm url_hash to the sha256 of the already downloaded file F
+                              (the recipe `deps-lock-refresh` downloads with curl; this command never touches the network)
+  vendor --from-system PKG    copy PKG's system header into its vendored dir, then recompute the lock
+  register [--write]          print the dependency table, or write registry/views/SL-REG-005-dependencies.md
+
+Common option: --root DIR (default: the repository). `check --ci-order a,b,c,d` is a test hook that
+replaces the ci provider order used by --strict. Stdlib only; nothing is fetched or installed.
+"""
+
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sldeps_lib as lib  # noqa: E402
+
+USAGE = __doc__
+
+
+def parse(argv):
+    """Return (command, options dict, positional list) or raise ValueError."""
+    if not argv:
+        raise ValueError("a command is required")
+    cmd, rest = argv[0], argv[1:]
+    opts = {"root": lib.ROOT, "strict": False, "write": False, "tested": {}, "from_system": None, "ci_order": None, "file": None}
+    pos = []
+    i = 0
+    while i < len(rest):
+        arg = rest[i]
+        if arg == "--strict":
+            opts["strict"] = True
+        elif arg == "--write":
+            opts["write"] = True
+        elif arg in ("--root", "--ci-order", "--tested", "--from-system", "--file"):
+            i += 1
+            if i >= len(rest):
+                raise ValueError("%s needs a value" % arg)
+            value = rest[i]
+            if arg == "--root":
+                opts["root"] = os.path.abspath(value)
+            elif arg == "--ci-order":
+                opts["ci_order"] = value.split(",")
+            elif arg == "--from-system":
+                opts["from_system"] = value
+            elif arg == "--file":
+                opts["file"] = value
+            else:
+                key, sep, ver = value.partition("=")
+                if not sep or not key or not ver:
+                    raise ValueError("--tested wants PKG=VERSION")
+                opts["tested"][key] = ver
+        elif arg.startswith("--"):
+            raise ValueError("unknown option %s" % arg)
+        else:
+            pos.append(arg)
+        i += 1
+    return cmd, opts, pos
+
+
+def main(argv):
+    try:
+        cmd, opts, pos = parse(argv[1:])
+    except ValueError as exc:
+        print("sldeps: %s\n\n%s" % (exc, USAGE), file=sys.stderr)
+        return 2
+    root = opts["root"]
+    try:
+        if cmd == "check" and not pos:
+            errors, notes = lib.check(root, opts["strict"], opts["ci_order"])
+            for note in notes:
+                print("sldeps check: note: %s" % note)
+            if errors:
+                for err in errors:
+                    print("sldeps check: FAIL: %s" % err)
+                return 1
+            print("sldeps check: ok%s" % (" (strict)" if opts["strict"] else ""))
+            return 0
+        if cmd == "lock" and not pos:
+            for rel in lib.cmd_lock(root, opts["tested"]):
+                print("sldeps lock: wrote %s" % rel)
+            return 0
+        if cmd == "sync-vcpkg" and not pos:
+            for rel in lib.cmd_sync_vcpkg(root):
+                print("sldeps sync-vcpkg: wrote %s" % rel)
+            return 0
+        if cmd == "cpm-url" and len(pos) == 1:
+            print(lib.cpm_url(root, pos[0]))
+            return 0
+        if cmd == "lock-refresh" and opts["file"] and len(pos) == 1:
+            for rel in lib.cmd_lock_refresh(root, pos[0], opts["file"]):
+                print("sldeps lock-refresh: wrote %s (cpm url_hash of %s)" % (rel, pos[0]))
+            return 0
+        if cmd == "vendor" and opts["from_system"] and not pos:
+            for rel in lib.cmd_vendor_from_system(root, opts["from_system"]):
+                print("sldeps vendor: wrote %s" % rel)
+            return 0
+        if cmd == "register" and not pos:
+            table = lib.register_table(lib.load(root, lib.LOCK_REL))
+            if opts["write"]:
+                rel = "registry/views/SL-REG-005-dependencies.md"
+                lib.write_text(root, rel, table)
+                print("sldeps register: wrote %s" % rel)
+            else:
+                sys.stdout.write(table)
+            return 0
+    except (lib.DepsError, lib.slib.LoadError, OSError) as exc:
+        print("sldeps %s: FAIL: %s" % (cmd, exc), file=sys.stderr)
+        return 1
+    print("sldeps: bad command line\n\n%s" % USAGE, file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

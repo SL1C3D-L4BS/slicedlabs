@@ -1,0 +1,40 @@
+{
+  "schema": "sl-layout/1",
+  "note": "ADR-0001 layout. 'dirs' must exist with a README.md; 'exist_only' must exist.",
+  "dirs": [
+    "deps",
+    "docs",
+    "docs/adr",
+    "docs/episodes",
+    "docs/gov",
+    "docs/templates",
+    "docs/vol",
+    "editor",
+    "engine",
+    "engine/core",
+    "engine/fabric",
+    "engine/render",
+    "engine/runtime",
+    "evidence",
+    "examples",
+    "examples/sandbox",
+    "platform",
+    "registry",
+    "schemas",
+    "scripts",
+    "sdk",
+    "tests",
+    "tests/gates",
+    "tests/governance",
+    "tests/unit",
+    "third_party",
+    "tools",
+    "tools/deps",
+    "tools/governance",
+    "tools/presets"
+  ],
+  "exist_only": [
+    "docs/plan",
+    "work-orders"
+  ]
+}

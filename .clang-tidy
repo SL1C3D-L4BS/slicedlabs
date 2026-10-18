@@ -1,0 +1,39 @@
+# The static-analysis gate for C++23. A change to this file is a gate change (config-protect, touches_gates).
+# Families: bugprone, cppcoreguidelines, modernize, performance, readability. Each disabled check is
+# disabled for a stated reason; do not add to the list without one.
+Checks: >
+  -*,
+  bugprone-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -bugprone-easily-swappable-parameters,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-vararg,
+  -modernize-use-trailing-return-type,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-magic-numbers
+# Why the exclusions:
+#  bugprone-easily-swappable-parameters          fires on every (int, int) signature; no real defects found
+#  cppcoreguidelines-avoid-magic-numbers         alias of readability-magic-numbers (below)
+#  cppcoreguidelines-macro-usage                 engine needs a few macros (platform, export, assert)
+#  cppcoreguidelines-owning-memory               requires the GSL owner<T> type, which we do not use (RAII types instead)
+#  cppcoreguidelines-pro-bounds-array-to-pointer-decay   fires inside assert and on string literals
+#  cppcoreguidelines-pro-bounds-pointer-arithmetic       renderer and allocator code needs pointers; reviewed instead
+#  cppcoreguidelines-pro-type-vararg             logging and platform APIs take variadic arguments
+#  modernize-use-trailing-return-type            style preference, not a defect
+#  readability-function-cognitive-complexity     threshold needs tuning per module; reviewed instead
+#  readability-identifier-length                 short loop and math names (i, x, dt) are idiomatic
+#  readability-magic-numbers                     constants tables and GPU limits are literals by design
+WarningsAsErrors: '*'
+HeaderFilterRegex: '^(engine|editor|sdk|platform|examples|tests)/'
+FormatStyle: file
+CheckOptions:
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '0'

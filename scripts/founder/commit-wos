@@ -1,0 +1,89 @@
+#!/usr/bin/env -S python3 -I
+"""commit-wos: stage and commit the working tree as one signed commit per work order (founder-run).
+
+Reads work-orders/WO-*.md in id order, matches every changed or untracked path against each work order's
+paths_allowed (first match wins, so earlier work orders take shared files such as the justfile), and prints
+the `git add` / `git commit` commands. With --apply it runs them (your git config signs the commits).
+Paths that match no work order are listed at the end for you to decide (they are not committed).
+
+Usage: scripts/founder/commit-wos [--apply] [--only WO-NNN]
+"""
+import fnmatch
+import os
+import re
+import subprocess
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+
+def sh(*args):
+    return subprocess.run(args, cwd=ROOT, check=True, capture_output=True, text=True).stdout
+
+
+def wo_paths(path):
+    text = open(path, encoding="utf-8").read()
+    fm = text.split("---", 2)[1]
+    goal = re.search(r'^goal:\s*"(.*)"', fm, re.M)
+    block = re.search(r"^paths_allowed:\n((?:  - .*\n)+)", fm, re.M)
+    pats = [ln.strip()[2:].strip().strip("'\"") for ln in block.group(1).splitlines()] if block else []
+    return (goal.group(1) if goal else ""), pats
+
+
+def glob_match(pat, rel):
+    if pat.endswith("/**"):
+        return rel == pat[:-3] or rel.startswith(pat[:-3] + "/")
+    if "**" in pat:
+        return fnmatch.fnmatch(rel, pat.replace("**", "*")) or fnmatch.fnmatch(rel, pat)
+    return fnmatch.fnmatch(rel, pat) or rel == pat
+
+
+def main(argv):
+    apply = "--apply" in argv
+    only = argv[argv.index("--only") + 1] if "--only" in argv else None
+    changed = [ln[3:] for ln in sh("git", "status", "--porcelain", "-uall").splitlines() if ln and not ln[3:].startswith("build/")]
+    changed = [c.split(" -> ")[-1] for c in changed]
+    wos = sorted(f for f in os.listdir(os.path.join(ROOT, "work-orders")) if re.match(r"WO-\d{3}\.md$", f))
+    specs = []
+    for f in wos:
+        goal, pats = wo_paths(os.path.join(ROOT, "work-orders", f))
+        specs.append((f[:-3], goal, pats + [f"work-orders/{f}"]))
+
+    def literal_len(pat):
+        return len(re.split(r"[*?\[]", pat, 1)[0])
+
+    owner = {}
+    for c in changed:
+        best = None
+        for wo, _goal, pats in specs:  # ties go to the earliest work order
+            for pat in pats:
+                if glob_match(pat, c):
+                    key = literal_len(pat)
+                    if best is None or key > best[0]:
+                        best = (key, wo)
+        if best:
+            owner[c] = best[1]
+    taken = set(owner)
+    plan = [(wo, goal, [c for c in changed if owner.get(c) == wo]) for wo, goal, _ in specs]
+    plan = [x for x in plan if x[2]]
+    extra = [c for c in changed if c not in taken]
+    for wo, goal, files in plan:
+        if only and wo != only:
+            continue
+        print(f"\n# {wo}: {len(files)} paths")
+        print("git add -- " + " ".join(f"'{x}'" for x in files))
+        msg = f"{wo}: {goal}" if goal else wo
+        print(f"git commit -q -m {msg!r}")
+        if apply:
+            subprocess.run(["git", "add", "--", *files], cwd=ROOT, check=True)
+            subprocess.run(["git", "commit", "-q", "-m", msg], cwd=ROOT, check=True)
+            print(f"committed {wo}")
+    if extra:
+        print("\n# not matched by any work order (decide yourself; commander-side fixes belong to the WO they fixed):")
+        for x in extra:
+            print("  ", x)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

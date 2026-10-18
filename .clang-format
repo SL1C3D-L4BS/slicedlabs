@@ -1,0 +1,6 @@
+# C++ style: LLVM base, 2 spaces, 100 columns, latest standard. A change here is a gate change (touches_gates).
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: Latest
+IndentWidth: 2
+ColumnLimit: 100
