@@ -444,35 +444,35 @@
     },
     "fabric-contracts-check": {
       "owner": "WO-036",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-contracts-strict": {
       "owner": "WO-036",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-contracts": {
       "owner": "WO-036",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-nothrow-check": {
       "owner": "WO-036",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-nothrow": {
       "owner": "WO-036",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-golden-check": {
       "owner": "WO-038",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-vectors-check": {
       "owner": "WO-038",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-golden": {
       "owner": "WO-038",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-schema-check": {
       "owner": "WO-040",
