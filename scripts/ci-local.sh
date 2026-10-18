@@ -3,8 +3,9 @@
 # Usage: scripts/ci-local.sh [--quick | --full]
 #   default  doctor, fmt-check, gov-check, then cmake --workflow --preset ci-clang, ci-gcc, ci-asan
 #   --quick  doctor, fmt-check, gov-check, ci-clang only
-#   --full   default plus ci-ubsan, ci-tsan, ci-release, ci-gcc-release (a workflow preset that does not
-#            exist is skipped and says so)
+#   --full   default plus ci-ubsan, ci-tsan, ci-release, ci-gcc-release. A workflow preset that CMakePresets.json
+#            does not define is skipped with a visible "skipped: no workflow preset <name>" line (summary and
+#            the final line list them); the run still exits 0 when every step that did run passed (WO-028).
 # Each step is timed; output goes to build/ci-local/<step>.log and the tail is printed on failure.
 # The first failing step stops the run: a summary table is printed, the step is named, exit 1.
 # Exit codes: 0 all steps passed, 1 a step failed, 2 usage error.
@@ -83,11 +84,12 @@ run_step() {
   echo "ci-local: [$name] ok (${times[-1]} s)"
 }
 
+skipped_presets=()
 skip_step() {
   names+=("$1")
   results+=("skipped")
   times+=("-")
-  echo "ci-local: [$1] skipped ($2)"
+  echo "ci-local: [$1] skipped: $2"
 }
 
 workflows="$(cmake --list-presets=workflow 2>/dev/null || true)"
@@ -106,9 +108,13 @@ for p in "${presets[@]}"; do
   if has_workflow "$p"; then
     run_step "workflow $p" cmake --workflow --preset "$p"
   else
-    skip_step "workflow $p" "no such workflow preset"
+    skip_step "workflow $p" "no workflow preset $p"
+    skipped_presets+=("$p")
   fi
 done
 
 print_summary
+if [ "${#skipped_presets[@]}" -gt 0 ]; then
+  echo "ci-local: skipped: no workflow preset for: ${skipped_presets[*]}"
+fi
 echo "ci-local: ok ($mode)"
