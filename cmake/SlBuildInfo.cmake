@@ -1,6 +1,7 @@
 # Configure-time build provenance (F3 field set). Writes, under ${CMAKE_BINARY_DIR} (= build/<preset>):
 #   generated/sl/build_info.hpp   constexpr strings for sl_core (target sl_build_info carries the include dir)
-#   build-info.json               {inputs, toolchain, parameters, environment_hash}
+#   build-info.json               {inputs, toolchain, parameters, environment_hash, provenance_dir}
+#                                 (provenance_dir: where sl_provenance() records land, cmake/SlProvenance.cmake)
 # Files are rewritten only when their content changes, so a re-configure does not rebuild.
 
 function(_sl_json_str out value)
@@ -125,6 +126,9 @@ function(sl_build_info_generate)
   string(JSON j SET "${j}" parameters warnings_as_errors ${werror})
   string(JSON j SET "${j}" parameters std ${SL_CXX_STANDARD})
   string(JSON j SET "${j}" environment_hash "\"${env_hash}\"")
+  file(RELATIVE_PATH _sl_prov_rel "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/provenance")
+  _sl_json_str(v "${_sl_prov_rel}")
+  string(JSON j SET "${j}" provenance_dir "${v}")
   _sl_write_if_different("${CMAKE_BINARY_DIR}/build-info.json" "${j}\n")
 
   message(STATUS "sliced: build-info.json ${preset} ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} "

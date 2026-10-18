@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/sl-provenance.schema.json",
+  "title": "build/<preset>/provenance/<target>.prov.json build provenance record (SL-GOV-006 F3, SL-EP-055)",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "sl-provenance/1"
+    },
+    "target": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.+-]+$"
+    },
+    "artifact": {
+      "$ref": "#/$defs/file"
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/file"
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "properties": {
+        "compiler": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compiler_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cmake": {
+          "type": "string",
+          "minLength": 1
+        },
+        "linker": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lock_sha256": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "compiler",
+        "compiler_version",
+        "cmake",
+        "linker",
+        "lock_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "preset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "build_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "std": {
+          "enum": [
+            23,
+            26
+          ]
+        },
+        "sanitize": {
+          "type": "string",
+          "minLength": 1
+        },
+        "warnings_as_errors": {
+          "type": "boolean"
+        },
+        "flags_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "preset",
+        "build_type",
+        "std",
+        "sanitize",
+        "warnings_as_errors",
+        "flags_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "environment_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "built_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    }
+  },
+  "required": [
+    "schema",
+    "target",
+    "artifact",
+    "inputs",
+    "toolchain",
+    "parameters",
+    "environment_hash",
+    "built_at"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "file": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
