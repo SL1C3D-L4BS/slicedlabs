@@ -11,7 +11,12 @@ change a status. `docs/templates/EPISODE.md` is the full per-episode template (W
   fixtures, local and hosted CI, provenance, diagnostics, docs, dependency ingestion, development image, release gate), in
   the same five sub-headings, then the acceptance transcripts of `just acceptance-049-060` (`build/acceptance/5-*.log` to
   `9-*.log`).
-- Gate: `just episodes-doc-check 041-048` and `just episodes-doc-check 049-060` (`tools/governance/cmd_episodes_doc_check.py`; rules `R-EPDOC-RANGE`,
+- `061-080.md` (WO-063): SL-EP-061 to SL-EP-080, the Fabric (identity, types, schema versioning, manifest, ownership,
+  provenance, serialization, events, transactions, undo, dependency graph, impact, boundary, resolver, recovery,
+  corruption, generated tooling, conformance, release), in the same five sub-headings, with honest limits (simulated
+  durability, Windows unverified, big-endian untested, wall time unmeasured, seams S1-S16), then the acceptance of
+  `just acceptance-061-080` (`build/acceptance/10-*.log` to `12-*.log`).
+- Gate: `just episodes-doc-check 041-048`, `just episodes-doc-check 049-060` and `just episodes-doc-check 061-080` (`tools/governance/cmd_episodes_doc_check.py`; rules `R-EPDOC-RANGE`,
   `R-EPDOC-FILE`, `R-EPDOC-SECTION`, `R-EPDOC-HEADINGS`, `R-EPDOC-ACCEPT`, `R-EPDOC-DECISIONS`;
   `python3 -I tools/governance/cmd_episodes_doc_check.py --selftest` plants one defect per rule).
 - Episodes 001 to 020 get their records with the Volume 01 work orders.

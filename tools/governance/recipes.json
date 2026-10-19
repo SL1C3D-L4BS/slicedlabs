@@ -374,6 +374,10 @@
       "owner": "WO-027",
       "status": "implemented"
     },
+    "fixtures-lock": {
+      "owner": "WO-063",
+      "status": "implemented"
+    },
     "golden-check": {
       "owner": "WO-027",
       "status": "implemented"
@@ -572,11 +576,11 @@
     },
     "fabric-gate": {
       "owner": "WO-063",
-      "status": "stub"
+      "status": "implemented"
     },
     "acceptance-061-080": {
       "owner": "WO-063",
-      "status": "stub"
+      "status": "implemented"
     }
   }
 }

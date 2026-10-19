@@ -1,4 +1,1296 @@
 {
   "format": "sl-schema-lock/1",
-  "released": {}
+  "released": {
+    "fabric.edge.edge": {
+      "1.0": {
+        "hash": "sha256:6243672686dd4df9ac94bd6c1dd83889a230f41a7274f13ff886563d53e0a3da",
+        "definition": {
+          "name": "fabric.edge.edge",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.edge",
+          "record_class": "entity",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "from",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Record id of the dependent record."
+            },
+            {
+              "no": 2,
+              "name": "to",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Record id of the record it depends on."
+            },
+            {
+              "no": 3,
+              "name": "kind",
+              "type": "fabric.edge.edge_kind",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Kind of the edge."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.edge.edge_kind": {
+      "1.0": {
+        "hash": "sha256:5897a8b00483a53c8fbd536e2c53cf9d58730d2b8f4d2e17444a36db5db58e72",
+        "definition": {
+          "name": "fabric.edge.edge_kind",
+          "kind": "enum",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.edge",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [
+            {
+              "no": 1,
+              "name": "reference",
+              "doc": "A strong reference.",
+              "since_minor": 0
+            },
+            {
+              "no": 2,
+              "name": "containment",
+              "doc": "An owner and what it owns.",
+              "since_minor": 0
+            },
+            {
+              "no": 3,
+              "name": "derives_from",
+              "doc": "A derived record and one of its inputs.",
+              "since_minor": 0
+            },
+            {
+              "no": 4,
+              "name": "builds",
+              "doc": "A build target and what it builds from.",
+              "since_minor": 0
+            },
+            {
+              "no": 5,
+              "name": "validates",
+              "doc": "A test and what it validates.",
+              "since_minor": 0
+            }
+          ],
+          "cases": []
+        }
+      }
+    },
+    "fabric.event.about": {
+      "1.0": {
+        "hash": "sha256:acef0d8dafa2290eaaa4a63731c8d2fc926e1d2d4b9353c04146215f75494512",
+        "definition": {
+          "name": "fabric.event.about",
+          "kind": "variant",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history.event",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [
+            {
+              "no": 1,
+              "name": "subject",
+              "type": "id",
+              "doc": "Id of the record the event is about.",
+              "since_minor": 0
+            },
+            {
+              "no": 2,
+              "name": "scope",
+              "type": "string",
+              "doc": "Scope tag of an event about no single record.",
+              "since_minor": 0
+            }
+          ]
+        }
+      }
+    },
+    "fabric.event.causality": {
+      "1.0": {
+        "hash": "sha256:3a746bf567f5281e2d747227f400dad3932e2df928cc57941a329ab49fec44d1",
+        "definition": {
+          "name": "fabric.event.causality",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history.event",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "cause",
+              "type": "id",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Event id of the event that caused this one."
+            },
+            {
+              "no": 2,
+              "name": "tx",
+              "type": "id",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Tx id of the transaction that caused it."
+            },
+            {
+              "no": 3,
+              "name": "revision",
+              "type": "digest",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Revision object id the event was observed at."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.event.correlation": {
+      "1.0": {
+        "hash": "sha256:3b480afc9a7886c1ee53956d09b59be17c939d0a33d2bf944175c447ede6eaf8",
+        "definition": {
+          "name": "fabric.event.correlation",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history.event",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "id",
+              "type": "u64",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Correlation id."
+            },
+            {
+              "no": 2,
+              "name": "scope",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Correlation scope, owned."
+            },
+            {
+              "no": 3,
+              "name": "tick",
+              "type": "u64",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Tick the event belongs to."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.event.event_envelope": {
+      "1.0": {
+        "hash": "sha256:c363c887c9114853f3fac9d2cc614561da4e3cf92e746d610e1d3ae6e350a4b5",
+        "definition": {
+          "name": "fabric.event.event_envelope",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history.event",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "id",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Event id derived from tx id, kind and seq (ARCH1-R47)."
+            },
+            {
+              "no": 2,
+              "name": "schema",
+              "type": "fabric.event.schema_ref",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Type and version of the payload."
+            },
+            {
+              "no": 3,
+              "name": "type",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Event type string, such as fabric.tx.committed."
+            },
+            {
+              "no": 4,
+              "name": "time",
+              "type": "fabric.event.time_us",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Time from the injected clock."
+            },
+            {
+              "no": 5,
+              "name": "seq",
+              "type": "u64",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Sequence number per source."
+            },
+            {
+              "no": 6,
+              "name": "actor",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Actor id of the actor that caused the event."
+            },
+            {
+              "no": 7,
+              "name": "about",
+              "type": "fabric.event.about",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Subject id or scope tag."
+            },
+            {
+              "no": 8,
+              "name": "correlation",
+              "type": "fabric.event.correlation",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Correlation of the event."
+            },
+            {
+              "no": 9,
+              "name": "causality",
+              "type": "fabric.event.causality",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Cause event, transaction and revision."
+            },
+            {
+              "no": 10,
+              "name": "payload",
+              "type": "bytes",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "SLB/1 encoding of the payload value."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.event.schema_ref": {
+      "1.0": {
+        "hash": "sha256:8cf98765cc8b55b5868a670eb48d90bc246c8ee1bd663ad2f396651d12e3e871",
+        "definition": {
+          "name": "fabric.event.schema_ref",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history.event",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "type",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Type id of the payload type."
+            },
+            {
+              "no": 2,
+              "name": "major",
+              "type": "u32",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Major version of the payload type."
+            },
+            {
+              "no": 3,
+              "name": "minor",
+              "type": "u32",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Minor version of the payload type."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.event.time_us": {
+      "1.0": {
+        "hash": "sha256:f71b574a6c80987150b0503d4b9817a3f4deca6cde2a3043d1b1a381f22146d7",
+        "definition": {
+          "name": "fabric.event.time_us",
+          "kind": "tagged",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history.event",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [],
+          "element": "i64"
+        }
+      }
+    },
+    "fabric.history.digest_list": {
+      "1.0": {
+        "hash": "sha256:a4ce52ea859bfcca934b216107e7b2989ec668f90e1a97e439a5ebae93535c57",
+        "definition": {
+          "name": "fabric.history.digest_list",
+          "kind": "list",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [],
+          "element": "digest"
+        }
+      }
+    },
+    "fabric.history.origin": {
+      "1.0": {
+        "hash": "sha256:d23d11d394ebf05479ea1b04d3eca1e9687553f2362ce68e89c95f31366c6b6c",
+        "definition": {
+          "name": "fabric.history.origin",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "subsystem",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Subsystem that made the edit, as its owner number 01 to 12."
+            },
+            {
+              "no": 2,
+              "name": "epistemic",
+              "type": "fabric.provenance.epistemic_class",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Epistemic class of the facts it writes."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.history.ref_update": {
+      "1.0": {
+        "hash": "sha256:208eac161a0551c9d589161f82875b8999cfdf1d20a8416a73fb49bc49b2ac61",
+        "definition": {
+          "name": "fabric.history.ref_update",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "name",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Ref name: 1 to 255 bytes of 0x21 to 0x7E."
+            },
+            {
+              "no": 2,
+              "name": "expected",
+              "type": "digest",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Object id the ref holds now; absent when the ref must not exist."
+            },
+            {
+              "no": 3,
+              "name": "target",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Object id the ref moves to."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.history.revision": {
+      "1.0": {
+        "hash": "sha256:d16c051aa79dc2feb8467d24dba060dd0bd175c1694cf7b9ad3593e7d99f1841",
+        "definition": {
+          "name": "fabric.history.revision",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "parents",
+              "type": "fabric.history.digest_list",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Parent revision object ids; empty for the genesis revision."
+            },
+            {
+              "no": 2,
+              "name": "root",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Object id of the root object (records trie and membership map)."
+            },
+            {
+              "no": 3,
+              "name": "schema_set",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Digest of the schema set the revision was written with."
+            },
+            {
+              "no": 4,
+              "name": "tx",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Object id of the tx record that produced this revision."
+            },
+            {
+              "no": 5,
+              "name": "generation",
+              "type": "u64",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Longest parent chain to the genesis revision (generation 0)."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.history.tx_record": {
+      "1.0": {
+        "hash": "sha256:e122b297502a621e9616156e16e21b9d2dc747b48f8bee3aa0f9b231f8b5c205",
+        "definition": {
+          "name": "fabric.history.tx_record",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.history",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "actor",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Actor id of the actor that committed the transaction."
+            },
+            {
+              "no": 2,
+              "name": "origin",
+              "type": "fabric.history.origin",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Subsystem and epistemic class of the transaction."
+            },
+            {
+              "no": 3,
+              "name": "provenance",
+              "type": "fabric.provenance.provenance",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Provenance of the derived records it writes."
+            },
+            {
+              "no": 4,
+              "name": "patch",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Object id of the patch object (kind 8) the transaction applied."
+            },
+            {
+              "no": 5,
+              "name": "idempotency_key",
+              "type": "string",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Client key that turns a retried commit into a no-op."
+            },
+            {
+              "no": 6,
+              "name": "label",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Human label shown in history and undo menus."
+            },
+            {
+              "no": 7,
+              "name": "undo_of",
+              "type": "id",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Tx id of the transaction this one undoes."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.identity.import_record": {
+      "1.0": {
+        "hash": "sha256:6da757bb0492e17ff5a12f929dd870733e19a1ec40cb9c5392d1f07688860ce7",
+        "definition": {
+          "name": "fabric.identity.import_record",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.identity",
+          "record_class": "import",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "system",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Name of the external system, such as a tool or a file format."
+            },
+            {
+              "no": 2,
+              "name": "external_id",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Identifier of the object inside the external system."
+            },
+            {
+              "no": 3,
+              "name": "locator",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Where the external object was read from."
+            },
+            {
+              "no": 4,
+              "name": "content",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Digest of the external content at import time."
+            },
+            {
+              "no": 5,
+              "name": "record",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Record id the import produced."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.identity.tombstone": {
+      "1.0": {
+        "hash": "sha256:6185fc766b7ddb4784441e1e64582ea9c6ca93ff9c3a4ca98b8062d9ac2526b9",
+        "definition": {
+          "name": "fabric.identity.tombstone",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.identity",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "id",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "The retired record id."
+            },
+            {
+              "no": 2,
+              "name": "last_record",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Object id of the last record object written under the id."
+            },
+            {
+              "no": 3,
+              "name": "retired_by",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Tx id of the transaction that retired the id."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.manifest.format_version": {
+      "1.0": {
+        "hash": "sha256:8238530224b68a5fec42b7ded13e028f2da011d8d09e83038ffe64da97a94a92",
+        "definition": {
+          "name": "fabric.manifest.format_version",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.manifest",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "major",
+              "type": "u32",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Major version: a change readers of an older major refuse."
+            },
+            {
+              "no": 2,
+              "name": "minor",
+              "type": "u32",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Minor version: additive changes within the major."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.manifest.manifest": {
+      "1.0": {
+        "hash": "sha256:804f5fda0ac8ba7f7c515624b76f618caa8351b8be72c7515167785d9c69fe0b",
+        "definition": {
+          "name": "fabric.manifest.manifest",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.manifest",
+          "record_class": "entity",
+          "state_class": "document",
+          "document_root": true,
+          "fields": [
+            {
+              "no": 1,
+              "name": "project",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Project id of the project."
+            },
+            {
+              "no": 2,
+              "name": "name",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Display name of the project."
+            },
+            {
+              "no": 3,
+              "name": "writer_format",
+              "type": "fabric.manifest.format_version",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Format version of the engine that last wrote it."
+            },
+            {
+              "no": 4,
+              "name": "min_reader_format",
+              "type": "fabric.manifest.format_version",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Oldest format version that can read it."
+            },
+            {
+              "no": 5,
+              "name": "schema_set",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Digest of the schema set of the head revision."
+            },
+            {
+              "no": 6,
+              "name": "modules",
+              "type": "fabric.manifest.module_ranges",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Required modules with their admitted version ranges."
+            },
+            {
+              "no": 7,
+              "name": "capabilities",
+              "type": "fabric.manifest.string_list",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Required capabilities by SL-REG-004 id."
+            },
+            {
+              "no": 8,
+              "name": "target_profiles",
+              "type": "fabric.manifest.string_list",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Target profiles by SL-GOV-007 name."
+            },
+            {
+              "no": 9,
+              "name": "package_pins",
+              "type": "fabric.manifest.package_pins",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Pinned packages in resolution order."
+            },
+            {
+              "no": 10,
+              "name": "default_branch",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Name of the default branch."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.manifest.module_ranges": {
+      "1.0": {
+        "hash": "sha256:1714adf421a9907fbfe34958dd41a4d53cec4cc71a2340a66ea3bad34b3834af",
+        "definition": {
+          "name": "fabric.manifest.module_ranges",
+          "kind": "map",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.manifest",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [],
+          "element": "fabric.manifest.version_range",
+          "key": "string"
+        }
+      }
+    },
+    "fabric.manifest.package_pin": {
+      "1.0": {
+        "hash": "sha256:a1c15b97a6d6a0c400e1e952e4be441d95cb982c7f4f3178d1e7c97eb6b56dd9",
+        "definition": {
+          "name": "fabric.manifest.package_pin",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.manifest",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "package",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Package id of the pinned package."
+            },
+            {
+              "no": 2,
+              "name": "revision",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Revision object id the package is pinned to."
+            },
+            {
+              "no": 3,
+              "name": "mount",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Mount point of the package inside the project."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.manifest.package_pins": {
+      "1.0": {
+        "hash": "sha256:d271312531ace8f1490307365b808a9ccf0c7d86cc64d1937570016861819f2a",
+        "definition": {
+          "name": "fabric.manifest.package_pins",
+          "kind": "oset",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.manifest",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [],
+          "element": "fabric.manifest.package_pin"
+        }
+      }
+    },
+    "fabric.manifest.string_list": {
+      "1.0": {
+        "hash": "sha256:4a160f24477bbd5768f11edaa87289eecc68394368243eefa6a28b3b7755eaf1",
+        "definition": {
+          "name": "fabric.manifest.string_list",
+          "kind": "list",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.manifest",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [],
+          "element": "string"
+        }
+      }
+    },
+    "fabric.manifest.version_range": {
+      "1.0": {
+        "hash": "sha256:216f255ea008ad8ca670ab771018c9a6c8094eeed0dd36c497a6ff237d305830",
+        "definition": {
+          "name": "fabric.manifest.version_range",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.manifest",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "at_least",
+              "type": "fabric.manifest.format_version",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Lowest admitted version, inclusive."
+            },
+            {
+              "no": 2,
+              "name": "below",
+              "type": "fabric.manifest.format_version",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "First version no longer admitted, exclusive."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.provenance.digest_list": {
+      "1.0": {
+        "hash": "sha256:a4828bed643e60ab6e7c1eb975b152a3c1525eb3ac4fe4394b778265913f1d8b",
+        "definition": {
+          "name": "fabric.provenance.digest_list",
+          "kind": "list",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.provenance",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [],
+          "element": "digest"
+        }
+      }
+    },
+    "fabric.provenance.epistemic_class": {
+      "1.0": {
+        "hash": "sha256:4cc311a8648f8d0b3aa03e6d6cfce293d2bb053674596c451fdc24f09587b418",
+        "definition": {
+          "name": "fabric.provenance.epistemic_class",
+          "kind": "enum",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.provenance",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [
+            {
+              "no": 1,
+              "name": "observed",
+              "doc": "Measured from a running system; immutable.",
+              "since_minor": 0
+            },
+            {
+              "no": 2,
+              "name": "imported",
+              "doc": "Read from an external source.",
+              "since_minor": 0
+            },
+            {
+              "no": 3,
+              "name": "asserted",
+              "doc": "Stated by an actor.",
+              "since_minor": 0
+            },
+            {
+              "no": 4,
+              "name": "calculated",
+              "doc": "Computed by a deterministic tool.",
+              "since_minor": 0
+            },
+            {
+              "no": 5,
+              "name": "inferred",
+              "doc": "Proposed by a heuristic or a model.",
+              "since_minor": 0
+            },
+            {
+              "no": 6,
+              "name": "accepted",
+              "doc": "Promoted by an actor holding accept on the domain.",
+              "since_minor": 0
+            }
+          ],
+          "cases": []
+        }
+      }
+    },
+    "fabric.provenance.id_list": {
+      "1.0": {
+        "hash": "sha256:66242f0032d5b6a178bf1a616df0a58b2f50cc2ca1f81c6c98f728328dc55d5b",
+        "definition": {
+          "name": "fabric.provenance.id_list",
+          "kind": "list",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.provenance",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [],
+          "element": "id"
+        }
+      }
+    },
+    "fabric.provenance.input_ref": {
+      "1.0": {
+        "hash": "sha256:5983b3c4c17137fde477a6aef1fc1cf52ee5b881c5cefda6203bab251e2497e6",
+        "definition": {
+          "name": "fabric.provenance.input_ref",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.provenance",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "id",
+              "type": "id",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Record id of the input."
+            },
+            {
+              "no": 2,
+              "name": "digest",
+              "type": "digest",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Content digest of the input record."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.provenance.provenance": {
+      "1.0": {
+        "hash": "sha256:26f6652d1254a5317b2ef70f6e222dc3f666e56de7f0cdc026a80e2e789a7ed8",
+        "definition": {
+          "name": "fabric.provenance.provenance",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.provenance",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "input_ids",
+              "type": "fabric.provenance.id_list",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Record ids of the inputs."
+            },
+            {
+              "no": 2,
+              "name": "input_revisions",
+              "type": "fabric.provenance.digest_list",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Record content digests of the inputs, one per id."
+            },
+            {
+              "no": 3,
+              "name": "toolchain_id",
+              "type": "string",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Id of the toolchain that derived the record."
+            },
+            {
+              "no": 4,
+              "name": "parameters_digest",
+              "type": "digest",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Digest of the derivation parameters."
+            },
+            {
+              "no": 5,
+              "name": "environment_hash",
+              "type": "digest",
+              "presence": "optional",
+              "since_minor": 0,
+              "doc": "Hash of the derivation environment."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.schema.domain_claim": {
+      "1.0": {
+        "hash": "sha256:43fd09b4d1759345567f1305026d9dc12c33510c3064fc7b093c95639c23177e",
+        "definition": {
+          "name": "fabric.schema.domain_claim",
+          "kind": "struct",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.schema",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [
+            {
+              "no": 1,
+              "name": "domain",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Dotted domain name under a reserved prefix."
+            },
+            {
+              "no": 2,
+              "name": "owner",
+              "type": "string",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "Owner subsystem number, 01 to 12."
+            },
+            {
+              "no": 3,
+              "name": "state_classes",
+              "type": "fabric.schema.state_classes",
+              "presence": "required",
+              "since_minor": 0,
+              "doc": "State classes the domain admits."
+            }
+          ],
+          "reserved": [],
+          "enumerators": [],
+          "cases": []
+        }
+      }
+    },
+    "fabric.schema.state_class": {
+      "1.0": {
+        "hash": "sha256:3ee887ebefdedfdda17906809d08edd30ea202ae03b667190cddfefcc1ab6c32",
+        "definition": {
+          "name": "fabric.schema.state_class",
+          "kind": "enum",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.schema",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [
+            {
+              "no": 1,
+              "name": "document",
+              "doc": "Authored state, edited through transactions.",
+              "since_minor": 0
+            },
+            {
+              "no": 2,
+              "name": "derived",
+              "doc": "Generated output with provenance.",
+              "since_minor": 0
+            },
+            {
+              "no": 3,
+              "name": "observation",
+              "doc": "Captured from a running system.",
+              "since_minor": 0
+            }
+          ],
+          "cases": []
+        }
+      }
+    },
+    "fabric.schema.state_classes": {
+      "1.0": {
+        "hash": "sha256:afbec0bd97bf3aa08fbe16871aac598e908fcedf3395538e386f518bceffc61b",
+        "definition": {
+          "name": "fabric.schema.state_classes",
+          "kind": "list",
+          "major": 1,
+          "minor": 0,
+          "domain": "fabric.schema",
+          "record_class": "none",
+          "state_class": "document",
+          "document_root": false,
+          "fields": [],
+          "reserved": [],
+          "enumerators": [],
+          "cases": [],
+          "element": "fabric.schema.state_class"
+        }
+      }
+    }
+  }
 }

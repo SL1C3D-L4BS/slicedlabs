@@ -22,7 +22,9 @@ trap 'rm -rf "$work"' EXIT
 fresh() {
   rm -rf "$work"
   mkdir -p "$work/schemas/fabric" "$work/docs"
-  cp "$root/schemas/fabric/sl-type-def.schema.json" "$root/schemas/fabric/schema.lock.json" "$work/schemas/fabric/"
+  cp "$root/schemas/fabric/sl-type-def.schema.json" "$work/schemas/fabric/"
+  # an empty lock: the repo lock pins the fabric.* modules (WO-063), which the fixture modules are not
+  printf '{\n  "format": "sl-schema-lock/1",\n  "released": {}\n}\n' >"$work/schemas/fabric/schema.lock.json"
   cp -r "$root/docs/arch" "$work/docs/arch"
   cp "$root"/tests/fixtures/fabric/schema/modules/*.sltype.json "$work/schemas/fabric/"
   python3 -I "$checker" lock --root "$work" >/dev/null

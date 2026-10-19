@@ -67,7 +67,7 @@ echo "neg-fabric-contract-lock: a-doc-drift: exit $status, names R-LOCK-DOC and 
 
 # (b) the lock drifts the same number
 fresh
-sed -i "s/\"$code\",[[:space:]]*5013/\"$code\", 5016/" "$work/schemas/fabric/contract.lock.json"
+sed -z -i "s/\"$code\",[[:space:]]*5013/\"$code\", 5016/" "$work/schemas/fabric/contract.lock.json"
 grep -qF "\"$code\", 5016" "$work/schemas/fabric/contract.lock.json" || fail "b-lock-drift: the lock copy was not changed"
 run_check
 [ "$status" -ne 0 ] || fail "b-lock-drift: fabric-contract-lock exited 0 with $code drifted in the lock"

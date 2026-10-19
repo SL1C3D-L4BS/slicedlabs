@@ -3,7 +3,7 @@ id: SL-GOV-006
 kind: GOV
 title: "Fragmentation Budget"
 status: Draft
-version: 0.1.0
+version: 0.2.0
 owner: founder
 episodes: [003]
 depends_on: [SL-GOV-001]
@@ -37,10 +37,10 @@ when every applicable invariant meets its threshold (master plan section 3). `ju
 ```sl-data
 {"fragmentation": [
 {"id": "F1", "invariant": "No manual export/import in native workflows", "numerator": "Workflow-test steps requiring an external app", "denominator": "total steps, per discipline acceptance workflow", "threshold": "0", "enforcement": "Workflow acceptance suite (Vol 21) + build graph rejects undeclared inputs", "episodes": ["SL-EP-003", "SL-EP-200", "SL-EP-220", "SL-EP-408"], "verified_by": "pending"},
-{"id": "F2", "invariant": "No duplicate authoritative representations", "numerator": "Data domains with >1 registered owner", "denominator": "all domains", "threshold": "0", "enforcement": "Identity registry rejects a second ownership claim", "episodes": ["SL-EP-066", "SL-EP-079"], "verified_by": "pending"},
+{"id": "F2", "invariant": "No duplicate authoritative representations", "numerator": "Data domains with >1 registered owner", "denominator": "all domains", "threshold": "0", "enforcement": "Identity registry rejects a second ownership claim", "episodes": ["SL-EP-066", "SL-EP-079"], "verified_by": "just fabric-ownership-check"},
 {"id": "F3", "invariant": "Complete provenance", "numerator": "Derived artifacts missing any of: input IDs, input revisions, toolchain ID, parameters, environment hash", "denominator": "all derived artifacts", "threshold": "0", "enforcement": "Artifact store refuses writes without the provenance record", "episodes": ["SL-EP-055", "SL-EP-182", "SL-EP-434"], "verified_by": "just provenance-check"},
 {"id": "F4", "invariant": "No stale artifact shown as current", "numerator": "Artifacts served while an input revision changed or is unverifiable", "denominator": "artifacts served", "threshold": "0", "enforcement": "Currency check on every artifact read", "episodes": ["SL-EP-187", "SL-EP-200"], "verified_by": "pending"},
-{"id": "F5", "invariant": "Every edit is transactional", "numerator": "Mutations bypassing the transaction manager", "denominator": "all mutations (instrumented in debug builds)", "threshold": "0", "enforcement": "Mutation APIs only reachable through the transaction manager", "episodes": ["SL-EP-070", "SL-EP-116", "SL-EP-390"], "verified_by": "pending"},
+{"id": "F5", "invariant": "Every edit is transactional", "numerator": "Mutations bypassing the transaction manager", "denominator": "all mutations (instrumented in debug builds)", "threshold": "0", "enforcement": "Mutation APIs only reachable through the transaction manager", "episodes": ["SL-EP-070", "SL-EP-116", "SL-EP-390"], "verified_by": "just fabric-scorecard"},
 {"id": "F6", "invariant": "Observations are traceable", "numerator": "Trace events missing correlation fields", "denominator": "all events; process-wide events carry a scope tag instead of an entity", "threshold": "0 missing required fields", "enforcement": "Trace schema validator", "episodes": ["SL-EP-301", "SL-EP-319"], "verified_by": "pending"},
 {"id": "F7", "invariant": "Minimal rebuild scope", "numerator": "Rebuilt nodes", "denominator": "dependency-closure nodes on the reference workload set", "threshold": "≤ 1.05 (baseline set in ep. 198)", "enforcement": "Build graph report", "episodes": ["SL-EP-186", "SL-EP-198"], "verified_by": "pending"},
 {"id": "F8", "invariant": "No external tool needed for final content in core disciplines", "numerator": "Core disciplines whose acceptance workflow needs an external app", "denominator": "core disciplines", "threshold": "0 at 1.0 for every core discipline", "enforcement": "Discipline acceptance suites", "episodes": ["SL-EP-220", "SL-EP-240", "SL-EP-260", "SL-EP-280"], "verified_by": "pending"}
@@ -89,3 +89,4 @@ above; SL-GOV-001 (doctrine), SL-REG-006 (exceptions); work order WO-006.
 | Version | Date | Change |
 | :---- | :---- | :---- |
 | 0.1.0 | 2026-10-17 | First draft (WO-006). |
+| 0.2.0 | 2026-10-18 | F2 verified_by `just fabric-ownership-check` and F5 verified_by `just fabric-scorecard` (WO-063). |

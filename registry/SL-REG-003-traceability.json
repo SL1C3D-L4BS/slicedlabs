@@ -14,7 +14,7 @@
         "SL-EP-079"
       ],
       "tests": [
-        "deferred:SL-EP-079"
+        "just fabric-conformance"
       ],
       "status": "planned"
     },
@@ -34,7 +34,7 @@
         "SL-EP-079"
       ],
       "tests": [
-        "deferred:SL-EP-079"
+        "just fabric-conformance"
       ],
       "status": "planned"
     },
@@ -86,7 +86,7 @@
         "SL-EP-066"
       ],
       "tests": [
-        "deferred:SL-EP-066"
+        "just fabric-ownership-check"
       ],
       "status": "planned"
     },
@@ -183,7 +183,7 @@
         "SL-EP-079"
       ],
       "tests": [
-        "deferred:SL-EP-066"
+        "just fabric-ownership-check"
       ],
       "status": "planned"
     },
@@ -251,7 +251,8 @@
         "SL-EP-390"
       ],
       "tests": [
-        "deferred:SL-EP-070"
+        "just fabric-surface-check",
+        "just neg-fabric-f5"
       ],
       "status": "planned"
     },
@@ -632,7 +633,7 @@
         "SL-EP-816"
       ],
       "tests": [
-        "deferred:SL-EP-079",
+        "just fabric-conformance",
         "deferred:SL-EP-816"
       ],
       "status": "planned"

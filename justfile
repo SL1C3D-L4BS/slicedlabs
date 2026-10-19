@@ -7,11 +7,11 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 default:
     @just --list
 
-# gate.fast (FACTORY.md): under 60 s. WO-001 ratchet: layout, gates, tool tests, format, ADRs, work orders.
-fast: layout-check gates-check tools-test fmt-check adr-check wo-check
+# gate.fast (FACTORY.md): under 60 s. WO-001 ratchet: layout, gates, tool tests, format, ADRs, work orders. WO-063 ratchet: the seven Python-only Fabric checks (each well under 1 s).
+fast: layout-check gates-check tools-test fmt-check adr-check wo-check fabric-contracts-strict fabric-nothrow-check fabric-schema-check fabric-gen-check fabric-surface-check fabric-golden-check fabric-vectors-check
 
-# gate.full (FACTORY.md). WO-020 ratchet: fast + C++ build gates + dependency/feature/Vulkan checks + tests + every negative test + the local CI (`check-full` adds the sanitizer and release workflows).
-check: fast gate-build deps-check features-check vk-check test negatives ci-local
+# gate.full (FACTORY.md). WO-020 ratchet: fast + C++ build gates + dependency/feature/Vulkan checks + tests + every negative test + the local CI (`check-full` adds the sanitizer and release workflows). WO-063 ratchet: fabric-gate after test.
+check: fast gate-build deps-check features-check vk-check test fabric-gate negatives ci-local
     @echo "check: ok"
 
 # every work order: front matter, class caps, `just <recipe>` acceptance, `Traces:` ids (in SL-REG-002 once it exists) (WO-012)
@@ -320,12 +320,12 @@ acceptance-041-048:
 acceptance-049-060:
     @bash scripts/acceptance-049-060
 
-# every negative test and selftest (WO-020)
-negatives: neg-format neg-doc neg-registry neg-rtm neg-deps neg-deps-missing neg-deps-unpinned-provider neg-vcpkg-absent neg-feature-removed neg-feature-unlisted neg-probe-never-fails neg-vk-layer-missing neg-ci-local-red doctor-selftest neg-plan
+# every negative test and selftest (WO-020); WO-063 adds every neg-fabric-* recipe
+negatives: neg-format neg-doc neg-registry neg-rtm neg-deps neg-deps-missing neg-deps-unpinned-provider neg-vcpkg-absent neg-feature-removed neg-feature-unlisted neg-probe-never-fails neg-vk-layer-missing neg-ci-local-red doctor-selftest neg-plan neg-fabric-contracts neg-fabric-nothrow neg-fabric-golden neg-fabric-determinism neg-fabric-schema neg-fabric-gen neg-fabric-f2 neg-fabric-event-schema neg-fabric-f5 neg-fabric-crash-sweep neg-fabric-fsck neg-fabric-conformance neg-fabric-contract-lock neg-fabric-scorecard
     @echo "negatives: ok"
 
-# the final `check` ratchet as a recipe (same dependency list); `check` itself is the protected gate line (WO-020)
-check-ratchet: fast gate-build deps-check features-check vk-check test negatives ci-local
+# the final `check` ratchet as a recipe (same dependency list); `check` itself is the protected gate line (WO-020, WO-063)
+check-ratchet: fast gate-build deps-check features-check vk-check test fabric-gate negatives ci-local
     @echo "check-ratchet: ok"
 
 # release gate: check-ratchet plus the ubsan, tsan, hardened release (clang and gcc) and gcc workflows (WO-020), then the static-analysis and hardening gates tidy analyze sanitize-proof hardening neg-tidy (WO-025)
@@ -384,9 +384,12 @@ analyze *args:
     @cmake --build --preset debug
     @rm -rf build/analyze
     @# analyze-build is a Python script; 3.14 defaults multiprocessing to forkserver, which needs a unix socket a jail may deny: force fork
+    @# libscanbuild --ctu cannot index the replacement operator new/delete USRs of codec_limits_test.cpp (the space in "operator new" splits its externalDefMap.txt lines); the file is still covered by tidy and the tests
     @if command -v analyze-build >/dev/null 2>&1; then \
+      mkdir -p build/analyze; \
+      python3 -I -c 'import json, sys; src, dst = sys.argv[1:3]; db = json.load(open(src, encoding="utf-8")); keep = [e for e in db if not e["file"].endswith("tests/unit/fabric/codec_limits_test.cpp")]; json.dump(keep, open(dst, "w", encoding="utf-8"), indent=2)' build/debug/compile_commands.json build/analyze/compile_commands.json; \
       lib="$(dirname "$(readlink -f "$(command -v analyze-build)")")/../lib"; \
-      python3 -I -c 'import multiprocessing, sys; multiprocessing.set_start_method("fork"); sys.path.append(sys.argv.pop(1)); from libscanbuild.analyze import analyze_build; sys.exit(analyze_build())' "$lib" --cdb build/debug/compile_commands.json --ctu --status-bugs -o build/analyze {{args}}; \
+      python3 -I -c 'import multiprocessing, sys; multiprocessing.set_start_method("fork"); sys.path.append(sys.argv.pop(1)); from libscanbuild.analyze import analyze_build; sys.exit(analyze_build())' "$lib" --cdb build/analyze/compile_commands.json --ctu --status-bugs -o build/analyze {{args}}; \
     else \
       echo "analyze: analyze-build not found, falling back to clang-tidy clang-analyzer-*"; \
       python3 -I tests/proofs/tidy_files.py build/debug/compile_commands.json tests/proofs/tidy-allow.txt | xargs -d '\n' run-clang-tidy -p build/debug -quiet -j "$(nproc)" '-checks=-*,clang-analyzer-*' '-warnings-as-errors=*'; \
@@ -450,6 +453,10 @@ neg-test-timeout:
 # fixtures-check: every file under tests/fixtures matches tests/fixtures/MANIFEST.json; fails on drift or an unmanifested file (R-FIX-*) (WO-027); `python3 -I tools/testing/fixtures.py lock` rewrites the manifest
 fixtures-check *args:
     @python3 -I tools/testing/fixtures.py check {{args}}
+
+# fixtures-lock: rewrite tests/fixtures/MANIFEST.json from the files under tests/fixtures (the founder's reviewed change after a fixture edit; fixtures-check then passes) (WO-063)
+fixtures-lock *args:
+    @python3 -I tools/testing/fixtures.py lock {{args}}
 
 # golden-check: configure and build debug, then run the golden tests (`ctest -R golden`); SL_UPDATE_GOLDEN=1 rewrites golden files (WO-027)
 golden-check *args:
@@ -696,10 +703,10 @@ fabric-demo *args:
     @cmake --build --preset debug --target sl_fabric_cli >/dev/null
     @build/debug/engine/fabric/tools/sl_fabric_cli demo build/fabric/demo {{args}}
 
-# owner WO-063
-fabric-gate *args:
-    @{{just_executable()}} stub fabric-gate
+# fabric-gate (Volume 04 release gate): every Fabric check and its negative test in one run: the strict contracts, the contract lock, the nothrow lint, the SLB/1 golden corpus and hash vectors, determinism across clang and gcc, the schema lock, generation, F2 ownership, the F6 event schema, the F5 surface, the crash sweeps, fsck, the conformance suite, the scorecard and the demo, then every neg-fabric-* recipe (WO-063)
+fabric-gate: fabric-contracts-strict fabric-contract-lock fabric-nothrow-check fabric-golden-check fabric-vectors-check fabric-determinism fabric-schema-check fabric-gen-check fabric-ownership-check fabric-event-schema-check fabric-surface-check fabric-crash-sweep fabric-fsck fabric-conformance fabric-scorecard fabric-demo neg-fabric-contracts neg-fabric-nothrow neg-fabric-golden neg-fabric-determinism neg-fabric-schema neg-fabric-gen neg-fabric-f2 neg-fabric-event-schema neg-fabric-f5 neg-fabric-crash-sweep neg-fabric-fsck neg-fabric-conformance neg-fabric-contract-lock neg-fabric-scorecard
+    @echo "fabric-gate: ok"
 
-# owner WO-063
-acceptance-061-080 *args:
-    @{{just_executable()}} stub acceptance-061-080
+# the three release checks of episodes 061-080 (fabric-gate, fabric-demo, check-full), logs 10-12 in build/acceptance/ (WO-063)
+acceptance-061-080:
+    @bash scripts/acceptance-061-080
