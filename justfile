@@ -656,33 +656,45 @@ fabric-fsck *args:
 neg-fabric-fsck *args:
     @bash tests/gates/neg_fabric_fsck.sh
 
-# owner WO-062
+# fabric-conformance: build preset debug, run the ctest labels fabric_conformance (the generic per-type suite, FAB-INV-CF-02, and release gate 1, FAB-INV-OWN-09, printed as numerator/denominator; writes build/fabric/scorecard-input.json) and fabric_replay (FAB-INV-RPL-01..03), then fabric-contracts-strict (no pending invariant) (WO-062)
 fabric-conformance *args:
-    @{{just_executable()}} stub fabric-conformance
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug
+    @ctest --preset debug -L '^fabric_(conformance|replay)$' --no-tests=error --output-on-failure {{args}}
+    @{{just_executable()}} fabric-contracts-strict
 
-# owner WO-062
+# negative test: a copy of the checker inputs with every FAB-INV-RPL-02 TEST_CASE deleted from replay_pin_test.cpp fails fabric-contracts-strict naming FAB-INV-RPL-02; one with the FAB-INV-CF-03 test methods deleted from test_contract_lock.py fails naming FAB-INV-CF-03; the control copy passes with pending 0 (WO-062)
 neg-fabric-conformance *args:
-    @{{just_executable()}} stub neg-fabric-conformance
+    @bash tests/gates/neg_fabric_conformance.sh
 
-# owner WO-062
+# fabric-contract-lock: build sl_fabric_dump_contract (preset debug), dump the engine's contract tables into build/fabric/contract.json, then tools/fabric/contract_lock.py compares them with the sl-data tables of SL-ARCH-001 and SL-ARCH-002 and with schemas/fabric/contract.lock.json (R-LOCK-*; an error code drift names the errc) (WO-062, FAB-INV-CF-03)
 fabric-contract-lock *args:
-    @{{just_executable()}} stub fabric-contract-lock
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug --target sl_fabric_dump_contract >/dev/null
+    @mkdir -p build/fabric
+    @build/debug/engine/fabric/tools/sl_fabric_dump_contract build/fabric/contract.json
+    @python3 -I tools/fabric/contract_lock.py check build/fabric/contract.json {{args}}
 
-# owner WO-062
+# negative test: errc store_io drifted to 5016 in a copy of SL-ARCH-001 fails fabric-contract-lock naming R-LOCK-DOC and errc store_io; the same drift in a copy of the lock fails naming R-LOCK-HASH and R-LOCK-LOCK; the control copy passes (WO-062)
 neg-fabric-contract-lock *args:
-    @{{just_executable()}} stub neg-fabric-contract-lock
+    @bash tests/gates/neg_fabric_contract_lock.sh
 
-# owner WO-062
+# fabric-scorecard: build preset debug, run fabric_conformance_gate1_test (it writes build/fabric/scorecard-input.json), then tools/fabric/scorecard.py writes build/fabric/scorecard.json (F2 and F5 numerators and denominators, invariant coverage, objects per commit, validator invocations) and fails when an F2 or F5 numerator is not 0 or coverage is below 1.0 (WO-062)
 fabric-scorecard *args:
-    @{{just_executable()}} stub fabric-scorecard
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug --target fabric_conformance_gate1_test >/dev/null
+    @ctest --preset debug -R '^fabric_conformance_gate1_test$' --no-tests=error --output-on-failure >/dev/null
+    @python3 -I tools/fabric/scorecard.py build/fabric/scorecard-input.json --out build/fabric/scorecard.json {{args}}
 
-# owner WO-062
+# negative test: a copy of the scorecard input with F5 bypassing = 1 fails tools/fabric/scorecard.py naming F5; F2 numerator 1 fails naming F2; the control input passes (WO-062)
 neg-fabric-scorecard *args:
-    @{{just_executable()}} stub neg-fabric-scorecard
+    @bash tests/gates/neg_fabric_scorecard.sh
 
-# owner WO-062
+# fabric-demo: build preset debug and run `sl_fabric_cli demo build/fabric/demo`: create a project, change one property and print the impact set, undo, commit, reopen, crash at FP4, recover and print the recovery report and the F2/F5 counters; ends with `fabric-demo: ok` (WO-062)
 fabric-demo *args:
-    @{{just_executable()}} stub fabric-demo
+    @cmake --preset debug >/dev/null
+    @cmake --build --preset debug --target sl_fabric_cli >/dev/null
+    @build/debug/engine/fabric/tools/sl_fabric_cli demo build/fabric/demo {{args}}
 
 # owner WO-063
 fabric-gate *args:

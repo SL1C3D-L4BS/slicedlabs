@@ -3,13 +3,13 @@ id: SL-ARCH-001
 kind: ARCH
 title: "Canonical Project Model (Fabric)"
 status: Draft
-version: 0.1.0
+version: 0.2.0
 owner: founder
 episodes: [61, 62, 63, 64, 65, 66, 67, 68, 69, 72, 73, 74, 75, 78, 79, 80]
 depends_on: [SL-GOV-001, SL-GOV-006]
 supersedes: []
 decisions: [ADR-0009, ADR-0010, ADR-0011, ADR-0012, ADR-0013, ADR-0014, ADR-0017, ADR-0019, ADR-0020]
-max_lines: 440
+max_lines: 540
 ---
 # SL-ARCH-001: Canonical Project Model (Fabric)
 
@@ -25,7 +25,10 @@ reference resolver and schema-generated tooling (Volume 04 episodes 061-069, 072
 
 ## Status and decisions
 
-Draft 0.1.0, written before any Volume 04 code (master plan, Authoring order: SL-ARCH-001, then SL-ARCH-002). Binding
+Draft 0.2.0: version 0.1.0 was written before any Volume 04 code (master plan, Authoring order: SL-ARCH-001, then
+SL-ARCH-002); 0.2.0 is reconciled with that code by WO-062 (the contract tables are bound by `just fabric-contract-lock`,
+the builders' decisions are recorded under "Code reconciliation", and what the code still has to change is an open
+issue naming its work order). Binding
 decisions: ADR-0009 (errors are values), ADR-0010 (error domain), ADR-0011 (identity), ADR-0012 (SLB/1), ADR-0013
 (schema source and lock), ADR-0014 (revision store, single CAS), ADR-0017 (ownership), ADR-0019 (collaboration and
 replay seams), ADR-0020 (acceptance state). The founder approves through `registry/SL-REG-001.approvals.json`; builders
@@ -121,7 +124,7 @@ release work order (WO-063) moves the document to InReview. Rule ids are ARCH1-R
 {"change": "change default of optional field", "class": "breaking"}, {"change": "optional to required", "class": "breaking"},
 {"change": "ref strength weak to strong", "class": "breaking"}, {"change": "remove ref target type", "class": "breaking"}, {"change": "list to oset or oset to list", "class": "breaking"},
 {"change": "change domain, state class or record class", "class": "forbidden"}, {"change": "reuse a reserved field number", "class": "forbidden"}],
-"bump": {"identical": "none", "additive": "minor", "backward_only": "major + identity migration step", "breaking": "major + migration step", "forbidden": "refused"},
+"bump": {"identical": "none before release; minor once released (any edit changes the lock hash)", "additive": "minor", "backward_only": "major + identity migration step", "breaking": "major + migration step", "forbidden": "refused"},
 "type_def_value": "struct {1 name, 2 kind, 3 major, 4 minor, 5 domain, 6 record_class, 7 state_class, 8 document_root, 9 fields list of struct {1 no, 2 name, 3 type, 4 presence, 5 default optional, 6 since_minor, 7 deprecated_in optional, 8 ref optional struct {1 strength, 2 targets}, 9 doc}, 10 reserved, 11 enumerators, 12 cases, 13 element optional, 14 key optional}",
 "lock_hash": "object id of the schema object: hash_object(kind 9, major 1, minor 0, flags 0, SLB/1 bytes of type_def_value); computed by tools/fabric/schemalib.py and by the C++ codec"}
 ```
@@ -140,7 +143,7 @@ release work order (WO-063) moves the document to InReview. Rule ids are ARCH1-R
 {"tag": "0x05", "name": "f32"}, {"tag": "0x06", "name": "f64"}, {"tag": "0x07", "name": "string"}, {"tag": "0x08", "name": "bytes"}, {"tag": "0x09", "name": "id"},
 {"tag": "0x0A", "name": "digest"}, {"tag": "0x0B", "name": "list"}, {"tag": "0x0C", "name": "map"}, {"tag": "0x0D", "name": "struct"}, {"tag": "0x0E", "name": "variant"}, {"tag": "0x0F", "name": "oset"}],
 "limits": {"depth": 64, "items": 16777216, "record_body_bytes": 16777216, "loose_blob_threshold_bytes": 1048576},
-"decode_rules": ["R-SER-TAG", "R-SER-VARINT", "R-SER-ORDER", "R-SER-DUP", "R-SER-UTF8", "R-SER-NAN", "R-SER-NEGZERO", "R-SER-TRUNC", "R-SER-TRAILING", "R-SER-LIMIT", "R-SER-FRAME"]}
+"decode_rules": ["R-SER-TAG", "R-SER-VARINT", "R-SER-ORDER", "R-SER-DUP", "R-SER-UTF8", "R-SER-NAN", "R-SER-NEGZERO", "R-SER-TRUNC", "R-SER-TRAILING", "R-SER-LIMIT", "R-SER-FRAME", "R-SER-UNKNOWN"]}
 ```
 
 ### Project manifest (episode 064)
@@ -267,18 +270,50 @@ result<record_id> mint(id_class, id_source&);
 record_id derive(id_class, const record_id& parent, std::string_view key) noexcept;
 record_id well_known(id_class, std::uint32_t ordinal) noexcept;
 record_id imported(id_class, std::string_view system, std::string_view external_id) noexcept;
-// digest.hpp: struct digest; enum class object_kind; digest hash_object(object_kind, frame_header, byte_span) noexcept;
-// value.hpp, type.hpp, schema.hpp: class value; struct type_desc; struct field_desc; class schema_registry;
-// codec.hpp: result<bytes> encode(const value&); result<value> decode(byte_span, unknown_policy);
-//            result<std::string> to_text(const value&, type_id, const schema_registry&); result<value> from_text(...)
-// snapshot.hpp: class snapshot { result<record_view> get(const record_id&) const; result<std::vector<record_delta>> diff(...) const;
-//               result<void> for_each_in_document(const record_id& doc, F&&) const; digest root_digest() const noexcept; };
-// ownership.hpp: class domain_registry { result<void> claim(domain_spec); void freeze() noexcept; f2_report f2() const; };
-// provenance.hpp: enum class epistemic_class; struct provenance; result<void> check_provenance(const provenance&);
-// events.hpp: struct event_envelope; class event_bus;  deps.hpp: class dependency_index;  impact.hpp: struct impact_set;
-// resolver.hpp: class resolver { result<resolution> resolve(const reference&) const; };
-// boundary.hpp: class document_projection; result<patch> propose_from_observation(...);
+// store.hpp / digest.hpp: struct digest; enum class object_kind; digest hash_object(const frame_header&, byte_span) noexcept;
+// value.hpp, type.hpp, schema.hpp: class value (get(path), with, insert_element, move_element); struct type_desc;
+//            struct field_desc; class schema_registry { result<void> add(type_desc); result<void> freeze(); check(...) };
+// codec.hpp: result<std::vector<std::uint8_t>> encode(const value&); result<value> decode(byte_span, unknown_policy);
+//            result<value> decode(byte_span, unknown_policy, type_id, const schema_registry&);   // strict, schema directed
+//            result<std::string> to_text(const value&, type_id, const schema_registry&); result<value> from_text(...);
+//            result<digest> schema_set_digest(const schema_registry&); inline constexpr std::size_t max_record_body;
+// snapshot.hpp: class snapshot { result<snapshot_entry> get(const record_id&) const; result<std::vector<record_delta>> diff(...) const;
+//               result<void> for_each_in_document(const record_id& doc, const entry_visitor&) const; digest root_digest() const noexcept; };
+// ownership.hpp: class domain_registry { result<void> claim(domain_spec); result<void> bind_types(const schema_registry&);
+//               result<void> freeze(); f2_report f2() const; };  class actor_directory;  result<void> claim_fabric_domains(domain_registry&);
+// provenance.hpp: using epistemic_class, provenance = generated types; legal_transitions; result<void> check_provenance(const provenance&);
+//               result<digest> derivation_key(const provenance&);
+// events.hpp: using event_envelope = generated type; class event_bus; class event_source;
+// deps.hpp: class dependency_graph; struct impact_set; struct impact_summary;  impact.hpp: class impact_engine; impact_index;
+// resolver.hpp: class resolver { result<resolution> resolve(const reference&, const record_id& from_document) const; };
+//               record_id import_record_id_for(std::string_view system, std::string_view locator);
+// boundary.hpp: class document_projection { static result<document_projection> make(const snapshot&, const schema_registry&,
+//               std::span<const std::string> domains); };  result<patch> propose_from_observation(projection, changes, const tx_origin&);
+// manifest.hpp: create_project(root, project_manifest, engine_profile, creator, workspace_options); open_project(root, mode, policy, ...);
+// migration.hpp: compat classify(const type_desc&, const type_desc&); plan_migration(...); run_migration(...); types_from_module(json);
 ```
+
+### Code reconciliation (WO-062)
+
+What the Volume 04 code does where version 0.1.0 was silent or said otherwise; each item is descriptive and the rules above stand. Items that still need a code change are open issues below.
+
+- Identity (WO-037, WO-058): the id text form is uppercase Crockford only and the null id prints as `none`; a prefix that disagrees with the class byte is `id_parse`, `id_class_mismatch` comes only from `typed_id`, a varint over 64 bits is `decode_noncanonical` (R-SER-VARINT) and `mint()` of an unassigned class is core `invalid_argument`. Reuse is refused by R-INV-ID-REUSE at the invariants stage and revival is checked against the patch meta's whole `undo_of` list; instance parents may be instance, entity or asset ids; re-importing or re-instantiating a tombstoned id is `id_reuse`, so importers skip tombstoned ids.
+- SLB/1 layouts (WO-038, WO-041): containers are count-prefixed; a struct entry is varint field number then value; an oset entry is the 16-byte element id, a varint-length order key and a tagged value; map keys are uint, nint, string or id ordered by their whole encoded bytes. A NUL in a string is R-SER-UTF8; depth counts containers only (64 accepted, the 65th is R-SER-LIMIT). R-SER-UNKNOWN (strict policy, schema directed) reports an undeclared struct field. Frame checks run magic, major, kind, flags: bad magic, unknown kind or non-zero flags are `object_corrupt`, another major is `format_unsupported`, and a newer minor parses as read-only (`read_only_newer` on write).
+- Text form (WO-038, WO-041): floats in shortest round-trip digits, bytes as lowercase hex, maps as `[[k, v]]`, unknown fields `"?<no>": "slb:<hex>"`; R-TXT-SYNTAX is `text_syntax`, R-TXT-TYPE is `type_mismatch`, an unknown type is `schema_unknown`; `from_text` also refuses duplicate map keys and NUL.
+- Schemas and lock (WO-040, WO-041, WO-045): a lock entry is `{hash, definition}` because R-SCH-BUMP compares with the last released definition; the `type_def_value` encoding is fixed in tools/fabric/schemalib.py and schemas/fabric/README.md; the builders added R-SCH-RESERVE, reserved-number drop as R-SCH-REUSE, document_root change as breaking, R-OWN-STATE (`schema_invalid`) and "a type domain is the module domain or a child"; widening is decided by integer range; enumerators and cases carry no since_minor or deprecated_in. `schema_set_digest` is SHA-256 over the sorted 33-byte schema ids of the non-built-in types (not the id of a kind-10 object).
+- Types and values (WO-039): `at(path)` is spelled `get(path)`; order keys are 1 to 2^24 bytes with a non-zero last byte; an identity-bearing struct is refused in a list (R-TY-LIST-ID); oset element ids are of class element; any state class makes a type a record; field numbers start at 1; user types may not declare a built-in kind (use tagged); `check()` needs a frozen registry.
+- Store seam (WO-042): a missing ref is core `not_found`; an empty batch is `invalid_argument`; ref names are 1 to 255 bytes of 0x21 to 0x7E, unique per batch, and a ref target must be stored or in the batch (`object_missing`); `has()` and `list_refs()` exist; verify takes a `link_reader*` (revision_links); test headers live in engine/fabric/testing/.
+- Revision objects (WO-046): tree node `{1 bitmap, 2 count, 3 entries | 4 children}` with leaf kinds record, tombstone, member and document, the empty trie never stored; record object `{1 id, 2 type, 3 document (absent for none), 4 major, 5 minor, 6 body}`; root object `{1 records, 2 membership}`; the snapshot view is `snapshot_entry`.
+- Ownership and authority (WO-048, WO-045): `freeze()` returns `result<void>` and is `invariant_violated` while the F2 numerator is not 0; the same owner claiming twice is `already_exists`, a claim after freeze `registry_frozen`. A human, tool or plugin writes a domain when the edit comes through its owner subsystem, else needs `write:<domain>`; grants cover descendants; accept always needs an explicit grant; an unknown actor is denied (R-AUTH-DENIED, R-AUTH-ORPHAN, R-AUTH-ACTOR). F2 counts a prefix's reserved owner as an implied claimant. Event records use the child domain `fabric.history.event`.
+- Provenance (WO-049): `derivation_key` returns `result<digest>`; a pair outside the matrix (same class included) is `invariant_violated`, a legal promotion without `accept:<domain>` is `promotion_denied`; "missing" is strict (empty list, null id, empty toolchain id, all-zero digest), and input_revisions match input_ids in length.
+- Events (WO-047): event id = derive(event, tx id, "<type>:<seq>"), with the source's own record id as parent when causality names no tx; the bus is one ordered stream, `publish` refuses seq at or below the last (`event_invalid`), handlers are noexcept; the JSON file is format `sl-fabric-event/1` with a hex SLB/1 payload.
+- Dependency graph and impact (WO-044, WO-056): `extract_edges(from, value, type_desc, schema_registry)`; the fabric.edge body is `{1 from, 2 to, 3 kind 1..5}`; containment, derives_from and builds are judged acyclic separately; `impact_set` and `impact_summary` live in deps.hpp and the index is `impact_index` in impact.hpp. The commit report is the receipt attachment `fabric.impact`, `receipt.impact` stays the distance-0 summary, and the committed event payload stays the tx record (the report is reached by `impact_engine::committed(event)`).
+- Manifest (WO-054): the manifest check lives in `create_project` / `open_project`; `check_open` returns `result<open_mode>` (read-only for a newer writer) in the order reader_too_old, manifest_invalid, module_unmet, capability_unknown; project.slp is JSON `{format: "sl-project/1", store, project}`; validator fabric.manifest adds R-MAN-PROJECT (the project id never changes).
+- Boundary (WO-061): `document_projection::make` takes the schema registry; out-of-scope live records read as `authority_denied`; `propose_from_observation` takes a `tx_origin` whose class is observed (else `invalid_argument`) and labels the patch `runtime.observation`.
+- Resolver (WO-060): `resolve(reference, from_document)`; the import record of (system, locator) is at `import_record_id_for(system, locator)`; pins follow oset order; an unavailable package reached in the search is `package_missing`; ill-formed references are `invalid_argument`.
+- Migrations (WO-057): the migration system actor is derive(actor, namespace 1, "fabric.migration"); steps are grouped by (type, from.major) and raise the major; a minor-only change needs no step; `remove_field` without a loss note is refused when added (`migration_lossy`).
+- Smaller decisions, as built: extra id API `entropy_self_test`, `record_id::from_bytes`, `hash_algo`, frame constants and uvarint helpers, and clock.hpp is covered only through its users (WO-037); the slb_ref.py offset conventions (TRUNC at input length, UTF8 at the first content byte, VARINT at its start) and limits covered by unit tests rather than vectors (WO-038); errors reuse core `not_found` / `already_exists`, container edits cost O(width) per level, a field segment steps into a variant's active case and no path enters a list (WO-039); the migration step requirement is enforced by WO-057, not the schema check (WO-040); `intent_record.operation` is a record id (WO-042); the graph is owner-keyed with reference-counted edges, and edge extraction is strict (`type_mismatch`, `schema_unknown`, `invalid_argument`) (WO-044); codec.hpp also exports a strict JSON reader, corpus loaders, hex helpers, `record_object_id` and `digest_text`, and `encode` refuses bodies over 16 MiB before allocating (WO-041); provenance fields are optional so a gap is a finding, `manifest.modules` maps id to version range, typed `from_value` is strict, and lock_hashes.json is a drift-checked fixture (WO-045); `snapshot::for_each` collects and sorts ids (O(n) memory) (WO-046); the event schema file is schemas/sl-fabric-event.schema.json and the checker enforces exactly one of subject and scope (WO-047); the projection copies in-scope records once in `make` (O(n)) (WO-061); `plan_migration` lists newer-minor records as preserved and `run_migration` always commits an annotate note (WO-057); a provider's not_found or object_missing means unavailable and a non-live member is `object_corrupt` (WO-060); the manifest is found from the first ref holding one and re-read from its default branch, and `open_project` inspects lock-free before repairing (the log is hashed twice per open) (WO-054).
+- Tests (WO-036): test case names start `"FAB-INV-<area>-<nn>:"` with a colon, the form contracts_check matches. FAB-INV-GEN-05 was delivered by WO-045 (tests/unit/fabric/gen_text_schema_test.cpp), so nothing is retired.
 
 ### Invariants
 
@@ -412,10 +447,17 @@ SL-ARCH-002 for transactions, undo, journal, recovery and corruption.
 - Record clustering for million-record projects and large-blob chunking (episode 348) are not designed here.
 - Big-endian hosts are untested; all byte layouts are little-endian by specification.
 - Reading master plan section 2.2 row 08 under ADR-0014 needs a registry amendment with an impact note for episodes 182 and 348 (master plan section 6.3 rule 3).
-- FAB-INV-GEN-05 is a cut line of WO-045; if cut it moves to `retired` with a note in WO-062.
+- Code changes the reconciliation found (WO-062). None is in a work order yet: WO-063 releases without new Fabric code, so each names WO-064, a Fabric hardening work order the commander still has to cut.
+  - ARCH1-R22: schema objects (kind 9) are not written per revision and `revision.schema_set` is the codec digest, not an object id; an old revision opens with its records' type versions (FAB-INV-RPL-03) but its schemas are not recoverable from the store (WO-064).
+  - The manifest's schema_set is filled at genesis but not checked at open, and nothing forces callers through `open_project` rather than `workspace::open` (WO-064: fold the check into workspace open).
+  - type.hpp makes any state class a record while sl-type-def/1 gives every type one; generated descriptors restore it through `type_entry.declared_state` (WO-064: fix in type.hpp or schemalib).
+  - Nothing in the transaction manager forces epistemic class observed on runtime submissions (WO-064: manager hook or validator); document_projection is not in the F5 surface lint's data classes (WO-064).
+  - The committed event payload does not carry the impact report (WO-064 if wanted: a tx_manager hook).
+  - schemas/fabric/schema.lock.json is still unpinned (WO-063 pins it).
 
 ## Change log
 
 | Version | Date | Change |
 | :---- | :---- | :---- |
 | 0.1.0 | 2026-10-18 | First draft, before any Volume 04 code (WO-035). |
+| 0.2.0 | 2026-10-18 | Reconciled with the Volume 04 code (WO-062): API surface rewritten to the headers; `decode_rules` gains R-SER-UNKNOWN; the identical bump is minor once released; "Code reconciliation" records the builders' decisions of WO-037 to WO-061; code changes listed as open issues for WO-064; the contract tables bound by `just fabric-contract-lock`; FAB-INV-GEN-05 kept (delivered), nothing retired. |

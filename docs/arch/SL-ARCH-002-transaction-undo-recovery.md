@@ -3,13 +3,13 @@ id: SL-ARCH-002
 kind: ARCH
 title: "Transaction, Undo and Recovery Protocol"
 status: Draft
-version: 0.1.0
+version: 0.2.0
 owner: founder
 episodes: [70, 71, 76, 77, 79, 80]
 depends_on: [SL-GOV-001, SL-GOV-006, SL-ARCH-001]
 supersedes: []
 decisions: [ADR-0009, ADR-0010, ADR-0014, ADR-0015, ADR-0016, ADR-0018, ADR-0019, ADR-0020]
-max_lines: 380
+max_lines: 460
 ---
 # SL-ARCH-002: Transaction, Undo and Recovery Protocol
 
@@ -23,7 +23,10 @@ them by rule or invariant id and never restates them.
 
 ## Status and decisions
 
-Draft 0.1.0, written after SL-ARCH-001 and before any Volume 04 code (master plan, Authoring order). Binding
+Draft 0.2.0: version 0.1.0 was written after SL-ARCH-001 and before any Volume 04 code (master plan, Authoring
+order); 0.2.0 is reconciled with that code by WO-062 (`tx_states`, `failpoints` and `corruption` are bound by
+`just fabric-contract-lock`, the builders' decisions are under "Code reconciliation", code still to change is an open
+issue naming its work order). Binding
 decisions: ADR-0009, ADR-0010, ADR-0014 (revision store), ADR-0015 (commit log and recovery default), ADR-0016 (F5
 enforcement), ADR-0018 (undo), ADR-0019 (collaboration and replay seams), ADR-0020 (acceptance state). The founder
 approves through `registry/SL-REG-001.approvals.json`. Rule ids are ARCH2-Rnn; invariants are FAB-INV-<area>-nn.
@@ -182,7 +185,9 @@ approves through `registry/SL-REG-001.approvals.json`. Rule ids are ARCH2-Rnn; i
 class mutation_capability;                                   // passkey: friend transaction_manager, testing::backdoor
 class store_backend { public: result<object> get(const digest&) const; result<digest> read_ref(std::string_view) const;
   result<commit_ack> commit(const mutation_capability&, commit_batch); result<verify_report> verify(verify_scope) const; };
-class memory_backend; class log_backend;                     // log_backend::open(vfs&, path, durability)
+  // also: result<bool> has(const digest&) const; result<std::vector<ref_entry>> list_refs() const;
+class memory_backend; class log_backend;                     // log_backend::open(vfs&, dir, durability | log_options)
+class revision_links;                                        // link_reader for verify (revision.hpp)
 struct patch; struct patch_op; struct footprint; result<patch> normalize(const patch&, const state_reader&);
 patch invert(const patch&); result<patch> compose(const patch&, const patch&); bool commutes(const footprint&, const footprint&) noexcept;
 result<patch> rebase_if_disjoint(const patch&, const patch& onto);
@@ -190,14 +195,38 @@ class transaction { result<void> stage(const patch&); const staged_state& view()
   result<commit_receipt> commit(); std::span<const diagnostic> diagnostics() const noexcept; void abort() noexcept; };
 class transaction_manager { result<transaction> begin(tx_options); result<snapshot> head(std::string_view ref = "main") const;
   validator_registry& validators() noexcept; event_bus& events() noexcept; void set_lock_authority(std::shared_ptr<lock_authority>);
-  void add_observer(std::shared_ptr<commit_observer>); merge_driver_registry& merge_drivers() noexcept; };
-class undo_manager { result<commit_receipt> undo(); result<commit_receipt> redo(); result<void> rebuild_from_history(const snapshot&); };
+  void add_observer(std::shared_ptr<commit_observer>); merge_driver_registry& merge_drivers() noexcept;
+  result<snapshot> at(const digest&) const; result<record_id> mint(id_class); failpoint_set& failpoints() noexcept;
+  result<commit_receipt> create_ref(name, target, const tx_origin&); result<commit_receipt> reset_ref(name, target, const tx_origin&); };
+class undo_manager { undo_manager(transaction_manager&, actor_id, undo_options{ref, intents, compensators});
+  result<commit_receipt> undo(); result<commit_receipt> redo(); result<void> rebuild_from_history(const snapshot&);
+  begin_group / group_meta / undo_stack / redo_stack / last_conflict; };  class intent_log;   // undo intents (in memory by default)
 class workspace { static result<std::unique_ptr<workspace>> create_memory(workspace_options);
-  static result<std::unique_ptr<workspace>> open(const std::filesystem::path&, open_mode, recovery_policy);
-  const recovery_report& last_recovery() const noexcept; result<snapshot> at(const digest&) const; };
-namespace f5 { struct ledger { std::uint64_t mutations, bypassing; }; ledger read() noexcept; class authorized_scope; void note_mutation(std::string_view) noexcept; }
+  static result<std::unique_ptr<workspace>> create_with(std::shared_ptr<store_backend>, workspace_options);
+  static result<std::unique_ptr<workspace>> create(const std::filesystem::path&, workspace_options);
+  static result<std::unique_ptr<workspace>> open(const std::filesystem::path&, open_mode, const recovery_policy&, workspace_options);
+  const recovery_report& last_recovery() const noexcept; result<snapshot> at(const digest&) const; open_mode mode() const noexcept; };
+result<recovered_log> recover_log(vfs&, const std::filesystem::path& store_dir, ...);   // recovery.hpp
+namespace f5 { struct ledger { std::uint64_t mutations, bypassing; }; ledger read() noexcept; class authorized_scope;
+  void note_mutation(std::string_view site, const store_backend* = nullptr) noexcept; inline constexpr bool enabled; }
+std::span<const failpoint_info> failpoint_table() noexcept; std::span<const corruption_policy> corruption_policies() noexcept;
 result<fsck_report> fsck(vfs&, const std::filesystem::path&, fsck_options);
 ```
+
+### Code reconciliation (WO-062)
+
+What the Volume 04 code does where version 0.1.0 was silent or said otherwise; each item is descriptive and the rules above stand. Items that still need a code change are open issues below.
+
+- Patches (WO-043): `patch_op` carries `expect_type` (retype inverse) and a three-state expectation (unchecked, absent, value); the patch layer has no tombstones (deleted = absent; tombstones are written at commit); a failed expectation is `conflict`; the patch value layout is documented in patch.hpp (newer major or unknown op kind `format_unsupported`, malformed `type_mismatch`); `compose` takes base and meta from the first patch and is associative; diagnostics carry their stage for the ARCH2-R05 sort.
+- Transactions (WO-050): tx id = derive(tx, actor, "tx/" + hex of the tx record object id), recoverable and entropy-free; the manager writes the patch object (kind 8, base = parent); the tx record holds the first `undo_of` only (the patch keeps the list) and has no field for per-op provenance or epistemic class changes (`class_changes` are judged, not stored). The built-in validator chain is fabric.structural, fabric.schema, fabric.authority, fabric.references, fabric.invariants, fabric.provenance and fabric.identity, and `create_project` / `open_project` add fabric.manifest; locks are asked after the validators (a denial is Conflict with `locked`). Idempotency compares the coalesced ops and meta without base and expectations; the index is rebuilt from tx records on open and rebuilt receipts have seq 0, commit_time_us 0 and `recovered`. `create_ref` and `reset_ref` commit annotate-only patches, a reset revision has parents {target, old head}; `head()` of a missing ref is the empty snapshot; `tx_options.sync` is recorded, the store decides durability.
+- F5 (WO-051): every backend commit call counts one mutation (plus one for intent writes); a bypass is always counted and logged fatal on `fabric/f5`, and the debug assertion fires only on a store a live transaction manager governs, so test stores seeded through `testing::backdoor` do not abort. R-F5-MUTABLE exempts mutex and atomic members.
+- Undo (WO-052): undo intents go to an `intent_log` (in memory by default), not to journal frames; a compensation is an annotate op marked compensable with note {1 command, 2 args}, committed newest-first after the inverse with key `sl.undo.compensate/<op id>`; stacks follow one ref's first-parent history through a commit observer and skip annotate-only commits. Inverse staging failures are `undo_conflict`, an empty redo stack `undo_empty`. ARCH2-R25's exact root holds when no id was retired in between: an undone create leaves a tombstone, which is history.
+- Journal (WO-053): `commit_batch` has no tx, revision or actor fields, so commit frame fields 3 and 4 take the first tx and revision objects of the batch and field 10 is the null actor; frame type 0 is `journal_corrupt`; intent frames belong to the following commit and an intents-only batch still writes a commit frame; the loose threshold is measured on the SLFO frame size and a loose blob is written as `<hex>.tmp`, fsynced, renamed and its directory synced; the durability flush is fdatasync; FORMAT is `slfabric 1.0\n`; segment names have 8 decimal digits; a commit never spans segments.
+- Recovery (WO-055): checkpoint field 8 is the offset of the last commit frame; checkpoints are written only by a write open, 2 kept; damage before the used checkpoint is left to read verification and fsck. C1 is only a partial frame or torn segment header (whole orphan frames are counted, not corruption); segment header damage is C2; an unparsable payload C6; bracketing C3; objects digest C4; a missing loose blob or linked object C5. Quarantine names: `<seq>-tail-<seg>-<off>`, `<seq>-header-<seg>`, `<seq>-checkpoint-<name>`, `<oid>-loose-tmp`. A read-only open only inspects (a needed repair is `recovery_required`) and refuses commits with core `permission_denied`; C11 uses `writer_locked`; `recovery_policy.open_store = false` gives the report only.
+- Corruption and fsck (WO-059): C5 has no quarantine; a bad pin file is reported as C6; tail damage with no resync point is C1; a lenient write open is allowed only for C1, C9, C11 and C12; fsck exits 2 for a missing or unreadable store and accepts a workspace or a `.slfabric` directory.
+- Smaller decisions, as built: `rebase_if_disjoint` returns the patch unchanged (the new base is the caller's), order-key conflicts are reported as bytes and remove beats a move of the same element (WO-043); the manager publishes one recovered event per ref on every open, `workspace_options.subscribers` and `omit_builtin` exist, rebase refuses multi-parent revisions (WO-050); vfs `pwrite` on an append handle is `invalid_argument`, locking is F_OFD_SETLK else F_SETLK, and the Windows vfs is a stub (WO-053); nested `begin_group` joins the open group and observers cannot be removed (destroyed managers leave a no-op observer) (WO-052); the lock holder text is not fsynced (WO-055); quarantine names `<seq>-<file>`, `<oid>-loose`, `<oid>-object`, and flagged records come from `check_records` on the recovered revision (WO-059).
+- Replay seams (WO-062): FAB-INV-RPL-01 replays the first-parent history from the store alone (revision, tx record, patch object) with the recorded commit times and the same seed; FAB-INV-RPL-02 binds the pin to a ref and the sweep to the verify reachability walk (revision_links from every ref), since no collector and no `.slfabric/pins` reader exist yet; FAB-INV-RPL-03 opens an old revision under a newer registry with its records' stored type versions and its schema_set digest.
+- Demo (WO-062): `just fabric-demo` and the system test `fabric_demo` run `sl_fabric_cli demo`: create, impact, undo, commit, reopen, a crash at FP4 (a torn commit frame before fsync), recovery with the report, the retry by idempotency key, and the F2 and F5 counters.
 
 ### Invariants
 
@@ -327,9 +356,21 @@ Named seams: what Volume 04 leaves to later volumes, with the hook that exists n
 - The default fsync per commit against edit latency is unmeasured; Volume 16 measures it.
 - Whether the collaboration service (Rust) runs this transaction manager or a port is undecided (ADR-0019).
 - Selection changes are `shell` document transactions; keeping them out of undo history may need a per-actor ref.
+- Code changes the reconciliation found (WO-062). WO-063 releases without new Fabric code, so each names WO-064, a Fabric hardening work order the commander still has to cut.
+  - Stale comments: the built-in validator list in transaction.hpp and "the only revival the structural validator accepts" in undo.hpp predate WO-058 (R-INV-ID-REUSE, fabric.identity) (WO-064).
+  - A lenient recovered workspace reports `mode()` write while commits are refused with `permission_denied` (WO-064: report read_only).
+  - Undo intents are not journal frames 3 and 4: the manager has no intent call (WO-064); undo commits through the entry's last subsystem and carries no provenance, so a cross-subsystem group or a revived derived record can be refused (WO-064).
+  - Reopen is not O(delta): `log_backend::open` hashes every object and the manager rebuilds the idempotency index from the whole history; rebuilt receipts lose seq and commit time (WO-064).
+  - Newer-minor (R-SCH-NEWER) and deprecation (R-SCH-DEPRECATED) validators are opt-in; the manager does not register them by default (WO-064).
+  - Delete checks scan the base snapshot (O(N)); unchanged records get no second-owner check; ref targets are checked by id class only (WO-064).
+  - Test budget: fabric_tree_history, fabric_tx_atomic and fabric_deps_cycle run near the 10 s unit timeout under sanitizers and load; the truncation sweep near its 60 s (WO-064: shrink or move to the integration tier).
+  - `testing::backdoor` commits print one fatal `fabric/f5` line each in passing tests (WO-064: quieter logging for ungoverned stores); gcc accepts a subclass of `mutation_capability` in a requires-expression (WO-064: make it final).
+  - No `just fixtures-lock` recipe exists; the lock is `python3 -I tools/testing/fixtures.py lock` (WO-063 or WO-064: add the recipe).
+  - Revision pins: `.slfabric/pins/<name>` is checked by fsck but nothing reads it as a collection root, and no collector exists (S7, Volume 18).
 
 ## Change log
 
 | Version | Date | Change |
 | :---- | :---- | :---- |
 | 0.1.0 | 2026-10-18 | First draft, after SL-ARCH-001 and before any Volume 04 code (WO-035). |
+| 0.2.0 | 2026-10-18 | Reconciled with the Volume 04 code (WO-062): API surface rewritten to the headers; "Code reconciliation" records the builders' decisions of WO-043 to WO-059 and the replay seam bindings; code changes listed as open issues for WO-064; `tx_states`, `failpoints` and `corruption` bound by `just fabric-contract-lock`; nothing retired. |

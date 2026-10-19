@@ -544,31 +544,31 @@
     },
     "fabric-conformance": {
       "owner": "WO-062",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-conformance": {
       "owner": "WO-062",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-contract-lock": {
       "owner": "WO-062",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-contract-lock": {
       "owner": "WO-062",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-scorecard": {
       "owner": "WO-062",
-      "status": "stub"
+      "status": "implemented"
     },
     "neg-fabric-scorecard": {
       "owner": "WO-062",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-demo": {
       "owner": "WO-062",
-      "status": "stub"
+      "status": "implemented"
     },
     "fabric-gate": {
       "owner": "WO-063",
