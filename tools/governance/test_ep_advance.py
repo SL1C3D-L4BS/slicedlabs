@@ -13,6 +13,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cmd_ep_advance as adv  # noqa: E402
+import cmd_gen_episodes as gen  # noqa: E402
 import slgov  # noqa: E402
 import slib  # noqa: E402
 
@@ -201,6 +202,136 @@ class DependencyTests(Base):
         reg["lifecycle"]["waivers"][0]["last"] = 4
         self.write_registry(reg)
         self.assertIn("no waiver", self.go("SL-EP-005", "InProgress", "WO-902", "ADR-0003")[1])
+
+
+class VolumeGateTests(Base):
+    """R-VOL-GATE (lifecycle.gates): ADR-0020 cap on 061-080, ADR-0021 on 081-100 and 121-140."""
+
+    def setUp(self):
+        super().setUp()
+        self.write_wo("WO-903", "SL-EP-061 SL-EP-081 SL-EP-121")
+
+    def gated(self, statuses):
+        """The fixture registry with episodes {number: status}, the real waivers and the real gates."""
+        template = self.reg["episodes"][3]  # SL-EP-004, Planned, no dependencies
+        episodes = []
+        for number, status in sorted(statuses.items()):
+            ep = copy.deepcopy(template)
+            ep["id"], ep["number"], ep["status"] = "SL-EP-%03d" % number, number, status
+            episodes.append(ep)
+        reg = copy.deepcopy(self.reg)
+        reg["episodes"] = episodes
+        reg["lifecycle"]["waivers"] = [dict(w) for w in gen.WAIVERS]
+        reg["lifecycle"]["gates"] = [dict(g) for g in gen.GATES]
+        return reg
+
+    def accepted(self, first, last, **others):
+        statuses = {n: "Accepted" for n in range(first, last + 1)}
+        statuses.update({int(k[1:]): v for k, v in others.items()})
+        return statuses
+
+    def test_adr_0020_cap_refuses_accepted_while_041_is_demonstrated(self):
+        reg = self.gated(self.accepted(42, 60, n41="Demonstrated", n61="Demonstrated"))
+        self.write_evidence("WO-903")
+        with self.assertRaises(adv.Refused) as ctx:
+            adv.advance(reg, self.root, "SL-EP-061", "Accepted", "WO-903", "2026-10-19")
+        message = str(ctx.exception)
+        for text in ("R-VOL-GATE", "SL-EP-061", "ADR-0020", "SL-EP-041", "Demonstrated", "no --adr bypass"):
+            self.assertIn(text, message)
+        self.assertEqual(next(e for e in reg["episodes"] if e["number"] == 61)["status"], "Demonstrated")
+        next(e for e in reg["episodes"] if e["number"] == 41)["status"] = "Accepted"
+        adv.advance(reg, self.root, "SL-EP-061", "Accepted", "WO-903", "2026-10-19")
+        self.assertEqual(next(e for e in reg["episodes"] if e["number"] == 61)["status"], "Accepted")
+
+    def test_adr_0020_cap_names_the_first_unmet_episode(self):
+        statuses = self.accepted(41, 60, n47="Verifying", n55="Planned", n61="Demonstrated")
+        self.write_evidence("WO-903")
+        with self.assertRaises(adv.Refused) as ctx:
+            adv.advance(self.gated(statuses), self.root, "SL-EP-061", "Accepted", "WO-903", "2026-10-19")
+        self.assertIn("SL-EP-047 is Verifying", str(ctx.exception))
+        del statuses[47]
+        statuses[55] = "Accepted"
+        with self.assertRaises(adv.Refused) as ctx:
+            adv.advance(self.gated(statuses), self.root, "SL-EP-061", "Accepted", "WO-903", "2026-10-19")
+        self.assertIn("SL-EP-047 is missing", str(ctx.exception))
+
+    def test_volume_04_below_the_cap_is_not_gated(self):
+        reg = self.gated({61: "Verifying", 41: "Planned"})
+        self.write_evidence("WO-903")
+        adv.advance(reg, self.root, "SL-EP-061", "Demonstrated", "WO-903", "2026-10-19")
+        reg = self.gated({61: "Verifying", 41: "Planned"})
+        adv.advance(reg, self.root, "SL-EP-061", "Blocked", "WO-903", "2026-10-19")  # never a gated target
+
+    def test_volume_05_may_reach_demonstrated_but_not_accepted_before_volume_02(self):
+        reg = self.gated({81: "Specified", 21: "Planned"})
+        self.write_evidence("WO-903")
+        for state in ("InProgress", "Verifying", "Demonstrated"):
+            adv.advance(reg, self.root, "SL-EP-081", state, "WO-903", "2026-10-19")
+        with self.assertRaises(adv.Refused) as ctx:
+            adv.advance(reg, self.root, "SL-EP-081", "Accepted", "WO-903", "2026-10-19")
+        for text in ("R-VOL-GATE", "ADR-0021", "SL-EP-021..SL-EP-040", "SL-EP-021 is Planned"):
+            self.assertIn(text, str(ctx.exception))
+        self.assertEqual(reg["episodes"][-1]["status"], "Demonstrated")
+        reg = self.gated(self.accepted(21, 40, n81="Demonstrated"))
+        adv.advance(reg, self.root, "SL-EP-081", "Accepted", "WO-903", "2026-10-19")
+        self.assertEqual(reg["episodes"][-1]["status"], "Accepted")
+
+    def test_volume_07_cannot_start_before_volume_02_is_accepted(self):
+        reg = self.gated({121: "Planned"})
+        adv.advance(reg, self.root, "SL-EP-121", "Specified", "WO-903", "2026-10-19")  # Specified is not gated
+        with self.assertRaises(adv.Refused) as ctx:
+            adv.advance(reg, self.root, "SL-EP-121", "InProgress", "WO-903", "2026-10-19")
+        for text in ("R-VOL-GATE", "ADR-0021", "SL-EP-121", "InProgress", "SL-EP-021 is missing"):
+            self.assertIn(text, str(ctx.exception))
+        reg = self.gated(self.accepted(21, 40, n121="Specified", n33="Demonstrated"))
+        self.assertIn("SL-EP-033 is Demonstrated", self.refusal(reg, "SL-EP-121", "InProgress"))
+        reg = self.gated(self.accepted(21, 40, n121="Specified"))
+        adv.advance(reg, self.root, "SL-EP-121", "InProgress", "WO-903", "2026-10-19")
+
+    def refusal(self, reg, ep, state):
+        with self.assertRaises(adv.Refused) as ctx:
+            adv.advance(reg, self.root, ep, state, "WO-903", "2026-10-19")
+        return str(ctx.exception)
+
+    def test_adr_flag_does_not_bypass_a_gate(self):
+        reg = self.gated({121: "Specified"})
+        reg["lifecycle"]["waivers"].append(
+            {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0021", "first": 121, "last": 140, "max_status": "Demonstrated"}
+        )
+        self.assertIn("R-VOL-GATE", self.refusal_adr(reg, "SL-EP-121", "InProgress", "ADR-0021"))
+
+    def refusal_adr(self, reg, ep, state, adr):
+        with self.assertRaises(adv.Refused) as ctx:
+            adv.advance(reg, self.root, ep, state, "WO-903", "2026-10-19", adr)
+        return str(ctx.exception)
+
+    def test_cli_refusal_leaves_the_registry_untouched(self):
+        self.write_registry(self.gated({121: "Specified", 21: "Demonstrated"}))
+        before = self.registry_text()
+        code, err = self.go("SL-EP-121", "InProgress", "WO-903")
+        self.assertEqual(code, 1)
+        self.assertIn("R-VOL-GATE", err)
+        self.assertIn("SL-EP-021 is Demonstrated", err)
+        self.assertEqual(self.registry_text(), before)
+
+    def test_registry_without_gates_is_not_gated(self):
+        reg = self.gated({121: "Specified"})
+        del reg["lifecycle"]["gates"]
+        adv.advance(reg, self.root, "SL-EP-121", "InProgress", "WO-903", "2026-10-19")
+
+    def test_waiver_for_adr_0021(self):
+        reg = self.gated({81: "Specified", 100: "Specified", 101: "Specified"})
+        ep81, ep101 = reg["episodes"][0], reg["episodes"][2]
+        self.assertEqual(adv.waiver_for(reg, ep81, "ADR-0021", "Demonstrated")["last"], 100)
+        ep100 = reg["episodes"][1]
+        self.assertEqual(adv.waiver_for(reg, ep100, "ADR-0021", "InProgress")["max_status"], "Demonstrated")
+        with self.assertRaises(adv.Refused) as ctx:
+            adv.waiver_for(reg, ep81, "ADR-0021", "Accepted")
+        self.assertIn("ADR-0021 waives only up to Demonstrated", str(ctx.exception))
+        for episode, adr in ((ep101, "ADR-0021"), (ep81, "ADR-0003")):
+            with self.assertRaises(adv.Refused) as ctx:
+                adv.waiver_for(reg, episode, adr, "InProgress")
+            self.assertIn("no waiver %s" % adr, str(ctx.exception))
 
 
 class ArgumentTests(unittest.TestCase):

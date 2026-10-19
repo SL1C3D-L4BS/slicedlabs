@@ -43,7 +43,9 @@ class RealRegistryTests(unittest.TestCase):
     def test_waiver_and_no_invented_dependencies(self):
         reg = self.ctx["reg"]
         self.assertEqual(reg["lifecycle"]["waivers"], [
-            {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0003", "first": 41, "last": 48, "max_status": "Demonstrated"}])
+            {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0003", "first": 41, "last": 48, "max_status": "Demonstrated"},
+            {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0021", "first": 81, "last": 100, "max_status": "Demonstrated"}])
+        self.assertEqual(reg["lifecycle"]["gates"], [dict(g) for g in gen.GATES])
         self.assertTrue(all(e["depends_on"] == [] for e in reg["episodes"]))
         self.assertEqual(sum(1 for v in reg["volumes"] if v["depends_on_volumes"]), 40)
 
@@ -77,6 +79,53 @@ class RealRegistryTests(unittest.TestCase):
         chk._m_no_evidence(reg)
         tags = {t for t, _, _ in chk.check(self.ctx, reg)}
         self.assertIn("R-NO-EVIDENCE", tags)
+
+    def gate_tags(self, statuses):
+        """R-VOL-GATE findings after setting {episode number: status} on a copy of the real registry."""
+        reg = copy.deepcopy(self.ctx["reg"])
+        for n in range(21, 141):
+            reg["episodes"][n - 1]["status"] = "Planned"
+        for n, status in statuses.items():
+            reg["episodes"][n - 1]["status"] = status
+        return chk.vol_gate_findings(reg)
+
+    def test_vol_gate_names_the_gate_and_the_unmet_episode(self):
+        found = self.gate_tags({n: "Accepted" for n in range(42, 61)} | {41: "Demonstrated", 61: "Accepted"})
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0][0], "R-VOL-GATE")
+        for text in ("SL-EP-061", "ADR-0020", "SL-EP-041", "Demonstrated"):
+            self.assertIn(text, found[0][2])
+
+    def test_vol_gate_allows_a_met_gate_and_lower_states(self):
+        accepted = {n: "Accepted" for n in range(41, 61)}
+        self.assertEqual(self.gate_tags(accepted | {61: "Accepted", 62: "Demonstrated"}), [])
+        # Volume 05 may be Demonstrated with Volume 02 untouched, but not Accepted (ADR-0021)
+        self.assertEqual(self.gate_tags({81: "Demonstrated", 82: "InProgress", 83: "Verifying"}), [])
+        self.assertEqual(len(self.gate_tags({81: "Accepted"})), 1)
+        volume_02 = {n: "Accepted" for n in range(21, 41)}
+        self.assertEqual(self.gate_tags(volume_02 | {81: "Accepted", 121: "InProgress"}), [])
+
+    def test_vol_gate_volume_07_starts_only_after_volume_02(self):
+        self.assertEqual(self.gate_tags({121: "Specified"}), [])
+        for status in ("InProgress", "Verifying", "Demonstrated", "Accepted", "Blocked", "Reopened"):
+            found = self.gate_tags({121: status})
+            self.assertEqual(len(found), 1, status)
+            self.assertIn("ADR-0021", found[0][2])
+            self.assertIn("SL-EP-021", found[0][2])
+        accepted = {n: "Accepted" for n in range(21, 41)}
+        self.assertEqual(self.gate_tags(accepted | {121: "InProgress"}), [])
+        accepted[33] = "Demonstrated"
+        self.assertIn("SL-EP-033", self.gate_tags(accepted | {121: "InProgress"})[0][2])
+
+    def test_gates_must_equal_the_generators(self):
+        for mutate in (lambda g: g.pop(), lambda g: g.reverse(), lambda g: g[0].update(first=62)):
+            reg = copy.deepcopy(self.ctx["reg"])
+            mutate(reg["lifecycle"]["gates"])
+            findings = [f for f in chk.check(self.ctx, reg) if f[1] == "/lifecycle/gates"]
+            self.assertEqual([f[0] for f in findings], ["GOLDEN"])
+        reg = copy.deepcopy(self.ctx["reg"])
+        del reg["lifecycle"]["gates"]
+        self.assertIn(("GOLDEN", "/lifecycle/gates"), [(t, p) for t, p, _ in chk.check(self.ctx, reg)])
 
     def test_cli_prints_wall_time(self):
         status, out, _ = run(chk, [])

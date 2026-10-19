@@ -10,6 +10,8 @@ Checks before it writes (any failure leaves the registry untouched, exit 1):
     evidence path
   - entering InProgress, Verifying, Demonstrated or Accepted needs every dependency Accepted (R-DEP-ACCEPTED),
     unless --adr names the registry waiver (lifecycle.waivers) that covers the episode and the target state
+  - R-VOL-GATE (registry lifecycle.gates, ADR-0020 and ADR-0021): entering a gated state, or one beyond it, needs
+    the gate's required episode range at its required status; --adr does not bypass it
   - the rule engine reports no finding that the registry did not already have
 
 Exit 0 advanced, 1 refused, 2 usage or unreadable input. Stdlib only (ADR-0004), no subprocess, no network.
@@ -24,6 +26,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import cmd_gen_episodes as gen  # noqa: E402
 import cmd_wo_check  # noqa: E402
 import slgov  # noqa: E402
 import slib  # noqa: E402
@@ -101,6 +104,27 @@ def check_dependencies(reg, ep, state, adr):
     return None
 
 
+def check_gates(reg, ep, state):
+    """Enforce R-VOL-GATE (lifecycle.gates): entering a gated state, or one beyond it on the main line, needs the
+    gate's required range at requires_status. No --adr bypass. Blocked and Reopened are never gated targets."""
+    if state not in slib.PROGRESS:
+        return
+    by_number = {e["number"]: e["status"] for e in reg["episodes"]}
+    for gate in reg["lifecycle"].get("gates", []):
+        if not gate["first"] <= ep["number"] <= gate["last"]:
+            continue
+        if slib.PROGRESS.index(state) < slib.PROGRESS.index(gate["state"]):
+            continue
+        unmet = gen.gate_unmet(gate, by_number)
+        if unmet is not None:
+            raise Refused(
+                "R-VOL-GATE: %s cannot enter %s: %s requires SL-EP-%03d..SL-EP-%03d to be %s first; SL-EP-%03d is %s "
+                "(no --adr bypass)"
+                % (ep["id"], state, gate["adr"], gate["requires_first"], gate["requires_last"],
+                   gate["requires_status"], unmet, by_number.get(unmet, "missing"))
+            )
+
+
 def advance(reg, root, ep_id, state, wo, date, adr=None):
     """Mutate reg in place; return the history entry. Raises Refused. Reads work-orders/ and evidence/ under root."""
     if state not in slib.STATES:
@@ -124,6 +148,7 @@ def advance(reg, root, ep_id, state, wo, date, adr=None):
     if ep_id not in traced:
         raise Refused("R-WO-TRACE: work-orders/%s.md does not trace %s" % (wo, ep_id))
     waiver = check_dependencies(reg, ep, state, adr)
+    check_gates(reg, ep, state)
     evidence = None
     if state in slib.EVIDENCE_STATES:
         evidence = load_evidence(root, wo)

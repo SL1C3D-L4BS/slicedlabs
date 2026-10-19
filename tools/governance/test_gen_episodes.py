@@ -189,7 +189,38 @@ class BuildTests(unittest.TestCase):
     def test_lifecycle_and_waiver(self):
         self.assertEqual(self.reg["lifecycle"]["states"], list(slib.STATES))
         self.assertEqual(self.reg["lifecycle"]["waivers"], [
-            {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0003", "first": 41, "last": 48, "max_status": "Demonstrated"}])
+            {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0003", "first": 41, "last": 48, "max_status": "Demonstrated"},
+            {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0021", "first": 81, "last": 100, "max_status": "Demonstrated"}])
+
+    def test_volume_gates(self):
+        def gate(adr, first, last, state, rfirst, rlast):
+            return {"adr": adr, "first": first, "last": last, "state": state, "requires_first": rfirst,
+                    "requires_last": rlast, "requires_status": "Accepted"}
+
+        self.assertEqual(self.reg["lifecycle"]["gates"], [
+            gate("ADR-0020", 61, 80, "Accepted", 41, 60),
+            gate("ADR-0021", 81, 100, "Accepted", 21, 40),
+            gate("ADR-0021", 121, 140, "InProgress", 21, 40)])
+        self.assertEqual(self.reg["lifecycle"]["gates"], [dict(g) for g in gen.GATES])
+        self.assertEqual(slib.schema_findings(self.reg, "sl-reg-002"), [])
+        bad = copy.deepcopy(self.reg)
+        bad["lifecycle"]["gates"][0]["extra"] = 1
+        self.assertTrue(slib.schema_findings(bad, "sl-reg-002"))
+
+    def test_gates_do_not_change_the_lock(self):
+        r = copy.deepcopy(self.reg)
+        r["lifecycle"]["gates"] = []
+        self.assertEqual(gen.lock_digest(r), gen.lock_digest(self.reg))
+
+    def test_gate_helpers(self):
+        self.assertEqual([gen.gate_rank(s) for s in ("Planned", "Blocked", "Reopened", "Accepted")], [0, 3, 5, 5])
+        gate = gen.GATES[0]
+        status = {n: "Accepted" for n in range(41, 61)}
+        self.assertIsNone(gen.gate_unmet(gate, status))
+        status[44] = "Demonstrated"
+        self.assertEqual(gen.gate_unmet(gate, status), 44)
+        del status[44]
+        self.assertEqual(gen.gate_unmet(gate, status), 44)
 
     def test_dumps_is_deterministic_with_trailing_newline(self):
         a, b = gen.dumps(self.reg), gen.dumps(copy.deepcopy(self.reg))

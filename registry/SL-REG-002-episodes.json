@@ -18483,6 +18483,35 @@
   }
  ],
  "lifecycle": {
+  "gates": [
+   {
+    "adr": "ADR-0020",
+    "first": 61,
+    "last": 80,
+    "requires_first": 41,
+    "requires_last": 60,
+    "requires_status": "Accepted",
+    "state": "Accepted"
+   },
+   {
+    "adr": "ADR-0021",
+    "first": 81,
+    "last": 100,
+    "requires_first": 21,
+    "requires_last": 40,
+    "requires_status": "Accepted",
+    "state": "Accepted"
+   },
+   {
+    "adr": "ADR-0021",
+    "first": 121,
+    "last": 140,
+    "requires_first": 21,
+    "requires_last": 40,
+    "requires_status": "Accepted",
+    "state": "InProgress"
+   }
+  ],
   "states": [
    "Planned",
    "Specified",
@@ -18540,6 +18569,13 @@
     "adr": "ADR-0003",
     "first": 41,
     "last": 48,
+    "max_status": "Demonstrated",
+    "rule": "R-DEP-ACCEPTED"
+   },
+   {
+    "adr": "ADR-0021",
+    "first": 81,
+    "last": 100,
     "max_status": "Demonstrated",
     "rule": "R-DEP-ACCEPTED"
    }

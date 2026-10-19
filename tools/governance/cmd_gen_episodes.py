@@ -39,9 +39,42 @@ MILESTONES = ("Foundation", "Core loop", "Production", "Early Access", "1.0")
 DEFAULT_DECISION_STATUS = "Unresolved"
 
 # ADR-0003 waiver: episodes 041-048 may start before Volume 01 is Accepted, but stop at Demonstrated.
+# ADR-0021 waiver: episodes 081-100 may start before Volume 02 is Accepted, but stop at Demonstrated.
 WAIVERS = (
     {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0003", "first": 41, "last": 48, "max_status": "Demonstrated"},
+    {"rule": "R-DEP-ACCEPTED", "adr": "ADR-0021", "first": 81, "last": 100, "max_status": "Demonstrated"},
 )
+
+# Volume gates (R-VOL-GATE): an episode in first..last may not enter `state` (or any later main-line state)
+# until every episode requires_first..requires_last is at requires_status.
+#   ADR-0020: Volume 04 (061-080) is Accepted only after Volume 03 (041-060) is Accepted.
+#   ADR-0021: Volume 05 (081-100) is Accepted only after Volume 02 (021-040) is Accepted, and no Volume 07
+#             episode (121-140) is InProgress before Volume 02 is Accepted.
+GATES = (
+    {"adr": "ADR-0020", "first": 61, "last": 80, "state": "Accepted",
+     "requires_first": 41, "requires_last": 60, "requires_status": "Accepted"},
+    {"adr": "ADR-0021", "first": 81, "last": 100, "state": "Accepted",
+     "requires_first": 21, "requires_last": 40, "requires_status": "Accepted"},
+    {"adr": "ADR-0021", "first": 121, "last": 140, "state": "InProgress",
+     "requires_first": 21, "requires_last": 40, "requires_status": "Accepted"},
+)
+
+
+def gate_rank(status):
+    """Position of a status on the main line (slib.PROGRESS); Blocked counts as Verifying, Reopened as Accepted."""
+    if status == "Blocked":
+        status = "Verifying"
+    elif status == "Reopened":
+        status = "Accepted"
+    return slib.PROGRESS.index(status)
+
+
+def gate_unmet(gate, status_by_number):
+    """The first episode number in the gate's required range that is not at requires_status, or None."""
+    for n in range(gate["requires_first"], gate["requires_last"] + 1):
+        if status_by_number.get(n) != gate["requires_status"]:
+            return n
+    return None
 
 _ESCAPE_RE = re.compile(r"\\([!-/:-@\[-`{-~])")
 _PART_RE = re.compile(r"^## \*\*Part ([IVX]+) \u2014 (.+?) \(episodes (\d{3})\u2013(\d{3})\)\*\*\s*$")
@@ -333,6 +366,7 @@ def build_registry(plan, plan_sha, seeds):
             "states": list(slib.STATES),
             "transitions": [list(t) for t in plan["transitions"]],
             "waivers": [dict(w) for w in WAIVERS],
+            "gates": [dict(g) for g in GATES],
         },
         "parts": plan["parts"],
         "volumes": volumes,

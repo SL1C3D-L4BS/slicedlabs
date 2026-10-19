@@ -48,6 +48,12 @@
           "items": {
             "$ref": "#/$defs/waiver"
           }
+        },
+        "gates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gate"
+          }
         }
       },
       "required": [
@@ -175,6 +181,46 @@
         "first",
         "last",
         "max_status"
+      ],
+      "additionalProperties": false
+    },
+    "gate": {
+      "type": "object",
+      "properties": {
+        "adr": {
+          "$ref": "#/$defs/adr_id"
+        },
+        "first": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "last": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "state": {
+          "$ref": "#/$defs/state"
+        },
+        "requires_first": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requires_last": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requires_status": {
+          "$ref": "#/$defs/state"
+        }
+      },
+      "required": [
+        "adr",
+        "first",
+        "last",
+        "state",
+        "requires_first",
+        "requires_last",
+        "requires_status"
       ],
       "additionalProperties": false
     },
