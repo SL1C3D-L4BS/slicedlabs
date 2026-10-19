@@ -1,0 +1,9 @@
+{
+  "wo": "WO-028",
+  "wo_sha256": "27686870fa6102184c786c108d25b4df2a8871e3775a9bfd4f0d6d78587afced",
+  "merge_commit": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34",
+  "branch_tip_tree": "2f0144224a386772999149e2f5aaa231700282d4",
+  "gate_log_sha256": "df5acbef5ee3ef741d328a6d4cba78b10ac6629371ce037c633ef4594e9437b8",
+  "pass": true,
+  "date": "2026-10-18"
+}
