@@ -1,7 +1,7 @@
 ---
 id: ADR-0016
 title: "F5 enforcement: immutable snapshots, a passkey on the only mutator, a debug ledger and a surface lint"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

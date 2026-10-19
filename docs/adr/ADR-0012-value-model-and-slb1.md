@@ -1,7 +1,7 @@
 ---
 id: ADR-0012
 title: "Canonical value model and the SLB/1 encoding, proven by two implementations"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

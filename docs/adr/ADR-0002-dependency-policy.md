@@ -1,7 +1,7 @@
 ---
 id: ADR-0002
 title: "One dependency policy, one lockfile, four providers"
-status: Proposed
+status: Accepted
 date: 2026-10-17
 decision_refs: []
 supersedes: []

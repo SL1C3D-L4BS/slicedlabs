@@ -1,7 +1,7 @@
 ---
 id: ADR-0010
 title: "Fabric error domain: sl::errc 5000-5999, every code reserved up front"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

@@ -1,7 +1,7 @@
 ---
 id: ADR-0013
 title: "Schema source of truth, released-version lock and committed generated code"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

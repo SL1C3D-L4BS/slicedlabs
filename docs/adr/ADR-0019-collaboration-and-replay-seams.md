@@ -1,7 +1,7 @@
 ---
 id: ADR-0019
 title: "Collaboration and replay seams frozen into patch v1 and the revision format"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

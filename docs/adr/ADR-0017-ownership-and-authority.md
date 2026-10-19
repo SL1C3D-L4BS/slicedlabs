@@ -1,7 +1,7 @@
 ---
 id: ADR-0017
 title: "Ownership and authority: one owner per domain, twelve reserved domains, innermost-domain authority"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

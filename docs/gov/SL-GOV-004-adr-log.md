@@ -23,27 +23,27 @@ and registries). It is generated from `docs/adr/`; edit an ADR, then regenerate.
 
 | ADR | Title | Status | Date | Supersedes | Decision refs |
 | :---- | :---- | :---- | :---- | :---- | :---- |
-| [ADR-0001](../adr/ADR-0001-repo-layout.md) | Repository layout follows the master plan starter prompt | Proposed | 2026-10-17 | none | D-126, D-135, D-141, D-144 |
-| [ADR-0002](../adr/ADR-0002-dependency-policy.md) | One dependency policy, one lockfile, four providers | Proposed | 2026-10-17 | none | none |
-| [ADR-0003](../adr/ADR-0003-authoring-order-waivers.md) | Volume 03 code starts before its authoring-order prerequisites | Proposed | 2026-10-17 | none | none |
-| [ADR-0004](../adr/ADR-0004-tooling-stdlib-only.md) | Repository tooling is Python 3 standard library only | Proposed | 2026-10-17 | none | none |
-| [ADR-0005](../adr/ADR-0005-cmake-floor.md) | CMake 3.28 floor, presets schema 8, import std as a probe | Proposed | 2026-10-17 | none | none |
-| [ADR-0006](../adr/ADR-0006-windows-parity.md) | Windows parity is verified structurally on Linux | Proposed | 2026-10-17 | none | none |
-| [ADR-0007](../adr/ADR-0007-factory-manual-mode.md) | Factory manual mode until wo-pipeline and land exist | Proposed | 2026-10-17 | none | none |
-| [ADR-0008](../adr/ADR-0008-conditional-decisions.md) | Conditional decisions: ADR seeds from the Engine Constitution | Proposed | 2026-10-17 | none | none |
-| [ADR-0009](../adr/ADR-0009-error-handling.md) | Errors are values: std::expected in engine code, assertions abort | Proposed | 2026-10-17 | none | none |
-| [ADR-0010](../adr/ADR-0010-fabric-error-domain.md) | Fabric error domain: sl::errc 5000-5999, every code reserved up front | Proposed | 2026-10-18 | none | none |
-| [ADR-0011](../adr/ADR-0011-fabric-identity-layout.md) | Fabric identity: 128-bit record ids minted at authoring time, SHA-256 object ids | Proposed | 2026-10-18 | none | none |
-| [ADR-0012](../adr/ADR-0012-value-model-and-slb1.md) | Canonical value model and the SLB/1 encoding, proven by two implementations | Proposed | 2026-10-18 | none | none |
-| [ADR-0013](../adr/ADR-0013-schema-source-lock-and-generation.md) | Schema source of truth, released-version lock and committed generated code | Proposed | 2026-10-18 | none | none |
-| [ADR-0014](../adr/ADR-0014-revision-store-and-single-cas.md) | Immutable Merkle revision store; the Fabric object store is the one content-addressed store | Proposed | 2026-10-18 | none | none |
-| [ADR-0015](../adr/ADR-0015-commit-log-durability-and-recovery.md) | Durability: one CRC-framed commit log, intact commit frame is the commit point, rollback-and-quarantine | Proposed | 2026-10-18 | none | none |
-| [ADR-0016](../adr/ADR-0016-f5-sole-mutation-path.md) | F5 enforcement: immutable snapshots, a passkey on the only mutator, a debug ledger and a surface lint | Proposed | 2026-10-18 | none | none |
-| [ADR-0017](../adr/ADR-0017-ownership-and-authority.md) | Ownership and authority: one owner per domain, twelve reserved domains, innermost-domain authority | Proposed | 2026-10-18 | none | none |
-| [ADR-0018](../adr/ADR-0018-undo-and-compensation.md) | Undo is a new transaction applying the stored inverse; per-actor stacks; barriers and compensations | Proposed | 2026-10-18 | none | none |
-| [ADR-0019](../adr/ADR-0019-collaboration-and-replay-seams.md) | Collaboration and replay seams frozen into patch v1 and the revision format | Proposed | 2026-10-18 | none | none |
-| [ADR-0020](../adr/ADR-0020-volume-04-acceptance-state.md) | Volume 04 acceptance state: Demonstrated cap, intra-volume order, founder-only status changes | Proposed | 2026-10-18 | none | none |
-| [ADR-0021](../adr/ADR-0021-volume-02-deferral.md) | Volume 02 deferral: Volume 05 before Volume 02, Volume 02 before Volume 07, and the mathematics allowed meanwhile | Proposed | 2026-10-19 | none | none |
+| [ADR-0001](../adr/ADR-0001-repo-layout.md) | Repository layout follows the master plan starter prompt | Accepted | 2026-10-17 | none | D-126, D-135, D-141, D-144 |
+| [ADR-0002](../adr/ADR-0002-dependency-policy.md) | One dependency policy, one lockfile, four providers | Accepted | 2026-10-17 | none | none |
+| [ADR-0003](../adr/ADR-0003-authoring-order-waivers.md) | Volume 03 code starts before its authoring-order prerequisites | Accepted | 2026-10-17 | none | none |
+| [ADR-0004](../adr/ADR-0004-tooling-stdlib-only.md) | Repository tooling is Python 3 standard library only | Accepted | 2026-10-17 | none | none |
+| [ADR-0005](../adr/ADR-0005-cmake-floor.md) | CMake 3.28 floor, presets schema 8, import std as a probe | Accepted | 2026-10-17 | none | none |
+| [ADR-0006](../adr/ADR-0006-windows-parity.md) | Windows parity is verified structurally on Linux | Accepted | 2026-10-17 | none | none |
+| [ADR-0007](../adr/ADR-0007-factory-manual-mode.md) | Factory manual mode until wo-pipeline and land exist | Accepted | 2026-10-17 | none | none |
+| [ADR-0008](../adr/ADR-0008-conditional-decisions.md) | Conditional decisions: ADR seeds from the Engine Constitution | Accepted | 2026-10-17 | none | none |
+| [ADR-0009](../adr/ADR-0009-error-handling.md) | Errors are values: std::expected in engine code, assertions abort | Accepted | 2026-10-17 | none | none |
+| [ADR-0010](../adr/ADR-0010-fabric-error-domain.md) | Fabric error domain: sl::errc 5000-5999, every code reserved up front | Accepted | 2026-10-18 | none | none |
+| [ADR-0011](../adr/ADR-0011-fabric-identity-layout.md) | Fabric identity: 128-bit record ids minted at authoring time, SHA-256 object ids | Accepted | 2026-10-18 | none | none |
+| [ADR-0012](../adr/ADR-0012-value-model-and-slb1.md) | Canonical value model and the SLB/1 encoding, proven by two implementations | Accepted | 2026-10-18 | none | none |
+| [ADR-0013](../adr/ADR-0013-schema-source-lock-and-generation.md) | Schema source of truth, released-version lock and committed generated code | Accepted | 2026-10-18 | none | none |
+| [ADR-0014](../adr/ADR-0014-revision-store-and-single-cas.md) | Immutable Merkle revision store; the Fabric object store is the one content-addressed store | Accepted | 2026-10-18 | none | none |
+| [ADR-0015](../adr/ADR-0015-commit-log-durability-and-recovery.md) | Durability: one CRC-framed commit log, intact commit frame is the commit point, rollback-and-quarantine | Accepted | 2026-10-18 | none | none |
+| [ADR-0016](../adr/ADR-0016-f5-sole-mutation-path.md) | F5 enforcement: immutable snapshots, a passkey on the only mutator, a debug ledger and a surface lint | Accepted | 2026-10-18 | none | none |
+| [ADR-0017](../adr/ADR-0017-ownership-and-authority.md) | Ownership and authority: one owner per domain, twelve reserved domains, innermost-domain authority | Accepted | 2026-10-18 | none | none |
+| [ADR-0018](../adr/ADR-0018-undo-and-compensation.md) | Undo is a new transaction applying the stored inverse; per-actor stacks; barriers and compensations | Accepted | 2026-10-18 | none | none |
+| [ADR-0019](../adr/ADR-0019-collaboration-and-replay-seams.md) | Collaboration and replay seams frozen into patch v1 and the revision format | Accepted | 2026-10-18 | none | none |
+| [ADR-0020](../adr/ADR-0020-volume-04-acceptance-state.md) | Volume 04 acceptance state: Demonstrated cap, intra-volume order, founder-only status changes | Accepted | 2026-10-18 | none | none |
+| [ADR-0021](../adr/ADR-0021-volume-02-deferral.md) | Volume 02 deferral: Volume 05 before Volume 02, Volume 02 before Volume 07, and the mathematics allowed meanwhile | Accepted | 2026-10-19 | none | none |
 
 ## Normative text
 

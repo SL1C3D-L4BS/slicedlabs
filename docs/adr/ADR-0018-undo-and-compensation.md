@@ -1,7 +1,7 @@
 ---
 id: ADR-0018
 title: "Undo is a new transaction applying the stored inverse; per-actor stacks; barriers and compensations"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

@@ -1,7 +1,7 @@
 ---
 id: ADR-0020
 title: "Volume 04 acceptance state: Demonstrated cap, intra-volume order, founder-only status changes"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

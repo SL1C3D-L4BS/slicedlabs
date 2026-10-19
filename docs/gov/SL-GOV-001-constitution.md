@@ -2,7 +2,7 @@
 id: SL-GOV-001
 kind: GOV
 title: "Engine Constitution and Engineering Doctrine"
-status: Draft
+status: Approved
 version: 0.1.0
 owner: founder
 episodes: [001, 003, 011, 020]

@@ -1,7 +1,7 @@
 ---
 id: ADR-0008
 title: "Conditional decisions: ADR seeds from the Engine Constitution"
-status: Proposed
+status: Accepted
 date: 2026-10-17
 decision_refs: []
 supersedes: []

@@ -1,7 +1,7 @@
 ---
 id: ADR-0014
 title: "Immutable Merkle revision store; the Fabric object store is the one content-addressed store"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

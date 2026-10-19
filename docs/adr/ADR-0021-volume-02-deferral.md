@@ -1,7 +1,7 @@
 ---
 id: ADR-0021
 title: "Volume 02 deferral: Volume 05 before Volume 02, Volume 02 before Volume 07, and the mathematics allowed meanwhile"
-status: Proposed
+status: Accepted
 date: 2026-10-19
 decision_refs: []
 supersedes: []

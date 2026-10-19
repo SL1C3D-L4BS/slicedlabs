@@ -1,7 +1,7 @@
 ---
 id: ADR-0001
 title: "Repository layout follows the master plan starter prompt"
-status: Proposed
+status: Accepted
 date: 2026-10-17
 decision_refs: [D-126, D-135, D-141, D-144]
 supersedes: []

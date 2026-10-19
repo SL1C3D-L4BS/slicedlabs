@@ -1,7 +1,7 @@
 ---
 id: ADR-0003
 title: "Volume 03 code starts before its authoring-order prerequisites"
-status: Proposed
+status: Accepted
 date: 2026-10-17
 decision_refs: []
 supersedes: []

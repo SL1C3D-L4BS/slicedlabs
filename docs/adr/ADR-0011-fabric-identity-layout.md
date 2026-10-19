@@ -1,7 +1,7 @@
 ---
 id: ADR-0011
 title: "Fabric identity: 128-bit record ids minted at authoring time, SHA-256 object ids"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

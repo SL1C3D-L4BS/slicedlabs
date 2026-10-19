@@ -1,7 +1,7 @@
 ---
 id: ADR-0015
 title: "Durability: one CRC-framed commit log, intact commit frame is the commit point, rollback-and-quarantine"
-status: Proposed
+status: Accepted
 date: 2026-10-18
 decision_refs: []
 supersedes: []

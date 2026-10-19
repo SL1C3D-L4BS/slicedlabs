@@ -1,7 +1,7 @@
 ---
 id: ADR-0006
 title: "Windows parity is verified structurally on Linux"
-status: Proposed
+status: Accepted
 date: 2026-10-17
 decision_refs: []
 supersedes: []

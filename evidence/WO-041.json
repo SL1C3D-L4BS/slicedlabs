@@ -1,0 +1,9 @@
+{
+  "wo": "WO-041",
+  "wo_sha256": "83cfa05ce016f1e8b78a52033ffb2571ec91f599c8d3a806ea2b46c8486b1d70",
+  "merge_commit": "406ffa37233a2e405fba525f52502dde89a9b196",
+  "branch_tip_tree": "047b1e27cc3990f187e5a890df8e21a20b92c3e9",
+  "gate_log_sha256": "b7cde8479e208f15bab12ed002431d33e75aae869da973ffd1b66b12992773e1",
+  "pass": true,
+  "date": "2026-10-19"
+}

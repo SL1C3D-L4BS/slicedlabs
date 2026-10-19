@@ -1,7 +1,7 @@
 ---
 id: ADR-0007
 title: "Factory manual mode until wo-pipeline and land exist"
-status: Proposed
+status: Accepted
 date: 2026-10-17
 decision_refs: []
 supersedes: []

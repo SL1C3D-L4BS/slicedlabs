@@ -1,7 +1,7 @@
 ---
 id: ADR-0005
 title: "CMake 3.28 floor, presets schema 8, import std as a probe"
-status: Proposed
+status: Accepted
 date: 2026-10-17
 decision_refs: []
 supersedes: []

@@ -1,7 +1,7 @@
 ---
 id: ADR-0004
 title: "Repository tooling is Python 3 standard library only"
-status: Proposed
+status: Accepted
 date: 2026-10-17
 decision_refs: []
 supersedes: []

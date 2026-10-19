@@ -4,11 +4,50 @@
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-006.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-006",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-006",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-006",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-006",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-006",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-001",
    "kohi_ref": null,
    "meaning_sha256": "e7e0d7788de141d3e5fe692e1c18abe4b57098806df587d3eb53041c32b4e0b1",
@@ -17,20 +56,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "engine, editor, SDK, runtime, content suite, automation layer and delivery platform as one product family",
    "title": "Define the Sliced Labs product",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-006"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-008.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-008",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-008",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-008",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-008",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-008",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-002",
    "kohi_ref": null,
    "meaning_sha256": "0048c38f1dd6a1b42727ee9efd61ba055c6f6f261cb747123f0f3491d085132b",
@@ -39,20 +119,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "compare Unreal, Unity, Godot, proprietary engines, DCC tools and standalone dev tools",
    "title": "Establish the competitive position",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-008"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-006.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-006",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-006",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-006",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-006",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-006",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-003",
    "kohi_ref": null,
    "meaning_sha256": "6cb176a2b81246ee543a8abcfdd8cfc7d12e908c43306f6db93ddde9f3cb9c44",
@@ -61,20 +182,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "native workflows, permitted integrations, F1–F8 measurement",
    "title": "Define the zero-manual-fragmentation doctrine",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-006"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-007.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-007",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-007",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-007",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-007",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-007",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-004",
    "kohi_ref": null,
    "meaning_sha256": "5b5aa8f73075772f0d5704df43008d739e29a82df1b4306f2fc9ed790418ad11",
@@ -83,20 +245,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "solo devs, studios, technical artists, simulation engineers, platform developers",
    "title": "Define users and production scenarios",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-007"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-008.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-008",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-008",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-008",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-008",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-008",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-005",
    "kohi_ref": null,
    "meaning_sha256": "a41b99a84555c9f40ef96516d384032ccbec97ecc743e0a5d30778b8d4d6fb1b",
@@ -105,20 +308,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "canonical inventory of capabilities, dependencies, interfaces, ownership",
    "title": "Define the capability ontology",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-008"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-008.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-008",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-008",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-008",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-008",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-008",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-006",
    "kohi_ref": null,
    "meaning_sha256": "8d4982002b370cf0361334c0d99ca2f22b167ee3eb2dbb6c363afc58387c3331",
@@ -127,20 +371,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "core, optional modules, plugins, external integrations, hosted services",
    "title": "Define the product boundary",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-008"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-010.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-010",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-010",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-010",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-010",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-010",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-007",
    "kohi_ref": null,
    "meaning_sha256": "26d689f1dbb59f77535a5e7553a7bceaeffacd8f18921e07c64afcacfd0c38b9",
@@ -149,20 +434,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "reliability, performance, usability, accessibility, security, compatibility",
    "title": "Establish the quality model",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-010"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-009.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-009",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-009",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-009",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-009",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-009",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-008",
    "kohi_ref": null,
    "meaning_sha256": "7ac9c26d2dad57a8e0926ab9ba3b7e68bf0a68eda518bbb4d2ca21bf73336563",
@@ -171,20 +497,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "minimum, recommended and high-end workstation configurations",
    "title": "Define the hardware support matrix",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-009"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-009.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-009",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-009",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-009",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-009",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-009",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-009",
    "kohi_ref": null,
    "meaning_sha256": "9d6afacbcfbab03d7766bed635a9d22341237ff3cd762cf92e8e97ae912c79bb",
@@ -193,20 +560,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "desktop, mobile, XR, console and browser, all in 1.0 scope",
    "title": "Define the target platforms and capability profiles",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-009"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-011.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-011",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-011",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-011",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-011",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-011",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-010",
    "kohi_ref": null,
    "meaning_sha256": "946aaba47e577564b3ee5a25705c5698802374001216501a1fdebcb98bdf91b5",
@@ -215,20 +623,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "create, author, execute, debug, collaborate, test, release",
    "title": "Define the product lifecycle",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-011"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-007.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-007",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-007",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-007",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-007",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-007",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-011",
    "kohi_ref": null,
    "meaning_sha256": "d6626ca1dc755f10cf2544aed71c28eedc6a09d3cb7b8e43ae95dfbaeb0fe4a9",
@@ -237,20 +686,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "product promises converted to tests and evidence",
    "title": "Define measurable acceptance criteria",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-007"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-003.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-003",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-003",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-003",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-003",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-003",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-012",
    "kohi_ref": null,
    "meaning_sha256": "2dd3ff76167042fdd67569be923b60c8ac84961981ad857b7763797673ee2820",
@@ -259,20 +749,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "ADRs, status rules, supersession, change control",
    "title": "Establish the engineering decision system",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-003"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-009.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-009",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-009",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-009",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-009",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-009",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-013",
    "kohi_ref": null,
    "meaning_sha256": "5e367b5e835d4ae8a76475a8e64ca92f50d30cedf46ce1be12d2a6ef527b6e79",
@@ -281,20 +812,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "technical uncertainty, dependencies, delivery constraints",
    "title": "Establish risk and feasibility registers",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-009"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-010.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-010",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-010",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-010",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-010",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-010",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-014",
    "kohi_ref": null,
    "meaning_sha256": "d84e7399342e185e80c3b46da805c081825df8e55bbd4db36b07dcac1d6b836b",
@@ -303,20 +875,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "proprietary advantages vs mature infrastructure",
    "title": "Define the build-versus-adopt policy",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-010"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-010.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-010",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-010",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-010",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-010",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-010",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-015",
    "kohi_ref": null,
    "meaning_sha256": "388ac203afd5d36e5391dab443de936057e4c230b5e97d2766c8973328f55215",
@@ -325,20 +938,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "licensing, security, support, reproducibility, supply chain",
    "title": "Define the dependency policy",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-010"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-010.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-010",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-010",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-010",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-010",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-010",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-016",
    "kohi_ref": null,
    "meaning_sha256": "ed006bff50140190b8fadde7772dcc95381ec60b43998a8d51bf8f7ae7d10fa6",
@@ -347,20 +1001,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "effort, hardware, distribution, support, hosting, maintenance",
    "title": "Define the development economics",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-010"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-008.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-008",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-008",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-008",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-008",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-008",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-017",
    "kohi_ref": null,
    "meaning_sha256": "6cb53011dacb7f9bf20a73c7ba6c5a54a1639fde0f3199428eaccd9181bd0f3c",
@@ -369,20 +1064,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "first-party modules, plugins, native extensions, compatibility",
    "title": "Define the extensibility strategy",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-008"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-011.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-011",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-011",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-011",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-011",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-011",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-018",
    "kohi_ref": null,
    "meaning_sha256": "e0545ad09b964a4c2f6c86f1993a6127f3efd23ce4cb994ffe6486121ee342e2",
@@ -391,20 +1127,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "capability milestones and evidence-based release gates",
    "title": "Define the public roadmap",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-011"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-007.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-007",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-007",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-007",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-007",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-007",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-019",
    "kohi_ref": null,
    "meaning_sha256": "dc303d64ce69165e824acd26d8c7c6b66d7395a8f6ece3628da19856cf2e7198",
@@ -413,20 +1190,61 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "requirement → architecture → implementation → test",
    "title": "Create the master requirements traceability matrix",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-007"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-023.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-023",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-023",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-023",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-023",
+     "to": "Demonstrated"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Demonstrated",
+     "note": "WO-023",
+     "to": "Accepted"
+    }
+   ],
    "id": "SL-EP-020",
    "kohi_ref": null,
    "meaning_sha256": "221d4710350a7ae836562b0ac8bb6d2d47e6cd66cc82b4d750c17cb2a837e18d",
@@ -435,11 +1253,13 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Accepted",
    "summary": "freeze locked commitments; record conditional decisions",
    "title": "Approve the Engine Constitution",
    "volume": "SL-VOL-01",
-   "work_orders": []
+   "work_orders": [
+    "WO-023"
+   ]
   },
   {
    "acceptance": [],
@@ -884,11 +1704,44 @@
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-013.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-013",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-013 (waiver ADR-0003)",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-013 (waiver ADR-0003)",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-013 (waiver ADR-0003)",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-041",
    "kohi_ref": "Architecture overview and setup (#000–#002)",
    "meaning_sha256": "68d896bb189ba7b5128543d0cf390806813d313d6c4bf48b3874dcb4f850eb67",
@@ -897,20 +1750,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "Arch Linux primary, Windows secondary",
    "title": "Select supported development environments",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-013"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-014.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-014",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-042",
    "kohi_ref": "Architecture overview and setup (#000–#002)",
    "meaning_sha256": "16460bf71454e6c70020b37d147a1e7a10189db4d57bf9f5fce5d24c117d8b94",
@@ -919,20 +1807,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "compiler, linker, standard library, debugger",
    "title": "Establish the C++ toolchain",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-014"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-015.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-015",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-015 (waiver ADR-0003)",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-015 (waiver ADR-0003)",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-015 (waiver ADR-0003)",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-043",
    "kohi_ref": "Architecture overview and setup (#000–#002)",
    "meaning_sha256": "047329f9f0cdf6e41e133a379c6d78f183fa6c0187fde4f3199f6b669665eb38",
@@ -941,20 +1864,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "supported features proven by toolchain tests",
    "title": "Define the C++23 baseline",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-015"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-015.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Experimental",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-015",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-015 (waiver ADR-0003)",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-015 (waiver ADR-0003)",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-015 (waiver ADR-0003)",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-044",
    "kohi_ref": "Architecture overview and setup (#000–#002)",
    "meaning_sha256": "626e310fd0ab68f64c9eb98eac9acf601a1a73858b0108b4608fe845e6e09b5f",
@@ -963,20 +1921,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "feature tests and promotion criteria",
    "title": "Evaluate C++26 capabilities",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-015"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-016.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-016",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-016 (waiver ADR-0003)",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-016 (waiver ADR-0003)",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-016 (waiver ADR-0003)",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-045",
    "kohi_ref": "Architecture overview and setup (#000–#002)",
    "meaning_sha256": "524426e19fff797ba588bac58900b5bfbf66071dc903fbf2620b2628c32faba7",
@@ -985,20 +1978,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "SDK, loader, validation layers, diagnostics",
    "title": "Configure Vulkan development",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-016"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-014.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-014",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-046",
    "kohi_ref": "Architecture overview and setup (#000–#002)",
    "meaning_sha256": "4cc840768cbf36332bb47decf26e5e51289f33d9cdab669bbaf6e747f6642dc3",
@@ -1007,20 +2035,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "engine, editor, tools, SDK, tests, docs, examples, third_party",
    "title": "Establish the repository architecture",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-014"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-014.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Locked",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-014",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-014 (waiver ADR-0003)",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-047",
    "kohi_ref": "Architecture overview and setup (#000–#002)",
    "meaning_sha256": "45ab6712d04ba20c8ffd35d6a28017e6313e1994555210f815b3cb98a01aeac7",
@@ -1029,20 +2092,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "targets, dependency graph, configurations, generated metadata",
    "title": "Design the build system",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-014"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-018.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-018",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-018 (waiver ADR-0003)",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-018 (waiver ADR-0003)",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-018 (waiver ADR-0003)",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-048",
    "kohi_ref": "Architecture overview and setup (#000–#002)",
    "meaning_sha256": "fd6a2872156495fc6c352fd43e6d2bbcd74319a430023367f6babcc83dd9cbb7",
@@ -1051,20 +2149,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "lockfiles, manifests, update process",
    "title": "Lock dependencies reproducibly",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-018"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-024.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-024",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-024",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-024",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-024",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-049",
    "kohi_ref": null,
    "meaning_sha256": "2b8f4dcd75595455ba89935d5d87914800878364114e7d5e4e566bac60669b48",
@@ -1073,20 +2206,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "style, include order, enforcement",
    "title": "Automated formatting",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-024"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-025.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-025",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-025",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-025",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-025",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-050",
    "kohi_ref": null,
    "meaning_sha256": "3c7e0581d2e718f44eaf83192c578339ad5a94c411c3ac0b0c54bb350641c6c8",
@@ -1095,20 +2263,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "warnings-as-errors, sanitizers, analyzers, quality gates",
    "title": "Static analysis",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-025"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-026.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-026",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-026",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-026",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-026",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-051",
    "kohi_ref": null,
    "meaning_sha256": "71f123076d2fe3af03988dc245ce0344e3e9a29f7cf88f9181a8780f444305b5",
@@ -1117,20 +2320,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "unit, integration, system, end-to-end runners",
    "title": "Test infrastructure",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-026"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-027.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-027",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-027",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-027",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-027",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-052",
    "kohi_ref": null,
    "meaning_sha256": "bd2ff6e3703af1d87296665df097c147b116a6572eefa365d0e61a20bec94dbb",
@@ -1139,20 +2377,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "versioned assets, expected outputs, deterministic fixtures",
    "title": "Test fixtures and golden data",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-027"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-028.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-028",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-028",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-028",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-028",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-053",
    "kohi_ref": null,
    "meaning_sha256": "27406108247c7f79847c6d43b969f1039f8c4f92471b736beee2c093d0a3c5e6",
@@ -1161,20 +2434,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "build, test, format and contract checks in one command",
    "title": "Local CI runner",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-028"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-028.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-028",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-028",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-028",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-028",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-054",
    "kohi_ref": null,
    "meaning_sha256": "f5a4eef6e33ad1b551bb8b2c318c30aafbc438fa21a19294d4e4f31757565249",
@@ -1183,20 +2491,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "clean builds, caching, artifacts, failure reports",
    "title": "Initial CI pipeline",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-028"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-029.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-029",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-029",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-029",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-029",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-055",
    "kohi_ref": null,
    "meaning_sha256": "53a3b92afba355c3c4a128e3fa03ee89401624a73524b1f0154ee037959ce1ed",
@@ -1205,20 +2548,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "source revision, compiler ID, parameters, output hashes (F3 seed)",
    "title": "Artifact provenance",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-029"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-030.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-030",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-030",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-030",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-030",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-056",
    "kohi_ref": "Logging and assertions (#003)",
    "meaning_sha256": "a83683217320d52a98defbf5d10fe84fbb5ac094d61355397f245a594b1e1eb8",
@@ -1227,20 +2605,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "structured logs, error codes, stack traces, machine-readable reports",
    "title": "Developer diagnostics",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-030"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-031.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-031",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-031",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-031",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-031",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-057",
    "kohi_ref": null,
    "meaning_sha256": "788936aec2874a1bc213b3126a7e0c17658c6b25a9ac2d6f49a9a381eb5cce74",
@@ -1249,20 +2662,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "API docs, dependency reports, architecture references",
    "title": "Documentation generation",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-031"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-032.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-032",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-032",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-032",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-032",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-058",
    "kohi_ref": null,
    "meaning_sha256": "6b98e9880618763a05abb9a7601c4a4ac430321c8b29f276f351b461b0c01164",
@@ -1271,20 +2719,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "licenses, checksums, vulnerability findings",
    "title": "Secure dependency ingestion",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-032"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-033.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-033",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-033",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-033",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-033",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-059",
    "kohi_ref": null,
    "meaning_sha256": "97db748408be476c7d204b6d2f49f0d34b39a4e8b5abf91fc6282f49a43bf2a7",
@@ -1293,20 +2776,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "packaged toolchain and environment",
    "title": "Reproducible development image",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-033"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-034.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "50ba2b8c541ce107380e62ce7bca7fbcd1f3cf34"
+   },
    "decision_status": "Conditional",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-034",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-034",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-034",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-034",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-060",
    "kohi_ref": null,
    "meaning_sha256": "0fd199ba7e4e1b13ea24a967197bfaa341c6473bdb12ba4d84ea4c1749d46a0b",
@@ -1315,20 +2833,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "clean checkout builds, tests and emits traceable artifacts",
    "title": "Gate the first infrastructure release",
    "volume": "SL-VOL-03",
-   "work_orders": []
+   "work_orders": [
+    "WO-034"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-037.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-037",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-037",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-037",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-037",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-061",
    "kohi_ref": null,
    "meaning_sha256": "dc03f2a086c4310856373de162e1b9c810bf6bbf5346b77deda557d883a9d2e7",
@@ -1337,20 +2890,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "stable IDs, typed references, namespaces, identity lifetime",
    "title": "Canonical identity algebra",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-037"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-039.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-039",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-039",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-039",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-039",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-062",
    "kohi_ref": null,
    "meaning_sha256": "00f130d8d2bee612972446f55b145f76178a1729e8040b460fea25fb83831237",
@@ -1359,20 +2947,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "primitive, compound, tagged, optional, reference, versioned types",
    "title": "Canonical type system",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-039"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-057.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-057",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-057",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-057",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-057",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-063",
    "kohi_ref": null,
    "meaning_sha256": "bb4e8806dd7a1a1d60cb0692708b3e877257ca52128c2cfadda4125075fdb1f3",
@@ -1381,20 +3004,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "compatibility, migration, deprecation, failure semantics",
    "title": "Schema versioning",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-057"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-054.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-054",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-054",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-054",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-054",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-064",
    "kohi_ref": null,
    "meaning_sha256": "1856a29eccb2e31542b9a5b1867351ed43d5d26f044fe7f82b2e6526f303caf6",
@@ -1403,20 +3061,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "metadata, capabilities, target profiles, required modules",
    "title": "Project manifest",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-054"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-058.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-058",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-058",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-058",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-058",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-065",
    "kohi_ref": null,
    "meaning_sha256": "2146c8f0769c49ecd2cfd7177615ab1f7052656fabe1b5eed1956672bdaa260d",
@@ -1425,20 +3118,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "assets vs entities vs instances vs derived resources",
    "title": "Asset and entity identities",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-058"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-048.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-048",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-048",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-048",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-048",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-066",
    "kohi_ref": null,
    "meaning_sha256": "f7ee529be44e732ece327e2a3e76742f12ab6e4f299707f66c042b8afdd1ca86",
@@ -1447,20 +3175,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "which subsystem owns each record and who may mutate it (F2)",
    "title": "Ownership and authority",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-048"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-049.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-049",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-049",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-049",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-049",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-067",
    "kohi_ref": null,
    "meaning_sha256": "4bbb177b2df0cc4b4332e607748868fde42c05b62cfa49a388a92e0b506ae249",
@@ -1469,20 +3232,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "observed, imported, asserted, calculated, inferred, accepted",
    "title": "Provenance and epistemic classes",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-049"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-041.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-041",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-041",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-041",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-041",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-068",
    "kohi_ref": null,
    "meaning_sha256": "55cfa194f1d53136ecf74bf2224144ad21a1ee43818fb80f84add477259e770e",
@@ -1491,20 +3289,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "stable encoding, version tags, validation, corruption handling",
    "title": "Canonical serialization",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-041"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-047.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-047",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-047",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-047",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-047",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-069",
    "kohi_ref": null,
    "meaning_sha256": "a2c82a7c7b30bcabf03dc925e0f1925dba531d9616a3e35e6918ac932285388c",
@@ -1513,20 +3346,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "IDs, schema versions, timestamps, causality, correlation",
    "title": "Event envelopes",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-047"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-050.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-050",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-050",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-050",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-050",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-070",
    "kohi_ref": null,
    "meaning_sha256": "518416b9e886a96513e400f04021da688d34e1ccd55163ef94c93818659ba1e8",
@@ -1535,20 +3403,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "atomic edits, validation, commit boundaries, rollback (F5)",
    "title": "Transaction model",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-050"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-052.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-052",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-052",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-052",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-052",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-071",
    "kohi_ref": null,
    "meaning_sha256": "dfc5531f32c31f7bcea4f940eade5dac78428ca43b3f5c924fdadb682348dd19",
@@ -1557,20 +3460,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "reversible ops, grouping, compensation for irreversible actions",
    "title": "Undo/redo semantics",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-052"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-044.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-044",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-044",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-044",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-044",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-072",
    "kohi_ref": null,
    "meaning_sha256": "8dfdb0ae3c3febc9867e76b4697433374514e03a5ea227376bf7f47f05ac66a3",
@@ -1579,20 +3517,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "source dependencies, derived outputs, invalidation, cycles",
    "title": "Dependency graph",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-044"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-056.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-056",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-056",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-056",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-056",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-073",
    "kohi_ref": null,
    "meaning_sha256": "106652a2ae9aca0403e21fa2a90c5f699230a3a36ce901c836bd0b94558460ba",
@@ -1601,20 +3574,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "affected assets, systems, tests, build targets",
    "title": "Change-impact engine",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-056"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-061.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-061",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-061",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-061",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-061",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-074",
    "kohi_ref": null,
    "meaning_sha256": "2598a2425c02e41d9b3db1ccf04d437f839f3dd60356c28887b13dbbc072a427",
@@ -1623,20 +3631,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "persistent project state vs transient simulation state",
    "title": "Runtime vs document boundary",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-061"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-060.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-060",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-060",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-060",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-060",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-075",
    "kohi_ref": null,
    "meaning_sha256": "d18675181b69f9241a268342e5dc92ec71823cce672b17c7a599578134fbcf0c",
@@ -1645,20 +3688,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "IDs across loaded documents, packages, external references",
    "title": "Reference resolver",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-060"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-055.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-055",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-055",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-055",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-055",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-076",
    "kohi_ref": null,
    "meaning_sha256": "f623a8d5ba2ebad1619230e2a5b0f51c7ae09e033bc2d1105600cc7f2a708472",
@@ -1667,20 +3745,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "journals, checkpoints, incomplete-transaction detection",
    "title": "Project recovery",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-055"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-059.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-059",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-059",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-059",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-059",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-077",
    "kohi_ref": null,
    "meaning_sha256": "1f00cf595b9a70f22e10fb6f8eed05e50be5542c95831cbd48001ca1a8958c9d",
@@ -1689,20 +3802,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "validation failures, quarantine, repair, loss reporting",
    "title": "Corruption policies",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-059"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-045.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-045",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-045",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-045",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-045",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-078",
    "kohi_ref": null,
    "meaning_sha256": "07dfea671e9da9b89505a8fc00dc786ff6a1187d5cc8235829f10e26a9739737",
@@ -1711,20 +3859,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "serializers, inspectors, validators, API metadata from schemas",
    "title": "Schema-generated tooling",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-045"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-062.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-062",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-062",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-062",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-062",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-079",
    "kohi_ref": null,
    "meaning_sha256": "65dbee938c7632440f40bcef347c49ee71c89826d3793f5e73787e2ece08ded2",
@@ -1733,20 +3916,55 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "identity, ownership, migration, transaction, dependency invariants",
    "title": "Architecture conformance suite",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-062"
+   ]
   },
   {
    "acceptance": [],
    "amendments": [],
-   "completion": null,
+   "completion": {
+    "benchmarks": [],
+    "evidence": [
+     "evidence/WO-063.json"
+    ],
+    "exceptions": [],
+    "open_defects": [],
+    "revision": "406ffa37233a2e405fba525f52502dde89a9b196"
+   },
    "decision_status": "Unresolved",
    "depends_on": [],
    "documents": [],
-   "history": [],
+   "history": [
+    {
+     "date": "2026-10-19",
+     "from": "Planned",
+     "note": "WO-063",
+     "to": "Specified"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Specified",
+     "note": "WO-063",
+     "to": "InProgress"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "InProgress",
+     "note": "WO-063",
+     "to": "Verifying"
+    },
+    {
+     "date": "2026-10-19",
+     "from": "Verifying",
+     "note": "WO-063",
+     "to": "Demonstrated"
+    }
+   ],
    "id": "SL-EP-080",
    "kohi_ref": null,
    "meaning_sha256": "b83a29197febe55854bd31d434e11d2c21933583c9f5c157ba0a612232e262dd",
@@ -1755,11 +3973,13 @@
     "milestone": "Foundation",
     "platforms": []
    },
-   "status": "Planned",
+   "status": "Demonstrated",
    "summary": "approved schemas plus executable contract tests",
    "title": "Release the canonical model",
    "volume": "SL-VOL-04",
-   "work_orders": []
+   "work_orders": [
+    "WO-063"
+   ]
   },
   {
    "acceptance": [],
