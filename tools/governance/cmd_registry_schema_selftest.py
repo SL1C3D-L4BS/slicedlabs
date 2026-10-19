@@ -26,7 +26,61 @@ SCHEMAS = (
     "sl-reg-006",
     "sl-doc-frontmatter",
     "sl-wo-trace",
+    "sl-fabric-event",
+    "sl-log-event",
+    "sl-provenance",
+    "sl-deps",
+    "sl-deps-lock",
 )
+# WO-073: one valid instance per later schema (schema name -> instance); the deps pair is the repository's own files.
+_ID_TAIL = "0C0000000000000000000001"
+INSTANCES = {
+    "sl-fabric-event": {
+        "format": "sl-fabric-event/1",
+        "id": "evt_090A02JWSJBNWYYT5ZCHMV2MKZ",
+        "schema": {"type": "typ_03" + _ID_TAIL, "major": 1, "minor": 0},
+        "type": "fabric.tx.committed",
+        "time_us": 1700000000000000,
+        "seq": 7,
+        "actor": "act_0A" + _ID_TAIL,
+        "subject": "ent_05" + _ID_TAIL,
+        "correlation": {"id": 11, "scope": "tx-manager", "tick": 3},
+        "causality": {
+            "cause": "evt_090885AG57MZ0RE3GQ2K7J8V73",
+            "tx": "txn_080C0000000000000000000005",
+            "revision": "sha256:" + "ab" * 32,
+        },
+        "payload": "0a2a",
+    },
+    "sl-log-event": {
+        "schema": "sl-log-event/1",
+        "level": "info",
+        "system": "core",
+        "message": "build info",
+        "fields": {"n": 3, "x": 0.5, "ok": True, "name": "a", "nan": None},
+        "correlation": {"id": 0, "scope": "process", "tick": 0},
+        "where": {"file": "engine/core/src/version.cpp", "line": 12, "function": "f"},
+        "ts": "2026-10-17T12:00:00.000Z",
+    },
+    "sl-provenance": {
+        "schema": "sl-provenance/1",
+        "target": "x",
+        "artifact": {"path": "libx.a", "sha256": "1" * 64},
+        "inputs": [{"path": "src/a.cpp", "sha256": "2" * 64}],
+        "toolchain": {"compiler": "Clang", "compiler_version": "1", "cmake": "4", "linker": "mold", "lock_sha256": "x"},
+        "parameters": {
+            "preset": "debug",
+            "build_type": "Debug",
+            "std": 23,
+            "sanitize": "none",
+            "warnings_as_errors": False,
+            "flags_sha256": "3" * 64,
+        },
+        "built_at": "2026-10-17T00:00:00Z",
+        "environment_hash": "4" * 64,
+    },
+}
+REPO_INSTANCES = (("sl-deps", "deps/deps.json"), ("sl-deps-lock", "deps/deps.lock.json"))
 # Instances of the good bundle and the schema each one is checked against.
 BUNDLE_PARTS = (("registry", "sl-reg-002"), ("documents", "sl-reg-001"))
 WRONG_VALUES = (None, True, 0, 1.5, "", "x", [], {})
@@ -96,8 +150,19 @@ def main():
         for p in glob.glob(os.path.join(slib.SCHEMA_DIR, "sl-*.schema.json"))
     )
     for name in extra:
-        if name not in SCHEMAS and name not in ("sl-deps", "sl-deps-lock", "sl-provenance", "sl-log-event"):
+        if name not in SCHEMAS:
             errors.append("schemas/%s.schema.json: not covered by the selftest" % name)
+
+    instances = dict(INSTANCES)
+    for name, rel in REPO_INSTANCES:
+        try:
+            instances[name] = slib.load_json(os.path.join(slib.ROOT, rel))
+        except slib.LoadError as exc:
+            errors.append(str(exc))
+    for name, instance in sorted(instances.items()):
+        if name in schemas:
+            for pointer, message in slib.validate(instance, schemas[name]):
+                errors.append("%s sample instance: %s %s" % (name, pointer or "/", message))
 
     cases = slib.load_json(os.path.join(FIXTURES, "validator-cases.json"))["cases"]
     for case in cases:
@@ -177,6 +242,12 @@ def main():
         agree("front matter sample", front, schemas["sl-doc-frontmatter"])
         for desc, m in mutants(front):
             agree("front matter: %s" % desc, m, schemas["sl-doc-frontmatter"])
+        for name, instance in sorted(instances.items()):
+            if name not in schemas:
+                continue
+            agree("%s sample instance" % name, instance, schemas[name])
+            for desc, m in mutants(instance):
+                agree("%s: %s" % (name, desc), m, schemas[name])
 
     if errors:
         for e in errors[:40]:
