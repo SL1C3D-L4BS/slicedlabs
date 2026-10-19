@@ -72,7 +72,8 @@ result<void> dependency_graph::set_record(const record_id &owner, std::vector<ed
     }
   }
   std::ranges::sort(edges);
-  edges.erase(std::ranges::unique(edges).begin(), edges.end());
+  auto [dup_first, dup_last] = std::ranges::unique(edges);
+  edges.erase(dup_first, dup_last);
 
   std::vector<edge> old = std::move(owners_[owner]);
   std::vector<edge> dropped;

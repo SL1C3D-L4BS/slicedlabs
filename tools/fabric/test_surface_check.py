@@ -106,6 +106,21 @@ class SurfaceCheckTest(unittest.TestCase):
         view = "struct record_view {\n  int &body();\n};\n"
         self.assertEqual(rules(sc.lint_text(view)), ["R-F5-SETTER"])
 
+    def test_fab_inv_f5_03_document_projection_is_a_data_class(self):
+        self.assertIn("document_projection", sc.DATA_CLASSES)
+        proj = ("class document_projection {\npublic:\n  [[nodiscard]] std::size_t size() const noexcept;\n"
+                "  void set_revision(int d);\n  int &body_of(int id);\n};\n")
+        found = sc.lint_text(proj)
+        self.assertEqual(sorted((f[1], f[2]) for f in found),
+                         [("R-F5-SETTER", "document_projection::body_of"),
+                          ("R-F5-SETTER", "document_projection::set_revision")])
+
+    def test_fab_inv_f5_03_final_capability(self):
+        final = CAPABILITY_OK.replace("class mutation_capability {", "class mutation_capability final {")
+        self.assertNotEqual(final, CAPABILITY_OK)
+        self.assertEqual([(f[1], f[2]) for f in sc.lint_text(final)],
+                         [("R-F5-FRIEND", "mutation_capability:transaction_manager")])
+
     def test_fab_inv_f5_03_mutable(self):
         planted = VALUE_OK.replace("  mutable std::mutex mutex_;",
                                    "  mutable std::mutex mutex_;\n  mutable int hits = 0;")

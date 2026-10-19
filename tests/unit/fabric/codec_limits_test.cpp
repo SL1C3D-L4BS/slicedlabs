@@ -8,11 +8,11 @@
 #include <doctest/doctest.h>
 
 #include <algorithm>
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <new>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
@@ -79,9 +79,10 @@ template <class T> T must(sl::result<T> r) {
 }
 
 std::vector<std::uint8_t> varint(std::uint64_t n) {
-  std::array<std::uint8_t, max_uvarint_size> tmp{};
-  const std::size_t len = encode_uvarint(n, tmp);
-  return {tmp.begin(), tmp.begin() + static_cast<std::ptrdiff_t>(len)};
+  std::vector<std::uint8_t> out(max_uvarint_size);
+  out.resize(
+      encode_uvarint(n, std::span<std::uint8_t, max_uvarint_size>(out.data(), max_uvarint_size)));
+  return out;
 }
 
 std::vector<std::uint8_t> cat(std::vector<std::uint8_t> a, const std::vector<std::uint8_t> &b) {

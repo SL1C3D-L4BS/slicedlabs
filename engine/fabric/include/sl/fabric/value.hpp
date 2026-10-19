@@ -185,10 +185,11 @@ public:
   /// A copy whose oset at `oset_path` gains `element` at `order_key`; `already_exists` when the
   /// element id is present.
   [[nodiscard]] result<value> insert_element(const path &oset_path, const id_bytes &element,
-                                             std::vector<std::uint8_t> order_key, value v) const;
+                                             const std::vector<std::uint8_t> &order_key,
+                                             value v) const;
   /// A copy whose oset at `oset_path` has `element` moved to `order_key`.
   [[nodiscard]] result<value> move_element(const path &oset_path, const id_bytes &element,
-                                           std::vector<std::uint8_t> order_key) const;
+                                           const std::vector<std::uint8_t> &order_key) const;
 
   /// Structural equality (floats compare by bits; -0.0 and NaN cannot occur).
   friend bool operator==(const value &a, const value &b) noexcept;

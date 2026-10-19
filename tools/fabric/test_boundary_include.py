@@ -132,7 +132,7 @@ class BoundaryIncludeTest(unittest.TestCase):
                              ["engine/runtime/two.cpp:%d" % n for n in (1, 2, 3)])
 
     def test_fab_inv_bnd_03_include_allow_list_cannot_excuse(self):
-        """An allow-list entry naming R-BND-INCLUDE is not a rule of the allow-list (R-F5-ALLOW), so no excuse exists."""
+        """An allow-list entry naming R-BND-INCLUDE is not an allow-list rule (R-F5-ALLOW), so no excuse exists."""
         with tempfile.TemporaryDirectory() as tmp:
             plant(tmp, "engine/runtime/a.cpp", '#include "sl/fabric/internal/x.hpp"\n')
             allow = os.path.join(tmp, "allow.txt")

@@ -3,9 +3,11 @@
 // structural, schema, authority, references and invariants gets all of them, in diagnostic_less
 // order, the same from validate() and commit(), and the same on every run.
 
+#include "sl/fabric/clock.hpp"
 #include "sl/fabric/id.hpp"
 #include "sl/fabric/memory_backend.hpp"
 #include "sl/fabric/patch.hpp"
+#include "sl/fabric/provenance.hpp"
 #include "sl/fabric/transaction.hpp"
 #include "sl/fabric/validate.hpp"
 #include "sl/fabric/value.hpp"
@@ -18,8 +20,10 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <fstream>
 #include <memory>
 #include <set>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -123,4 +127,47 @@ TEST_CASE("FAB-INV-TX-05: diagnostics are complete and sorted by stage, record, 
   // The dry run reports exactly what commit does, and a second run is identical.
   CHECK(first.dry == first.committed);
   CHECK(run_once().committed == first.committed);
+}
+
+TEST_CASE("FAB-INV-TX-05: the built-in chain documented in transaction.hpp is builtin_validators() "
+          "in order") {
+  // The names of the doc comment above builtin_validators(), read from the header itself.
+  const std::string header = std::string(SL_FABRIC_FIXTURES_DIR) +
+                             "/../../../engine/fabric/include/sl/fabric/transaction.hpp";
+  std::ifstream in(header);
+  REQUIRE(in.good());
+  std::vector<std::string> documented;
+  bool inside = false;
+  for (std::string line; std::getline(in, line);) {
+    if (line.starts_with("/// The built-in validator chain")) {
+      inside = true;
+      continue;
+    }
+    if (!inside) {
+      continue;
+    }
+    if (!line.starts_with("///")) {
+      break;
+    }
+    // An entry line: "///   fabric.<name>  (<stage>) ..."; continuation lines are indented more.
+    if (line.starts_with("///   fabric.")) {
+      std::istringstream words(line.substr(3));
+      std::string name;
+      words >> name;
+      documented.push_back(name);
+    }
+  }
+  auto ws =
+      must(workspace::create_memory(must(tg::scene_options(std::make_shared<manual_clock>(1)))));
+  const fixed_provenance_source provenance;
+  const auto chain = must(builtin_validators(builtin_validator_env{
+      .domains = &ws->domains(), .actors = &ws->actors(), .provenance = &provenance}));
+  std::vector<std::string> built;
+  built.reserve(chain.size());
+  for (const auto &v : chain) {
+    built.emplace_back(v->name());
+  }
+  CHECK(documented == built);
+  CHECK(std::ranges::count(built, "fabric.identity") == 1); // WO-058 appended it
+  CHECK(std::ranges::count(built, "fabric.schema.newer") == 1);
 }

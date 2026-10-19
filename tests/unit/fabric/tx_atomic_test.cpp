@@ -15,6 +15,7 @@
 #include "sl/fabric/transaction.hpp"
 #include "sl/fabric/workspace.hpp"
 
+#include "../../../engine/fabric/testing/crash_harness.hpp"
 #include "../../../engine/fabric/testing/patch_gen.hpp"
 #include "../../../engine/fabric/testing/store_faults.hpp"
 #include "../../../engine/fabric/testing/tx_fixture.hpp"
@@ -208,7 +209,7 @@ TEST_CASE("FAB-INV-TX-01: FP3 and FP4 inside log_backend: a crash after every st
   const clean_run want = clean();
   struct policy_case {
     tg::crash_policy policy;
-    std::uint64_t tear;
+    std::uint64_t tear = 0;
   };
   const std::vector<policy_case> policies = {
       {.policy = tg::crash_policy::drop_unsynced, .tear = 0},
@@ -266,7 +267,9 @@ TEST_CASE("FAB-INV-TX-01: seeded workloads on both backends: every failpoint lea
           "the retry equals the oracle") {
   const std::vector<failpoint> fps = {failpoint::fp0, failpoint::fp1, failpoint::fp2,
                                       failpoint::fp5, failpoint::fp6};
-  for (std::uint64_t seed = 1; seed <= 3; ++seed) {
+  // SL_FABRIC_SWEEP_SCALE (0.1 under the sanitizer presets) keeps one seed (WO-064).
+  const std::uint64_t seeds = tg::scaled(3, 1);
+  for (std::uint64_t seed = 1; seed <= seeds; ++seed) {
     for (const bool durable : {false, true}) {
       CAPTURE(seed);
       CAPTURE(durable);

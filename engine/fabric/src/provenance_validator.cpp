@@ -50,6 +50,11 @@ result<type_id> type_of(const validation_context &ctx, const record_id &id) {
 
 } // namespace
 
+result<std::optional<epistemic_class>>
+provenance_source::origin_class([[maybe_unused]] const validation_context &ctx) const {
+  return std::optional<epistemic_class>{};
+}
+
 result<std::optional<provenance>>
 fixed_provenance_source::origin([[maybe_unused]] const validation_context &ctx) const {
   return origin_;

@@ -228,6 +228,7 @@ private:
 /// nodes into `sink`; untouched subtrees are shared, so a change writes only the nodes on its
 /// path. Removing an absent id changes nothing.
 [[nodiscard]] result<subtree> update_tree(const tree_reader &reader, const digest &root,
-                                          std::vector<tree_change> changes, object_sink &sink);
+                                          const std::vector<tree_change> &changes,
+                                          object_sink &sink);
 
 } // namespace sl::fabric

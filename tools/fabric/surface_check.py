@@ -37,7 +37,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 HEADER_DIR = "engine/fabric/include/sl/fabric"
 DEFAULT_ALLOW = os.path.join("tools", "fabric", "surface-allow.txt")
 RULES = ("R-F5-FRIEND", "R-F5-MUTABLE", "R-F5-CAP", "R-F5-SETTER", "R-F5-INCLUDE")
-DATA_CLASSES = ("value", "snapshot", "snapshot_entry", "record_view")
+DATA_CLASSES = ("value", "snapshot", "snapshot_entry", "record_view", "document_projection")
 CAPABILITY = "mutation_capability"
 SYNC_TYPES = re.compile(
     r"\bstd::(?:mutex|shared_mutex|recursive_mutex|timed_mutex|shared_timed_mutex|condition_variable(?:_any)?|"
@@ -295,8 +295,8 @@ def _capability_uses(clean, starts, bodies):
         if any(s <= m.start() <= e for s, e in bodies):
             continue
         before = clean[max(0, m.start() - 16) : m.start()]
-        after = clean[m.end() : m.end() + 4]
-        if re.search(r"\b(?:class|struct)\s+$", before) and re.match(r"\s*[;{:]", after):
+        after = clean[m.end() : m.end() + 16]
+        if re.search(r"\b(?:class|struct)\s+$", before) and re.match(r"\s*(?:final\b\s*)?[;{:]", after):
             continue  # a forward declaration or the definition itself
         if re.search(r"\bconst\s+$", before) and re.match(r"\s*&(?!&)", after):
             continue
@@ -374,7 +374,7 @@ def check_tree(root, allow_path=None):
 
 
 def bnd_lint_text(text):
-    """Return a sorted list of (line, included path, reason) for the forbidden includes of one runtime or render file."""
+    """Return a sorted list of (line, included path, reason) for the forbidden includes of one runtime/render file."""
     found = []
     raw_lines = text.splitlines()
     # blank() keeps offsets, so the same line numbers locate a directive in the blanked text (a directive inside a

@@ -31,7 +31,8 @@ namespace {
 
 void sort_unique(std::vector<edge> &edges) {
   std::ranges::sort(edges);
-  edges.erase(std::ranges::unique(edges).begin(), edges.end());
+  auto [dup_first, dup_last] = std::ranges::unique(edges);
+  edges.erase(dup_first, dup_last);
 }
 
 class walker {

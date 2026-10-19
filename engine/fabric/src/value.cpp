@@ -8,6 +8,7 @@
 #include <array>
 #include <bit>
 #include <cmath>
+#include <cstdlib>
 #include <format>
 #include <limits>
 #include <variant>
@@ -106,8 +107,11 @@ std::optional<std::size_t> utf8_violation(std::string_view s) noexcept {
 template <class T> const T &payload_of(const value &v) noexcept {
   const value_node *n = value_access::node(v);
   SL_ASSERT(n != nullptr, "value accessor used on the wrong kind");
-  const T *p = std::get_if<T>(&n->data);
+  const T *p = n == nullptr ? nullptr : std::get_if<T>(&n->data);
   SL_ASSERT(p != nullptr, "value accessor used on the wrong kind");
+  if (p == nullptr) [[unlikely]] {
+    std::abort(); // an installed assert handler returned; never dereference null
+  }
   return *p;
 }
 
@@ -115,6 +119,9 @@ const value_node &node_of(const value &v, value_kind k) noexcept {
   const value_node *n = value_access::node(v);
   const bool matches = n != nullptr && n->kind == k;
   SL_ASSERT(matches, "value accessor used on the wrong kind");
+  if (!matches) [[unlikely]] {
+    std::abort(); // an installed assert handler returned; never dereference null
+  }
   return *n;
 }
 
@@ -839,7 +846,7 @@ result<value> value::without(const path &p) const {
 }
 
 result<value> value::insert_element(const path &oset_path, const id_bytes &element,
-                                    std::vector<std::uint8_t> order_key, value v) const {
+                                    const std::vector<std::uint8_t> &order_key, value v) const {
   if (order_key.size() > max_byte_length) {
     return limit_error("order key length", order_key.size());
   }
@@ -858,7 +865,7 @@ result<value> value::insert_element(const path &oset_path, const id_bytes &eleme
 }
 
 result<value> value::move_element(const path &oset_path, const id_bytes &element,
-                                  std::vector<std::uint8_t> order_key) const {
+                                  const std::vector<std::uint8_t> &order_key) const {
   if (order_key.size() > max_byte_length) {
     return limit_error("order key length", order_key.size());
   }

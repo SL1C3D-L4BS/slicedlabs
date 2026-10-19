@@ -60,6 +60,18 @@ constexpr std::array<failpoint_info, failpoint_count> table{{
      .manager_visits = true},
 }};
 
+// One counter slot; a named fixed-extent span keeps the index bounds-checked in debug builds.
+template <class T, std::size_t N> T &slot(std::array<T, N> &arr, std::size_t i) noexcept {
+  const std::span<T, N> s(arr);
+  return s[i];
+}
+
+template <class T, std::size_t N>
+const T &slot(const std::array<T, N> &arr, std::size_t i) noexcept {
+  const std::span<const T, N> s(arr);
+  return s[i];
+}
+
 std::size_t index_of(failpoint fp) noexcept {
   return static_cast<std::size_t>(fp) % failpoint_count;
 }
@@ -70,32 +82,32 @@ std::span<const failpoint_info> failpoint_table() noexcept { return table; }
 
 std::string_view to_string(failpoint fp) noexcept {
   const auto n = static_cast<std::size_t>(fp);
-  return n < failpoint_count ? std::span{table}[n].name : std::string_view{"FP?"};
+  return n < failpoint_count ? failpoint_table()[n].name : std::string_view{"FP?"};
 }
 
 result<void> failpoint_set::visit(failpoint fp) noexcept {
   const std::size_t i = index_of(fp);
-  std::span{visits_}[i].fetch_add(1, std::memory_order_relaxed);
-  const std::uint32_t code = std::span{armed_}[i].exchange(0, std::memory_order_acq_rel);
+  slot(visits_, i).fetch_add(1, std::memory_order_relaxed);
+  const std::uint32_t code = slot(armed_, i).exchange(0, std::memory_order_acq_rel);
   if (code == 0) {
     return {};
   }
-  std::span{trips_}[i].fetch_add(1, std::memory_order_relaxed);
-  const failpoint_info &info = std::span{table}[i];
+  slot(trips_, i).fetch_add(1, std::memory_order_relaxed);
+  const failpoint_info &info = failpoint_table()[i];
   return make_error(static_cast<errc>(code), std::string("failpoint ") + std::string(info.name) +
                                                  " (" + std::string(info.at) + ") tripped");
 }
 
 std::uint64_t failpoint_set::visits(failpoint fp) const noexcept {
-  return std::span{visits_}[index_of(fp)].load(std::memory_order_relaxed);
+  return slot(visits_, index_of(fp)).load(std::memory_order_relaxed);
 }
 
 std::uint64_t failpoint_set::trips(failpoint fp) const noexcept {
-  return std::span{trips_}[index_of(fp)].load(std::memory_order_relaxed);
+  return slot(trips_, index_of(fp)).load(std::memory_order_relaxed);
 }
 
 bool failpoint_set::armed(failpoint fp) const noexcept {
-  return std::span{armed_}[index_of(fp)].load(std::memory_order_acquire) != 0;
+  return slot(armed_, index_of(fp)).load(std::memory_order_acquire) != 0;
 }
 
 } // namespace sl::fabric

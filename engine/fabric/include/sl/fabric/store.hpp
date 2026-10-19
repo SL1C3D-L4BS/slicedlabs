@@ -187,9 +187,9 @@ public:
 };
 } // namespace testing
 
-/// The passkey of the only mutator (ARCH2-R01, ADR-0016): not copyable, not movable, and
-/// constructible only by its friends.
-class mutation_capability {
+/// The passkey of the only mutator (ARCH2-R01, ADR-0016): not copyable, not movable, final (no
+/// subclass can exist) and constructible only by its friends.
+class mutation_capability final {
 public:
   mutation_capability(const mutation_capability &) = delete;
   mutation_capability(mutation_capability &&) = delete;

@@ -117,6 +117,7 @@ TEST_CASE("FAB-INV-COR-05: lenient is a read-only view at recovered/<seq> before
   REQUIRE_FALSE(open_in(s, cfg, corruption_mode::strict).has_value());
   checked_open view = must(open_in(s, cfg, corruption_mode::lenient));
   REQUIRE(view.recovered_view);
+  CHECK(view.ws->mode() == open_mode::read_only); // WO-064: the view says what it is
   const std::uint64_t seq = p.seq - 1;
   CHECK(view.recovered_ref == "recovered/" + std::to_string(seq));
   REQUIRE(view.recovered_revision.has_value());

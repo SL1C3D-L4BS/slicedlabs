@@ -134,7 +134,8 @@ def compare(rule, section, code, other, what):
             if name not in theirs:
                 lines.append("%s: error_codes: errc %s = %d is in the code, not in %s" % (rule, name, mine[name], what))
             elif name not in mine:
-                lines.append("%s: error_codes: errc %s = %d is in %s, not in the code" % (rule, name, theirs[name], what))
+                lines.append("%s: error_codes: errc %s = %d is in %s, not in the code"
+                             % (rule, name, theirs[name], what))
             elif mine[name] != theirs[name]:
                 lines.append("%s: error_codes: errc %s is %d in the code, %d in %s" % (rule, name, mine[name],
                                                                                      theirs[name], what))

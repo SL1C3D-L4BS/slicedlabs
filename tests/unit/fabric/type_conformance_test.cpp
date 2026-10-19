@@ -82,6 +82,19 @@ schema_registry integer_registry() {
   return reg;
 }
 
+// "rule path message" of the first diagnostic, or empty.
+std::string first_diagnostic(const std::vector<diagnostic_lite> &d) {
+  if (d.empty()) {
+    return {};
+  }
+  std::string out = d.front().rule;
+  out += ' ';
+  out += to_string(d.front().path);
+  out += ' ';
+  out += d.front().message;
+  return out;
+}
+
 } // namespace
 
 TEST_CASE("FAB-INV-TY-02: conforming values are accepted") {
@@ -103,9 +116,9 @@ TEST_CASE("FAB-INV-TY-02: generated values conform to generated and test types")
     for (int i = 0; i < 4; ++i) {
       const value v = must(gen.conforming(reg, t));
       const auto d = diagnose(v, reg.find(t)->name, reg);
-      CHECK_MESSAGE(d.empty(), (d.empty() ? std::string()
-                                          : d.front().rule + " " + to_string(d.front().path) + " " +
-                                                d.front().message));
+      // The message is built outside CHECK_MESSAGE's context lambda (gcc -fanalyzer, WO-064).
+      const std::string why = first_diagnostic(d);
+      CHECK_MESSAGE(d.empty(), why);
     }
   }
   testing::value_gen gen(7);
@@ -113,9 +126,9 @@ TEST_CASE("FAB-INV-TY-02: generated values conform to generated and test types")
     for (int i = 0; i < 50; ++i) {
       CAPTURE(name);
       const auto d = diagnose(must(gen.conforming(registry(), type_id_of(name))), name);
-      CHECK_MESSAGE(d.empty(), (d.empty() ? std::string()
-                                          : d.front().rule + " " + to_string(d.front().path) + " " +
-                                                d.front().message));
+      // The message is built outside CHECK_MESSAGE's context lambda (gcc -fanalyzer, WO-064).
+      const std::string why = first_diagnostic(d);
+      CHECK_MESSAGE(d.empty(), why);
     }
   }
 }

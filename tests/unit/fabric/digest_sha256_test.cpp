@@ -65,7 +65,7 @@ TEST_CASE("FAB-INV-DG-01: SHA-256 of one million 'a'") {
 TEST_CASE("FAB-INV-DG-01: SHA-256 padding boundaries (hashlib values)") {
   using sl::fabric::sha256;
   struct row {
-    std::size_t size;
+    std::size_t size = 0;
     std::string_view hex;
   };
   const auto rows = std::to_array<row>({

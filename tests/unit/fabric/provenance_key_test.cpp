@@ -80,7 +80,8 @@ TEST_CASE("FAB-INV-PRV-04: the key equals the Python hashlib golden value") {
   const std::vector<std::string_view> id_hex = {"040278afc37aaad76c9c7b66fec96eda",
                                                 "0402f1650efab04aeb10bab41a4cdc29",
                                                 "0402a992fb28f5e4f9798bb68cf8632c"};
-  const std::vector<record_id> ids = parts{}.ids;
+  const parts golden;
+  const std::vector<record_id> &ids = golden.ids;
   REQUIRE(ids.size() == id_hex.size());
   for (std::size_t i = 0; i < id_hex.size(); ++i) {
     std::string hex;

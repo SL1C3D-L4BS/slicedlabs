@@ -538,12 +538,25 @@ std::vector<frame_entry> frame_table(byte_span segment) {
   return out;
 }
 
-scratch_dir::scratch_dir(std::string_view name) {
+namespace {
+
+// The scratch root under the working directory, or empty when the working directory is unknown.
+std::filesystem::path scratch_root(std::string_view name) {
   std::error_code ec;
-  root_ = std::filesystem::current_path(ec) / (std::string(name) + ".scratch");
+  std::filesystem::path cwd = std::filesystem::current_path(ec);
   if (ec) {
+    return {};
+  }
+  return cwd / (std::string(name) + ".scratch");
+}
+
+} // namespace
+
+scratch_dir::scratch_dir(std::string_view name) : root_(scratch_root(name)) {
+  if (root_.empty()) {
     return;
   }
+  std::error_code ec;
   std::filesystem::remove_all(root_, ec);
   std::filesystem::create_directories(root_, ec);
   ok_ = !ec;

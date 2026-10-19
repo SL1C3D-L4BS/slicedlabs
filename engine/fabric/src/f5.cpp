@@ -96,15 +96,15 @@ void note(std::string_view site, const store_backend *store) noexcept {
     s.last_site = site;
     governed = governed || s.governed.contains(store);
   }
+  // A store no transaction manager governs is a test store seeded through testing::backdoor:
+  // counted, logged at debug (below the default level, so a passing test prints no line). A
+  // governed or unnamed store is a real bypass: fatal, then the debug assertion.
   sl::log::emit(
-      sl::log::level::fatal, log_system,
+      governed ? sl::log::level::fatal : sl::log::level::debug, log_system,
       "backend mutation outside f5::authorized_scope: it bypassed the transaction manager",
       {{"site", site}, {"governed", governed}, {"mutations", mutations}, {"bypassing", bypassing}});
-  if (governed) {
-    const std::string message = "F5: backend mutation at " + std::string(site) +
-                                " bypassed the transaction manager (ADR-0016)";
-    SL_DEBUG_ASSERT(!governed, message);
-  }
+  SL_DEBUG_ASSERT(!governed, "F5: backend mutation at " + std::string(site) +
+                                 " bypassed the transaction manager (ADR-0016)");
 }
 
 } // namespace sl::fabric::f5::detail

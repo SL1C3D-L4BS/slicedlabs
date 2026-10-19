@@ -43,10 +43,8 @@ std::string text_of(const std::vector<std::uint8_t> &b) { return {b.begin(), b.e
 // A directory under the ctest working directory (the build tree), removed on both ends.
 class scratch_dir {
 public:
-  explicit scratch_dir(std::string_view name) {
+  explicit scratch_dir(std::string_view name) : root_(root_for(name)) {
     std::error_code ec;
-    root_ = std::filesystem::current_path(ec) / (std::string(name) + ".scratch");
-    REQUIRE_FALSE(ec);
     std::filesystem::remove_all(root_, ec);
     std::filesystem::create_directories(root_, ec);
     REQUIRE_FALSE(ec);
@@ -61,6 +59,15 @@ public:
   }
   [[nodiscard]] const std::filesystem::path &path() const noexcept { return root_; }
 
+private:
+  static std::filesystem::path root_for(std::string_view name) {
+    std::error_code ec;
+    std::filesystem::path cwd = std::filesystem::current_path(ec);
+    REQUIRE_FALSE(ec);
+    return cwd / (std::string(name) + ".scratch");
+  }
+
+public:
 private:
   std::filesystem::path root_;
 };

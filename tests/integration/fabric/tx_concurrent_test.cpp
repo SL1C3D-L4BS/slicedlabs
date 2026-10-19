@@ -20,6 +20,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <latch>
 #include <memory>
 #include <string>
@@ -64,6 +65,9 @@ TEST_CASE("FAB-INV-TX-10: N reader threads and one writer see monotonic revision
   std::vector<reader_report> reports(reader_count);
   std::vector<std::thread> readers;
   readers.reserve(reader_count);
+  // Built once, outside the readers (gcc -fanalyzer, WO-064).
+  const path name_path{path_segment::field(1)};
+  const std::string first_name("hero");
   for (std::size_t i = 0; i < reader_count; ++i) {
     readers.emplace_back([&, i] {
       reader_report &rep = reports[i];
@@ -87,8 +91,8 @@ TEST_CASE("FAB-INV-TX-10: N reader threads and one writer see monotonic revision
           ++rep.errors;
           continue;
         }
-        const auto name = r->body.get({path_segment::field(1)});
-        const std::string want = g == 0 ? std::string("hero") : "g" + std::to_string(g);
+        const auto name = r->body.get(name_path);
+        const std::string want = g == 0 ? first_name : std::format("g{}", g);
         if (!name || name->as_string() != want || head->root_digest() == digest{}) {
           ++rep.mismatches;
         }

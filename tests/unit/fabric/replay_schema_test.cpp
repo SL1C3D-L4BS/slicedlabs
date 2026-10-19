@@ -141,7 +141,7 @@ TEST_CASE("FAB-INV-RPL-03: an old revision opens with the schema set it was writ
     CHECK(now == e); // same v1 version, body and record object
     const type_desc *t = ws->schemas().find(e.type);
     REQUIRE(t != nullptr);
-    older += e.version != t->version ? 1 : 0;
+    older += e.version != t->version ? std::size_t{1} : std::size_t{0};
   }
   CHECK(older > 0); // some types evolved between v1 and v2
 }

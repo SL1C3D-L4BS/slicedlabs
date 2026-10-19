@@ -180,6 +180,14 @@ public:
     }
     return o->class_changes;
   }
+  [[nodiscard]] result<std::optional<epistemic_class>>
+  origin_class(const validation_context &ctx) const override {
+    const tx_origin *o = find(ctx);
+    if (o == nullptr) {
+      return std::optional<epistemic_class>{};
+    }
+    return std::optional<epistemic_class>{o->epistemic};
+  }
 
 private:
   [[nodiscard]] const tx_origin *find(const validation_context &ctx) const {

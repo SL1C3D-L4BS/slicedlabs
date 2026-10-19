@@ -63,10 +63,8 @@ std::filesystem::path store_path() { return store_text; }
 // A directory under the ctest working directory (the build tree), removed on both ends.
 class scratch_dir {
 public:
-  explicit scratch_dir(std::string_view name) {
+  explicit scratch_dir(std::string_view name) : root_(root_for(name)) {
     std::error_code ec;
-    root_ = std::filesystem::current_path(ec) / (std::string(name) + ".scratch");
-    REQUIRE_FALSE(ec);
     std::filesystem::remove_all(root_, ec);
     std::filesystem::create_directories(root_, ec);
     REQUIRE_FALSE(ec);
@@ -81,6 +79,15 @@ public:
   }
   [[nodiscard]] const std::filesystem::path &path() const noexcept { return root_; }
 
+private:
+  static std::filesystem::path root_for(std::string_view name) {
+    std::error_code ec;
+    std::filesystem::path cwd = std::filesystem::current_path(ec);
+    REQUIRE_FALSE(ec);
+    return cwd / (std::string(name) + ".scratch");
+  }
+
+public:
 private:
   std::filesystem::path root_;
 };
@@ -342,7 +349,7 @@ TEST_CASE("FAB-INV-STO-06: a crash at every primitive of a commit loses no ackno
 
   struct policy_case {
     crash_policy policy;
-    std::uint64_t tear;
+    std::uint64_t tear = 0;
   };
   const std::vector<policy_case> policies = {
       {.policy = crash_policy::keep_unsynced, .tear = 0},

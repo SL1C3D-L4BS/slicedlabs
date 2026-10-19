@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <format>
 #include <memory>
 #include <optional>
 #include <string>
@@ -22,7 +23,9 @@
 #include "sl/fabric/clock.hpp"
 #include "sl/fabric/digest.hpp"
 #include "sl/fabric/log_backend.hpp"
+#include "sl/fabric/manifest.hpp"
 #include "sl/fabric/recovery.hpp"
+#include "sl/fabric/revision.hpp"
 #include "sl/fabric/store.hpp"
 #include "sl/fabric/vfs.hpp"
 #include "sl/fabric/workspace.hpp"
@@ -117,35 +120,49 @@ private:
   vfs_file file_;
 };
 
-// The store of a read-only workspace: every read forwards, every commit is refused.
-class read_only_store final : public store_backend {
-public:
-  explicit read_only_store(std::unique_ptr<log_backend> inner) noexcept
-      : inner_(std::move(inner)) {}
-
-  [[nodiscard]] result<object> get(const digest &id) const noexcept override {
-    return inner_->get(id);
+// WO-064 (ARCH1-R22, ARCH1-R32): a manifest's schema_set must be the schema set of a revision on
+// the first-parent history of the ref it was read from. Nothing rewrites the manifest when a later
+// commit changes the schema set (a migration), so the genesis set stays valid; a digest no
+// revision was written with is `manifest_invalid`. A store without a manifest is not judged. The
+// walk stops at the first match, the head in the common case.
+result<void> check_manifest_schema_set(const store_backend &store) {
+  auto found = find_manifest(store);
+  if (!found) {
+    if (found.error().code == errc::manifest_missing) {
+      return {};
+    }
+    return pass(found);
   }
-  [[nodiscard]] result<bool> has(const digest &id) const noexcept override {
-    return inner_->has(id);
+  const digest want = found->manifest.schema_set;
+  auto head = store.read_ref(found->ref);
+  if (!head) {
+    return pass(head);
   }
-  [[nodiscard]] result<digest> read_ref(std::string_view name) const noexcept override {
-    return inner_->read_ref(name);
+  std::optional<digest> at = *head;
+  std::optional<digest> head_set;
+  while (at) {
+    auto o = store.get(*at);
+    if (!o) {
+      return pass(o);
+    }
+    auto rev = decode_revision(*o);
+    if (!rev) {
+      return pass(rev);
+    }
+    if (rev->schema_set == want) {
+      return {};
+    }
+    if (!head_set) {
+      head_set = rev->schema_set;
+    }
+    at = rev->parents.empty() ? std::nullopt : std::optional<digest>(rev->parents.front());
   }
-  [[nodiscard]] result<std::vector<ref_entry>> list_refs() const noexcept override {
-    return inner_->list_refs();
-  }
-  [[nodiscard]] result<commit_ack> commit(const mutation_capability & /*cap*/,
-                                          commit_batch /*batch*/) noexcept override {
-    return make_error(errc::permission_denied, "the workspace is open read-only");
-  }
-  [[nodiscard]] result<verify_report> verify(const verify_scope &scope) const noexcept override {
-    return inner_->verify(scope);
-  }
-
-private:
-  std::unique_ptr<log_backend> inner_;
-};
+  return make_error(errc::manifest_invalid,
+                    std::format("manifest: schema_set {} is the schema set of no revision of '{}' "
+                                "(its head is written with {})",
+                                want.to_hex(), found->ref,
+                                head_set ? head_set->to_hex() : std::string("(none)")));
+}
 
 std::shared_ptr<vfs> file_system(const workspace_options &options) {
   if (options.fs) {
@@ -271,12 +288,10 @@ result<std::unique_ptr<workspace>> workspace::open(const std::filesystem::path &
                                                    " read-only: the log needs a repair first (" +
                                                    report.summary() + ")");
   }
-  std::shared_ptr<store_backend> backend;
-  if (mode == open_mode::read_only) {
-    backend = std::make_shared<read_only_store>(std::move(recovered->store));
-  } else {
-    backend = std::shared_ptr<store_backend>(std::move(recovered->store));
+  if (result<void> ok = check_manifest_schema_set(*recovered->store); !ok) {
+    return pass(ok);
   }
+  std::shared_ptr<store_backend> backend(std::move(recovered->store));
   return assemble(std::move(backend), options, std::move(fs), lock.release(), std::move(report),
                   mode);
 }

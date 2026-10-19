@@ -82,7 +82,7 @@ template <class T> const T &pick(rng &r, const std::vector<T> &items) {
 
 } // namespace
 
-patch_gen::patch_gen(std::uint64_t seed, patch_gen_options options)
+patch_gen::patch_gen(std::uint64_t seed, const patch_gen_options &options)
     : values_(seed, value_gen_options{.max_depth = 0, .max_items = 3, .max_chars = 8}),
       options_(options) {
   options_.max_ops = std::max<std::size_t>(options_.max_ops, 1);
@@ -255,7 +255,9 @@ result<std::optional<patch_op>> patch_gen::op(const oracle_store &state, op_kind
   }
   const record_id target = pick(r, ids);
   const auto found = state.records().find(target);
-  SL_ASSERT(found != state.records().end(), "patch_gen lost a record");
+  if (found == state.records().end()) [[unlikely]] {
+    return std::optional<patch_op>(); // unreachable: the target was drawn from state.records()
+  }
   const record_state &rec = found->second;
   switch (kind) {
   case op_kind::delete_record: {

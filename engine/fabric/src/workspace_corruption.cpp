@@ -194,7 +194,7 @@ result<checked_open> open_view(const std::shared_ptr<vfs> &fs, const stdfs::path
     return pass(view);
   }
   result<std::unique_ptr<workspace>> ws =
-      workspace::create_with(std::move(*view), std::move(options));
+      workspace::create_with(std::move(*view), std::move(options), open_mode::read_only);
   if (!ws) {
     return pass(ws);
   }

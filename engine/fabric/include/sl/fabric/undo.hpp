@@ -61,8 +61,8 @@
 // drag commits once, as one revision and one undo entry.
 //
 // Delete then undo (ARCH2-R27): the inverse of delete_record re-creates the captured body under
-// the same id with undo_of set, which is the only revival the structural validator accepts, and
-// the record object id is the same.
+// the same id with undo_of set, which is the only revival the invariants stage accepts
+// (R-INV-ID-REUSE, fabric.identity), and the record object id is the same.
 //
 // Intents: transaction_manager has no intent API and only it may commit to a store (F5), so the
 // intent records go to an intent_log; memory_intent_log is the default. Writing them as journal

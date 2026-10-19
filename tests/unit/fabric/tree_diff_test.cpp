@@ -100,7 +100,7 @@ TEST_CASE("FAB-INV-REV-03: diff equals the symmetric difference of a map oracle"
       cs.push_back(tree_change{.id = id, .entry = e});
     }
     object_sink sink(store);
-    const digest rb = must(update_tree(reader, ra, std::move(cs), sink)).id;
+    const digest rb = must(update_tree(reader, ra, cs, sink)).id;
     REQUIRE(testing::commit_objects(store, sink.take()).has_value());
     CHECK(rb == put_all(store, b));
 

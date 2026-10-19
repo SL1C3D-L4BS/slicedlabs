@@ -3,7 +3,9 @@
 // recovery live in workspace_open.cpp.
 
 #include <memory>
+#include <string_view>
 #include <utility>
+#include <vector>
 
 #include "sl/core/error.hpp"
 #include "sl/fabric/clock.hpp"
@@ -23,6 +25,36 @@ namespace {
 
 // A cleanup whose failure changes nothing a caller can act on.
 void best_effort(const result<void> &r) noexcept { static_cast<void>(r); }
+
+// The store of a read-only workspace: every read forwards, every commit is refused.
+class read_only_store final : public store_backend {
+public:
+  explicit read_only_store(std::shared_ptr<store_backend> inner) noexcept
+      : inner_(std::move(inner)) {}
+
+  [[nodiscard]] result<object> get(const digest &id) const noexcept override {
+    return inner_->get(id);
+  }
+  [[nodiscard]] result<bool> has(const digest &id) const noexcept override {
+    return inner_->has(id);
+  }
+  [[nodiscard]] result<digest> read_ref(std::string_view name) const noexcept override {
+    return inner_->read_ref(name);
+  }
+  [[nodiscard]] result<std::vector<ref_entry>> list_refs() const noexcept override {
+    return inner_->list_refs();
+  }
+  [[nodiscard]] result<commit_ack> commit(const mutation_capability & /*cap*/,
+                                          commit_batch /*batch*/) noexcept override {
+    return make_error(errc::permission_denied, "the workspace is open read-only");
+  }
+  [[nodiscard]] result<verify_report> verify(const verify_scope &scope) const noexcept override {
+    return inner_->verify(scope);
+  }
+
+private:
+  std::shared_ptr<store_backend> inner_;
+};
 
 } // namespace
 
@@ -47,12 +79,12 @@ result<std::unique_ptr<workspace>> workspace::create_memory(workspace_options op
 }
 
 result<std::unique_ptr<workspace>> workspace::create_with(std::shared_ptr<store_backend> store,
-                                                          workspace_options options) {
+                                                          workspace_options options,
+                                                          open_mode mode) {
   if (!store) {
     return make_error(errc::invalid_argument, "a workspace needs a store");
   }
-  return assemble(std::move(store), options, nullptr, vfs_file{}, recovery_report{},
-                  open_mode::write);
+  return assemble(std::move(store), options, nullptr, vfs_file{}, recovery_report{}, mode);
 }
 
 result<std::unique_ptr<workspace>> workspace::assemble(std::shared_ptr<store_backend> store,
@@ -77,6 +109,9 @@ result<std::unique_ptr<workspace>> workspace::assemble(std::shared_ptr<store_bac
   }
   if (auto ok = options.domains.freeze(); !ok) {
     return std::unexpected(ok.error());
+  }
+  if (mode == open_mode::read_only) {
+    store = std::make_shared<read_only_store>(std::move(store));
   }
   auto ws = std::make_unique<workspace>(open_key{}, std::move(store), options);
   ws->fs_ = std::move(fs);

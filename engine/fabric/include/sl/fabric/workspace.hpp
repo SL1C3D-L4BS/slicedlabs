@@ -25,7 +25,10 @@
 //                                open a read-only recovery view instead). read_only: no lock and
 //                                no repair; a log that needs one is `recovery_required`, and every
 //                                commit is `permission_denied`. `not_found` when root holds no
-//                                store.
+//                                store. When the store holds a project manifest, its schema_set
+//                                must be the schema_set of a revision on the first-parent history
+//                                of the ref it was read from (the genesis set until a transaction
+//                                changes it), else `manifest_invalid` and nothing opens (WO-064).
 // last_recovery() is the report of the open (empty after create). Closing a writer clears the
 // holder text and releases the lock; a crashed writer leaves the text behind (the next writer
 // reports it). The project locator `project.slp` is WO-054's.
@@ -95,8 +98,11 @@ public:
   /// (transaction_manager::create) and `entropy_failure` for a failing default id source.
   [[nodiscard]] static result<std::unique_ptr<workspace>> create_memory(workspace_options options);
   /// The same over `store` (not null: `invalid_argument`), which may already hold commits.
+  /// open_mode::read_only refuses every commit with `permission_denied` and mode() reports it
+  /// (a lenient recovered view, corruption.hpp).
   [[nodiscard]] static result<std::unique_ptr<workspace>>
-  create_with(std::shared_ptr<store_backend> store, workspace_options options);
+  create_with(std::shared_ptr<store_backend> store, workspace_options options,
+              open_mode mode = open_mode::write);
   /// A new durable workspace in directory `root` (file comment).
   [[nodiscard]] static result<std::unique_ptr<workspace>> create(const std::filesystem::path &root,
                                                                  workspace_options options);
@@ -131,11 +137,13 @@ public:
   [[nodiscard]] const actor_directory &actors() const noexcept { return actors_; }
   /// The report of the recovery open() ran (empty for other workspaces).
   [[nodiscard]] const recovery_report &last_recovery() const noexcept { return recovery_; }
-  /// write for every workspace but one opened read_only.
+  /// read_only for a workspace opened or created read_only (every commit is then
+  /// `permission_denied`), write otherwise.
   [[nodiscard]] open_mode mode() const noexcept { return mode_; }
 
 private:
-  // Freezes the registries and builds the manager over store_ (create_with and open).
+  // Freezes the registries and builds the manager over store_ (create_with and open); a
+  // read_only workspace wraps the store so that every commit is refused.
   [[nodiscard]] static result<std::unique_ptr<workspace>>
   assemble(std::shared_ptr<store_backend> store, workspace_options &options,
            std::shared_ptr<vfs> fs, vfs_file lock, recovery_report report, open_mode mode);

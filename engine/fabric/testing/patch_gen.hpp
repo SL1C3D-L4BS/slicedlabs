@@ -43,7 +43,7 @@ struct body_node {
 
 class patch_gen {
 public:
-  explicit patch_gen(std::uint64_t seed, patch_gen_options options = {});
+  explicit patch_gen(std::uint64_t seed, const patch_gen_options &options = {});
 
   /// A store of `records` random records.
   [[nodiscard]] result<oracle_store> state(std::size_t records);

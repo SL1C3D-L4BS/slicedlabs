@@ -108,9 +108,12 @@ std::vector<scanned_commit> scan(sl::fabric::vfs &fs, std::string_view path) {
         } else if (f.type == frame_type::commit) {
           auto c = sl::fabric::decode_commit(f.payload);
           REQUIRE(c.has_value());
-          out.push_back(scanned_commit{.record = std::move(*c),
-                                       .payload = {f.payload.begin(), f.payload.end()},
-                                       .objects = std::move(objects)});
+          // Built field by field, not as one aggregate (gcc -fanalyzer, WO-064).
+          scanned_commit sc;
+          sc.payload.assign(f.payload.begin(), f.payload.end());
+          sc.record = std::move(*c);
+          sc.objects = std::move(objects);
+          out.push_back(std::move(sc));
           objects.clear();
         }
         return {};

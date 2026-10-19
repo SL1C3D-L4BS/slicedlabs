@@ -211,7 +211,8 @@ condensation dependency_graph::condense(edge_kind_mask kinds) const {
     }
   }
   std::ranges::sort(out.edges);
-  out.edges.erase(std::ranges::unique(out.edges).begin(), out.edges.end());
+  auto [dup_first, dup_last] = std::ranges::unique(out.edges);
+  out.edges.erase(dup_first, dup_last);
 
   // Kahn from the components that depend on nothing, smallest index first.
   std::vector<std::size_t> waiting(out.components.size(), 0);

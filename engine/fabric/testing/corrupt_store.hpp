@@ -104,11 +104,13 @@ struct planted {
 /// Commits through testing::backdoor a new head of `ref` on top of the current one: its records
 /// trie is the current one with `changes` applied (membership, schema set and tx unchanged), and
 /// `extra` objects are stored with it. Returns the new revision.
-[[nodiscard]] result<digest> rewrite_head(store_backend &store, std::vector<tree_change> changes,
+[[nodiscard]] result<digest> rewrite_head(store_backend &store,
+                                          const std::vector<tree_change> &changes,
                                           std::vector<object> extra, std::string_view ref = "main");
 
 /// rewrite_head over the closed sample's log store (recover_log repair, then the backdoor).
-[[nodiscard]] result<digest> rewrite_sample(const sample_store &s, std::vector<tree_change> changes,
+[[nodiscard]] result<digest> rewrite_sample(const sample_store &s,
+                                            const std::vector<tree_change> &changes,
                                             std::vector<object> extra,
                                             const sample_config &cfg = {});
 

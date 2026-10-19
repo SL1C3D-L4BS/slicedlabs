@@ -2,7 +2,8 @@
 // `validation_stages`; WO-048 authority, WO-049 provenance, WO-058 identity). The identity
 // validator (identity.hpp) owns the tombstone-reuse rule (R-INV-ID-REUSE, which replaced
 // WO-050's R-STR-TOMBSTONE) and the id-class rule (R-INV-ID-CLASS, moved out of
-// fabric.invariants).
+// fabric.invariants). WO-064 registers the newer-minor and deprecation validators (migration.hpp)
+// by default and adds fabric.boundary (R-BND-OBSERVED, ARCH1-R60).
 //
 // Each validator looks only at what the patch changed (the staged changes and the ops), so the
 // work is bounded by changed records times validators (SL-ARCH-002 Measures, performance), with
@@ -21,9 +22,11 @@
 
 #include "sl/core/error.hpp"
 #include "sl/fabric/authority.hpp"
+#include "sl/fabric/boundary.hpp"
 #include "sl/fabric/deps.hpp"
 #include "sl/fabric/id.hpp"
 #include "sl/fabric/identity.hpp"
+#include "sl/fabric/migration.hpp"
 #include "sl/fabric/patch.hpp"
 #include "sl/fabric/provenance.hpp"
 #include "sl/fabric/schema.hpp"
@@ -345,6 +348,43 @@ private:
   }
 };
 
+// ---- boundary --------------------------------------------------------------------------------
+
+// R-BND-OBSERVED (ARCH1-R60): what the runtime learns enters the document only with epistemic
+// class observed. A patch labelled observation_label (propose_from_observation) is a runtime
+// submission; its transaction's origin must say observed.
+class boundary_validator final : public validator {
+public:
+  explicit boundary_validator(const provenance_source &source) noexcept : source_(&source) {}
+
+  [[nodiscard]] std::string_view name() const noexcept override { return "fabric.boundary"; }
+  [[nodiscard]] validator_stage stage() const noexcept override {
+    return validator_stage::invariants;
+  }
+  [[nodiscard]] result<void> run(const validation_context &ctx,
+                                 std::vector<diagnostic> &out) const override {
+    if (ctx.patch().meta.label != observation_label) {
+      return {};
+    }
+    auto cls = source_->origin_class(ctx);
+    if (!cls) {
+      return std::unexpected(cls.error());
+    }
+    if (!*cls || **cls == epistemic_class::observed) {
+      return {};
+    }
+    out.push_back(finding(validator_stage::invariants, "R-BND-OBSERVED", record_id{}, path{},
+                          errc::invalid_argument,
+                          std::format("a runtime observation ({}) commits with epistemic class "
+                                      "observed, not {}",
+                                      observation_label, to_string(**cls))));
+    return {};
+  }
+
+private:
+  const provenance_source *source_;
+};
+
 } // namespace
 
 result<std::vector<std::shared_ptr<const validator>>>
@@ -357,12 +397,15 @@ builtin_validators(const builtin_validator_env &env) {
   std::vector<std::shared_ptr<const validator>> chain;
   chain.push_back(std::make_shared<structural_validator>());
   chain.push_back(std::make_shared<schema_validator>());
+  chain.push_back(std::make_shared<newer_minor_validator>());
+  chain.push_back(std::make_shared<deprecation_validator>());
   chain.push_back(std::make_shared<authority_validator>(*env.domains, *env.actors));
   chain.push_back(std::make_shared<references_validator>());
   chain.push_back(std::make_shared<invariants_validator>());
   chain.push_back(
       std::make_shared<provenance_validator>(*env.provenance, *env.actors, *env.domains));
   chain.push_back(std::make_shared<identity_validator>());
+  chain.push_back(std::make_shared<boundary_validator>(*env.provenance));
   return chain;
 }
 

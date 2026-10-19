@@ -218,8 +218,8 @@ TEST_CASE("FAB-INV-RCV-09: every manager failpoint at every commit under every c
                                       failpoint::fp5, failpoint::fp6};
   std::vector<tg::crash_workload> workloads;
   struct unit {
-    std::size_t workload;
-    std::size_t commit;
+    std::size_t workload = 0;
+    std::size_t commit = 0;
     failpoint fp;
   };
   std::vector<unit> units;

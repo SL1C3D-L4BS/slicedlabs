@@ -121,7 +121,7 @@ TEST_CASE("FAB-INV-COR-04: a dangling strong reference is repaired by recreating
   }
   std::vector<tree_change> drop;
   drop.push_back(tree_change{.id = m0, .entry = std::nullopt});
-  const digest head = must(tg::rewrite_sample(s, std::move(drop), {}, cfg));
+  const digest head = must(tg::rewrite_sample(s, drop, {}, cfg));
   const std::vector<finding> found = findings_of(s, cfg);
   REQUIRE(found.size() == 1);
   REQUIRE(found[0].cls == corruption_class::c9);

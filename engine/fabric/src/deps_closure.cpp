@@ -21,7 +21,8 @@ result<impact_set> dependency_graph::reverse_closure(std::span<const record_id> 
     }
   }
   std::ranges::sort(seeds);
-  seeds.erase(std::ranges::unique(seeds).begin(), seeds.end());
+  auto [dup_first, dup_last] = std::ranges::unique(seeds);
+  seeds.erase(dup_first, dup_last);
 
   impact_set set;
   set.at_revision = options.at_revision;

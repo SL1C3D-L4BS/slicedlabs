@@ -214,7 +214,8 @@ TEST_CASE("FAB-INV-DEP-03: 300 seeded graphs: the closure equals a brute-force o
 
     std::vector<record_id> unique = changed;
     std::ranges::sort(unique);
-    unique.erase(std::ranges::unique(unique).begin(), unique.end());
+    auto [dup_first, dup_last] = std::ranges::unique(unique);
+    unique.erase(dup_first, dup_last);
     const impact_set want = oracle(edges, unique, opt);
     const impact_set got = must(g.reverse_closure(changed, opt));
     CAPTURE(seed);

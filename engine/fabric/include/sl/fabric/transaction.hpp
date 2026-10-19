@@ -267,23 +267,34 @@ struct builtin_validator_env {
   const provenance_source *provenance = nullptr;
 };
 
-/// The built-in validator chain (src/tx_builtin_validators.cpp; WO-058 appends identity), in
-/// registration order:
-///   fabric.structural  (structural) R-STR-TARGET a mutating op with a null target or a target of
-///                      class tx, event, element or operation; R-STR-TYPE a create or retype with
-///                      a null type; R-STR-TOMBSTONE a create over a tombstoned id with no undo_of
-///                      (ARCH2-R27; WO-058 refines it); R-STR-APPLY a patch that no longer applies
-///   fabric.schema      (schema) R-SCH-UNKNOWN an unregistered type, R-SCH-RECORD a type that is
-///                      not a record type, then every R-TY-* finding of schema_registry::check
-///   fabric.authority   (authority) WO-048
-///   fabric.references  (references) R-REF-DANGLING a strong or owned ref of a written record to
-///                      a record that is not live after the patch; R-REF-BLOCKED a deleted record
-///                      still referenced strongly by a live record; R-REF-CASCADE a deleted owner
-///                      whose owned children stay live
-///   fabric.invariants  (invariants) R-INV-ID-CLASS a record id whose class is not its type's
-///                      record class; R-INV-OWNED-CYCLE an owned cycle through a written record;
-///                      R-INV-OWNED-TWICE one child owned by two written records
-///   fabric.provenance  (invariants) WO-049, over `env.provenance`
+/// The built-in validator chain (src/tx_builtin_validators.cpp), in registration order; each
+/// can be left out by name (manager_config::omit_builtin, workspace_options::omit_builtin):
+///   fabric.structural        (structural) R-STR-TARGET a mutating op with a null target or a
+///                            target of class tx, event, element or operation; R-STR-TYPE a
+///                            create or retype with a null type (the manager itself reports
+///                            R-STR-APPLY, a patch that no longer applies)
+///   fabric.schema            (schema) R-SCH-UNKNOWN an unregistered type, R-SCH-RECORD a type
+///                            that is not a record type, then every R-TY-* finding of
+///                            schema_registry::check
+///   fabric.schema.newer      (schema) R-SCH-NEWER a write to a record written by a newer
+///                            version of its type (migration.hpp, ARCH1-R23)
+///   fabric.schema.deprecated (schema) R-SCH-DEPRECATED, a warning for a write of a deprecated
+///                            field (migration.hpp, ARCH1-R24)
+///   fabric.authority         (authority) WO-048
+///   fabric.references        (references) R-REF-DANGLING a strong or owned ref of a written
+///                            record to a record that is not live after the patch; R-REF-BLOCKED
+///                            a deleted record still referenced strongly by a live record;
+///                            R-REF-CASCADE a deleted owner whose owned children stay live
+///   fabric.invariants        (invariants) R-INV-OWNED-CYCLE an owned cycle through a written
+///                            record; R-INV-OWNED-TWICE one child owned by two written records
+///   fabric.provenance        (invariants) WO-049, over `env.provenance`
+///   fabric.identity          (invariants) R-INV-ID-CLASS a record id whose class is not its
+///                            type's record class; R-INV-ID-REUSE a write over a tombstoned id
+///                            that is not the undo of the retiring transaction (identity.hpp,
+///                            ARCH1-R05, ARCH2-R27)
+///   fabric.boundary          (invariants) R-BND-OBSERVED a runtime observation (patch label
+///                            boundary.hpp observation_label) whose origin's epistemic class is
+///                            not observed (ARCH1-R60), over `env.provenance`
 /// Every message starts with the error code name ("ref_dangling: ...").
 [[nodiscard]] result<std::vector<std::shared_ptr<const validator>>>
 builtin_validators(const builtin_validator_env &env);

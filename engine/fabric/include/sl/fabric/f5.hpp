@@ -13,13 +13,13 @@
 //   - The manager opens an authorized_scope around its backend commit (step C4). The scope takes
 //     the capability, so only a capability holder can open one; its depth is per thread.
 //   - Every mutating site of a backend calls note_mutation(site, store): `mutations` counts every
-//     call, and a call with no authorized_scope open on the thread also counts in `bypassing`,
-//     logs a fatal event of system "fabric/f5" naming the site and the counters, and trips
-//     SL_DEBUG_ASSERT.
-//   - The assertion fires when the store is governed (a live transaction manager holds a
-//     governed_store for it) or when no store is named. A commit on a store no manager governs can
-//     only come from the test backdoor (production code cannot make a capability), so it is
-//     counted and logged but not asserted: tests seed bare stores that way.
+//     call, and a call with no authorized_scope open on the thread also counts in `bypassing` and
+//     logs an event of system "fabric/f5" naming the site and the counters.
+//   - On a governed store (a live transaction manager holds a governed_store for it), or when no
+//     store is named, the bypass is real: the event is fatal and SL_DEBUG_ASSERT trips. A commit
+//     on a store no manager governs can only come from the test backdoor (production code cannot
+//     make a capability), so it is counted and logged at debug level, below the default, and not
+//     asserted: tests seed bare stores that way without printing a fatal line (WO-064).
 //
 // The site must be a string literal (static storage): last_bypass_site() returns the view.
 
@@ -86,8 +86,8 @@ inline void reset_for_test() noexcept {
 }
 
 /// Counts one backend mutation at `site` (a string literal) of `store` (null: no store named).
-/// Outside an authorized_scope it is a bypass: counted, logged as a fatal "fabric/f5" event and,
-/// for a governed or unnamed store, SL_DEBUG_ASSERT.
+/// Outside an authorized_scope it is a bypass: counted and logged as a "fabric/f5" event, fatal
+/// with SL_DEBUG_ASSERT for a governed or unnamed store, debug for an ungoverned one.
 inline void note_mutation(std::string_view site, const store_backend *store = nullptr) noexcept {
   if constexpr (enabled) {
     detail::note(site, store);

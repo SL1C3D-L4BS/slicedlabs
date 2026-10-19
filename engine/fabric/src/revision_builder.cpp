@@ -189,7 +189,7 @@ result<built_revision> revision_builder::build(const revision_inputs &in) const 
     }
   }
 
-  auto records_root = update_tree(reader, base_.records_root(), std::move(records), sink);
+  auto records_root = update_tree(reader, base_.records_root(), records, sink);
   if (!records_root) {
     return std::unexpected(records_root.error());
   }
@@ -208,7 +208,7 @@ result<built_revision> revision_builder::build(const revision_inputs &in) const 
       }
       members_root = (*cur)->target;
     }
-    auto next = update_tree(reader, members_root, std::move(member_changes), sink);
+    auto next = update_tree(reader, members_root, member_changes, sink);
     if (!next) {
       return std::unexpected(next.error());
     }
@@ -218,7 +218,7 @@ result<built_revision> revision_builder::build(const revision_inputs &in) const 
     }
     documents.push_back(c);
   }
-  auto membership_root = update_tree(reader, base_.membership_root(), std::move(documents), sink);
+  auto membership_root = update_tree(reader, base_.membership_root(), documents, sink);
   if (!membership_root) {
     return std::unexpected(membership_root.error());
   }

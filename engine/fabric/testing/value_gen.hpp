@@ -39,7 +39,7 @@ struct value_gen_options {
 
 class value_gen {
 public:
-  explicit value_gen(std::uint64_t seed, value_gen_options options = {}) noexcept
+  explicit value_gen(std::uint64_t seed, const value_gen_options &options = {}) noexcept
       : rng_(seed), options_(options) {}
 
   /// Any SLB/1 value: every kind, boundary integers, multi-byte UTF-8, raw (possibly invalid)

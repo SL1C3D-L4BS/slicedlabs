@@ -11,6 +11,7 @@
 #include "sl/fabric/store.hpp"
 #include "sl/fabric/tree.hpp"
 
+#include "../../../engine/fabric/testing/crash_harness.hpp"
 #include "../../../engine/fabric/testing/tree_fixture.hpp"
 #include "../../../engine/fabric/testing/value_gen.hpp"
 
@@ -45,10 +46,12 @@ constexpr std::uint64_t wrong = 1'000'000;
 
 } // namespace
 
-TEST_CASE("FAB-INV-REV-01: trie root depends only on the entry set over 200 permutations") {
+TEST_CASE("FAB-INV-REV-01: trie root depends only on the entry set over 200 permutations (20 "
+          "under the sanitizers)") {
   const std::vector<std::size_t> sizes = {20, 33, 40, 56, 72};
   constexpr std::size_t extras = 8;
-  constexpr std::size_t permutations = 200;
+  // SL_FABRIC_SWEEP_SCALE (0.1 under the sanitizer presets) keeps the unit budget (WO-064).
+  const std::size_t permutations = testing::scaled(200, 20);
   memory_backend store;
   const tree_reader reader(store);
   const std::vector<record_id> ids =
@@ -107,7 +110,7 @@ TEST_CASE("FAB-INV-REV-01: trie root depends only on the entry set over 200 perm
         }
       }
       object_sink sink(store);
-      root = must(update_tree(reader, root, std::move(changes), sink)).id;
+      root = must(update_tree(reader, root, changes, sink)).id;
       flush(store, sink);
     }
     CHECK_MESSAGE(root == expected[n].id, "permutation " << perm << " size " << n);

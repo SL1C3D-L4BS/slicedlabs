@@ -163,6 +163,13 @@ struct type_desc {
   std::string doc;
 
   /// A record type: a record class, a state class or the document_root flag is set.
+  ///
+  /// The rule (WO-064, SL-ARCH-001 "Code reconciliation"): sl-type-def/1 gives every type a state
+  /// class, but because a state class alone makes a record type here, a value type (no record
+  /// class, no document_root) registers with state_class none. Its declared state class is kept
+  /// outside the descriptor: in the generated gen::type_entry::declared_state, which
+  /// gen::lock_hash restores so the schema object id matches the Python lock; types_from_module
+  /// drops it the same way. A record type keeps its declared state class in the descriptor.
   [[nodiscard]] bool is_record() const noexcept {
     return record_class != id_class::none || state_class != fabric::state_class::none ||
            document_root;

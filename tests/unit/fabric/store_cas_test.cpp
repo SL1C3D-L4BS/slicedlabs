@@ -51,8 +51,8 @@ struct oid_vector {
   std::string_view name;
   std::string_view frame;
   std::string_view oid; // empty: not openable
-  bool read_only;
-  errc code;
+  bool read_only = false;
+  errc code = errc::ok;
 };
 
 // tests/fixtures/fabric/hash/vectors.json, section oid (tools/fabric/slb_ref.py frame_oid).
@@ -96,8 +96,8 @@ struct reject_vector {
   std::string_view name;
   std::string_view hex;
   std::string_view rule;
-  std::size_t offset;
-  errc code;
+  std::size_t offset = 0;
+  errc code = errc::ok;
 };
 
 // tests/fixtures/fabric/slb/reject.json, every vector with target "frame".

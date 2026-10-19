@@ -285,10 +285,10 @@ result<subtree> build_tree(std::span<const tree_entry> entries, object_sink &sin
 }
 
 result<subtree> update_tree(const tree_reader &reader, const digest &root,
-                            std::vector<tree_change> changes, object_sink &sink) {
+                            const std::vector<tree_change> &changes, object_sink &sink) {
   std::vector<keyed_change> cs;
   cs.reserve(changes.size());
-  for (tree_change &c : changes) {
+  for (const tree_change &c : changes) {
     if (c.id.is_null() || (c.entry && c.entry->id != c.id)) {
       return make_error(errc::invalid_argument, "trie change with a null or mismatched id");
     }

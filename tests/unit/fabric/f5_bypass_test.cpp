@@ -2,9 +2,10 @@
 // bypass: the ledger counts it in `mutations` and `bypassing`, a fatal "fabric/f5" event names
 // the site, and on a store a live transaction manager governs SL_DEBUG_ASSERT trips (captured
 // here by a scoped handler). On a store no manager governs (how tests seed bare stores) it is
-// counted and logged without the assertion. The log backend's commit and intent writes are both
-// mutating sites. Builds without SL_FABRIC_F5_INSTRUMENT (Release) compile the ledger out: the
-// test then asserts !f5::enabled and that nothing is counted.
+// counted and logged at debug level, below the default, without the assertion (WO-064), so a
+// passing test that seeds through the backdoor prints no "fabric/f5" line. The log backend's commit
+// and intent writes are both mutating sites. Builds without SL_FABRIC_F5_INSTRUMENT (Release)
+// compile the ledger out: the test then asserts !f5::enabled and that nothing is counted.
 
 #include "sl/core/assert.hpp"
 #include "sl/core/log.hpp"
@@ -142,7 +143,8 @@ TEST_CASE("FAB-INV-F5-02: a backdoor commit on a governed store is counted, logg
   CHECK(log.f5_events().size() == 1);
 }
 
-TEST_CASE("FAB-INV-F5-02: a bypass on an ungoverned store is counted and logged, not asserted") {
+TEST_CASE("FAB-INV-F5-02: a bypass on an ungoverned store is counted and logged at debug, not "
+          "asserted") {
   if constexpr (!f5::enabled) {
     CHECK_FALSE(f5::enabled);
     return;
@@ -156,17 +158,28 @@ TEST_CASE("FAB-INV-F5-02: a bypass on an ungoverned store is counted and logged,
     auto ws = must(workspace::create_with(store, must(tg::scene_options(clock))));
   }
   f5::reset_for_test();
+  // At the default level the seed prints no "fabric/f5" line at all.
   REQUIRE(tg::backdoor::commit(*store, blob_batch('u')).has_value());
   CHECK(f5::read() == f5::ledger{.mutations = 1, .bypassing = 1});
+  CHECK(log.f5_events().empty());
+  CHECK(asserts.count == 0);
+
+  // It is still logged, at debug: visible when the logger is lowered.
+  sl::log::logger &logger = sl::log::default_logger();
+  const sl::log::level before = logger.min_level();
+  logger.set_min_level(sl::log::level::debug);
+  REQUIRE(tg::backdoor::commit(*store, blob_batch('v')).has_value());
+  logger.set_min_level(before);
   const auto events = log.f5_events();
   REQUIRE(events.size() == 1);
-  CHECK(events[0].level == sl::log::level::fatal);
+  CHECK(events[0].level == sl::log::level::debug);
   CHECK_FALSE(bool_field(events[0], "governed"));
   CHECK(asserts.count == 0);
+  CHECK(f5::read() == f5::ledger{.mutations = 2, .bypassing = 2});
 
   // A refused rogue commit still counts: the call itself is the bypass.
   CHECK_FALSE(tg::backdoor::commit(*store, commit_batch{}).has_value());
-  CHECK(f5::read() == f5::ledger{.mutations = 2, .bypassing = 2});
+  CHECK(f5::read() == f5::ledger{.mutations = 3, .bypassing = 3});
 }
 
 TEST_CASE("FAB-INV-F5-02: log_backend commit and intent writes are counted mutating sites") {

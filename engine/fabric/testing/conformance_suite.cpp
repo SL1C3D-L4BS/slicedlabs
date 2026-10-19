@@ -538,7 +538,7 @@ result<gate1_report> measure_gate1(const snapshot &head, const schema_registry &
 std::string scorecard_input_json(const conformance_run &run) {
   std::size_t failed = 0;
   for (const type_report &t : run.types) {
-    failed += t.passed() ? 0 : 1;
+    failed += t.passed() ? std::size_t{0} : std::size_t{1};
   }
   const workload_counters &c = run.counters;
   return std::format("{{\n"

@@ -12,6 +12,7 @@
 #include "sl/fabric/deps.hpp"
 #include "sl/fabric/events.hpp"
 #include "sl/fabric/gen/fabric.edge.gen.hpp"
+#include "sl/fabric/gen/fabric.history.gen.hpp"
 #include "sl/fabric/id.hpp"
 #include "sl/fabric/impact.hpp"
 #include "sl/fabric/patch.hpp"
@@ -282,4 +283,37 @@ TEST_CASE("FAB-INV-IMP-04: the summary lists at most 64 ids per class and role a
   REQUIRE(s.nodes.size() == 3);
   CHECK(s.nodes[0].id == p.a);
   CHECK(s.nodes[1].distance == 1);
+}
+
+TEST_CASE("FAB-INV-IMP-04: the committed event payload stays the tx record; its report is "
+          "committed(event), on one seq stream") {
+  // WO-064 decision: observers cannot extend the payload without a second seq stream, so the
+  // manager publishes the tx record and the impact report is reached through the engine.
+  auto ws = must(workspace::create_memory(project_options()));
+  transaction_manager &m = ws->manager();
+  const tx_origin origin = tg::tx_origin_of(tg::tx_editor());
+  auto engine = must(impact_engine::attach(m, must(m.head())));
+  std::vector<event_envelope> committed;
+  std::vector<std::uint64_t> seqs;
+  auto all = m.events().subscribe("", [&](const event_envelope &ev) noexcept {
+    seqs.push_back(ev.seq);
+    if (ev.type == "fabric.tx.committed") {
+      committed.push_back(ev);
+    }
+  });
+  const project p;
+  static_cast<void>(must(tg::commit_ops(m, origin, project_ops(p))));
+  const commit_receipt edited = must(tg::commit_ops(m, origin, {touch(p.a, 1)}));
+  REQUIRE(committed.size() == 2);
+  const event_envelope &ev = committed.back();
+  REQUIRE(ev.payload.has_value());
+  const value payload =
+      must(decode(ev.payload.value_or(std::vector<std::uint8_t>{}), unknown_policy::preserve));
+  static_cast<void>(must(gen::fabric_history::tx_record::from_value(payload)));
+  CHECK(ev.schema.type == type_id_of("fabric.history.tx_record").id());
+  CHECK(ev.causality.tx == std::optional<record_id>(edited.tx.id()));
+  CHECK(engine->committed(ev) == std::optional<impact_report>(attached(edited)));
+  for (std::size_t i = 1; i < seqs.size(); ++i) {
+    CHECK(seqs[i] > seqs[i - 1]); // one ordered stream: nothing published beside it
+  }
 }

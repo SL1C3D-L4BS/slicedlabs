@@ -2,6 +2,7 @@
 // failpoints. Declared in sl/fabric/failpoints.hpp and defined only here, in sl_fabric_testing,
 // so production code (which links sl_fabric alone) cannot arm a failpoint.
 
+#include <array>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -12,6 +13,17 @@
 #include "sl/fabric/failpoints.hpp"
 
 namespace sl::fabric::testing {
+
+namespace {
+
+// One armed slot; a named fixed-extent span keeps the index bounds-checked in debug builds.
+std::atomic<std::uint32_t> &slot(std::array<std::atomic<std::uint32_t>, failpoint_count> &arr,
+                                 std::size_t i) noexcept {
+  const std::span<std::atomic<std::uint32_t>, failpoint_count> s(arr);
+  return s[i];
+}
+
+} // namespace
 
 result<void> tx_failpoints::arm(failpoint_set &set, failpoint fp, errc code) noexcept {
   const auto i = static_cast<std::size_t>(fp);
@@ -26,14 +38,14 @@ result<void> tx_failpoints::arm(failpoint_set &set, failpoint fp, errc code) noe
   if (code == errc::ok) {
     return make_error(errc::invalid_argument, "a failpoint needs an error code");
   }
-  std::span{set.armed_}[i].store(static_cast<std::uint32_t>(code), std::memory_order_release);
+  slot(set.armed_, i).store(static_cast<std::uint32_t>(code), std::memory_order_release);
   return {};
 }
 
 void tx_failpoints::disarm(failpoint_set &set, failpoint fp) noexcept {
   const auto i = static_cast<std::size_t>(fp);
   if (i < failpoint_count) {
-    std::span{set.armed_}[i].store(0, std::memory_order_release);
+    slot(set.armed_, i).store(0, std::memory_order_release);
   }
 }
 

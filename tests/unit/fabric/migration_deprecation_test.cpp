@@ -1,9 +1,9 @@
 // FAB-INV-SCH-08 (SL-ARCH-001 ARCH1-R24): a deprecated field decodes and writing it yields a
 // warning diagnostic. content.demo.item 1.1 deprecates field 4 (legacy) in minor 1. With
-// deprecation_validator registered, creating an item that holds legacy, or changing legacy,
-// commits with one warning R-SCH-DEPRECATED at path /4; writes that leave legacy alone (another
-// field, an item without it) give none. The stored body keeps the field, decodes under the strict
-// policy and conforms to the type.
+// deprecation_validator built into the manager's chain (WO-064, no registration), creating an item
+// that holds legacy, or changing legacy, commits with one warning R-SCH-DEPRECATED at path /4;
+// writes that leave legacy alone (another field, an item without it) give none. The stored body
+// keeps the field, decodes under the strict policy and conforms to the type.
 
 #include "sl/core/error.hpp"
 #include "sl/fabric/authority.hpp"
@@ -78,8 +78,7 @@ workspace_options options() {
   must_ok(o.actors.add(actor{.id = editor(), .kind = actor_kind::human, .grants = {}}));
   o.clock = std::make_shared<manual_clock>(1'000'000);
   o.ids = std::make_shared<deterministic_source>(57, "wo057");
-  o.validators.push_back(std::make_shared<deprecation_validator>());
-  return o;
+  return o; // deprecation_validator is built in (WO-064): no registration here
 }
 
 // Commits `op` and returns the R-SCH-DEPRECATED diagnostics of the commit.

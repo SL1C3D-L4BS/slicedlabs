@@ -1,10 +1,10 @@
 // FAB-INV-SCH-07 (SL-ARCH-001 ARCH1-R23): a record from a newer minor is preserved byte-identically
 // and refused for write. A workspace with content.demo.item 1.1 writes two items (one holding
 // field 3, which only minor 1 declares); a workspace over the same store whose registry knows
-// item 1.0 (and registers newer_minor_validator) reads them with the unknown field kept, refuses
-// set and delete on them (R-SCH-NEWER, read_only_newer) while a note at its own version stays
-// writable, and keeps both record objects unchanged through other commits and through a
-// migration, which lists them as preserved.
+// item 1.0 (the manager registers newer_minor_validator by default, WO-064) reads them with the
+// unknown field kept, refuses set and delete on them (R-SCH-NEWER, read_only_newer) while a note at
+// its own version stays writable, and keeps both record objects unchanged through other commits and
+// through a migration, which lists them as preserved.
 
 #include "sl/core/error.hpp"
 #include "sl/fabric/authority.hpp"
@@ -95,8 +95,7 @@ workspace_options options(bool older) {
       o.actors.add(actor{.id = migration_system_actor(), .kind = actor_kind::tool, .grants = {}}));
   o.clock = std::make_shared<manual_clock>(1'000'000);
   o.ids = std::make_shared<deterministic_source>(57, "wo057");
-  o.validators.push_back(std::make_shared<newer_minor_validator>());
-  return o;
+  return o; // newer_minor_validator is built in (WO-064): no registration here
 }
 
 sl::result<commit_receipt> commit_ops(workspace &ws, const std::vector<patch_op> &ops,
@@ -207,4 +206,41 @@ TEST_CASE("FAB-INV-SCH-07: a record from a newer minor is preserved byte-identic
   CHECK(plan.preserved == std::vector<record_id>{std::min(lamp, rope), std::max(lamp, rope)});
   (void)must(run_migration(older->manager(), plan, origin_of(editor())));
   unchanged(must(older->manager().head()));
+}
+
+TEST_CASE("FAB-INV-SCH-07: the manager registers the newer-minor validator by default; "
+          "omit_builtin leaves it out by name") {
+  auto store = std::make_shared<memory_backend>();
+  const record_id lamp = record_named("item/lamp");
+  {
+    auto newer = must(workspace::create_with(store, options(false)));
+    const type_id item = type_id_of("content.demo.item");
+    (void)must(commit_ops(*newer, {op_create(lamp, item,
+                                             must(from_text(R"({"label":"lamp","count":3})", item,
+                                                            newer->schemas())))}));
+  }
+  const auto names = [](workspace &ws) {
+    std::vector<std::string> out;
+    for (const validator *v : ws.manager().validators().in_order()) {
+      out.emplace_back(v->name());
+    }
+    return out;
+  };
+  const patch_op rename = op_set(lamp, {path_segment::field(1)}, must(value::string("brass")));
+  {
+    auto older = must(workspace::create_with(store, options(true)));
+    CHECK(std::ranges::count(names(*older), "fabric.schema.newer") == 1);
+    CHECK(std::ranges::count(names(*older), "fabric.schema.deprecated") == 1);
+    std::vector<diagnostic> diags;
+    const auto refused = commit_ops(*older, {rename}, &diags);
+    REQUIRE_FALSE(refused.has_value());
+    CHECK(refused_as_newer(diags, lamp));
+  }
+  workspace_options without = options(true);
+  without.omit_builtin = {"fabric.schema.newer"};
+  auto bare = must(workspace::create_with(store, std::move(without)));
+  CHECK(std::ranges::count(names(*bare), "fabric.schema.newer") == 0);
+  std::vector<diagnostic> diags;
+  (void)must(commit_ops(*bare, {rename}, &diags)); // nothing refuses it now
+  CHECK_FALSE(refused_as_newer(diags, lamp));
 }

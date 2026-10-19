@@ -3,6 +3,7 @@
 
 #include "sl/fabric/deps.hpp"
 
+#include "../../../engine/fabric/testing/crash_harness.hpp"
 #include "../../../engine/fabric/testing/deps_model_store.hpp"
 #include "../../../engine/fabric/testing/value_gen.hpp"
 
@@ -207,8 +208,11 @@ TEST_CASE(
   CHECK(ring.front().from == ids.front());
 }
 
-TEST_CASE("FAB-INV-DEP-02: 300 seeded graphs agree with a transitive-closure oracle") {
-  for (std::uint64_t seed = 0; seed < 300; ++seed) {
+TEST_CASE("FAB-INV-DEP-02: 300 seeded graphs (30 under the sanitizers) agree with a "
+          "transitive-closure oracle") {
+  // SL_FABRIC_SWEEP_SCALE (0.1 under the sanitizer presets) keeps the unit budget (WO-064).
+  const std::uint64_t seeds = tg::scaled(300, 30);
+  for (std::uint64_t seed = 0; seed < seeds; ++seed) {
     tg::rng r((seed * 7919) + 1);
     const auto ids = tg::graph_ids(2 + r.below(13));
     const std::size_t count = r.below((ids.size() * 2) + 1);

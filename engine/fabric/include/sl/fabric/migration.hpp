@@ -36,8 +36,9 @@
 // naming the record and the path (FAB-INV-SCH-06). The caller registers the system actor in the
 // actor directory (a tool with the grants its domains need).
 //
-// Newer minors and deprecation (ARCH1-R23, ARCH1-R24) are validators the workspace registers
-// (workspace_options::validators): newer_minor_validator refuses every write (set, retype or
+// Newer minors and deprecation (ARCH1-R23, ARCH1-R24) are built-in validators the transaction
+// manager registers by default (builtin_validators(); leave them out by name through
+// workspace_options::omit_builtin): newer_minor_validator refuses every write (set, retype or
 // delete) to a record written by a newer minor (or major) of its type with a `read_only_newer`
 // diagnostic, so such a record stays byte-identical, unknown fields included; check_writable()
 // gives the same verdict as an error. deprecation_validator adds a warning diagnostic for every

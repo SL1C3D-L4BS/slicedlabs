@@ -157,6 +157,9 @@ public:
   /// The epistemic class changes the transaction makes.
   [[nodiscard]] virtual result<std::vector<class_change>>
   class_changes(const validation_context &ctx) const = 0;
+  /// The epistemic class of the transaction's origin; nullopt when unknown (the default).
+  [[nodiscard]] virtual result<std::optional<epistemic_class>>
+  origin_class(const validation_context &ctx) const;
 
 protected:
   provenance_source() = default;

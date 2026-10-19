@@ -1,6 +1,7 @@
 // FAB-INV-TY-05 (SL-ARCH-001 ARCH1-R17): freeze rejects record types with no domain or a state
 // class outside document, derived, observation; add after freeze is schema_frozen.
 
+#include "sl/fabric/gen/system.gen.hpp"
 #include "sl/fabric/schema.hpp"
 #include "sl/fabric/type.hpp"
 
@@ -9,6 +10,7 @@
 #include <doctest/doctest.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -157,4 +159,39 @@ TEST_CASE("FAB-INV-TY-05: the frozen registry finds types by id and name, in id 
       CHECK(t.state_class != state_class::none);
     }
   }
+}
+
+TEST_CASE("FAB-INV-TY-05: a state class alone makes a record type, so a declared value type "
+          "registers with none and keeps its state class in its type entry") {
+  // The rule documented on type_desc::is_record (WO-064).
+  type_desc v;
+  v.name = "content.demo.value";
+  v.domain = "content.demo";
+  CHECK_FALSE(v.is_record());
+  v.state_class = state_class::document;
+  CHECK(v.is_record());
+  v.state_class = state_class::none;
+  v.document_root = true;
+  CHECK(v.is_record());
+
+  const schema_registry reg = gen::system_registry().value_or(schema_registry{});
+  REQUIRE(reg.frozen());
+  std::size_t values = 0;
+  std::size_t records = 0;
+  for (const gen::type_entry &e : gen::system_types()) {
+    CAPTURE(e.name);
+    const type_desc *d = reg.find(e.name);
+    REQUIRE(d != nullptr);
+    CHECK(e.declared_state != state_class::none); // sl-type-def/1 declares one for every type
+    if (d->record_class == id_class::none && !d->document_root) {
+      CHECK(d->state_class == state_class::none);
+      CHECK_FALSE(d->is_record());
+      ++values;
+    } else {
+      CHECK(d->state_class == e.declared_state);
+      ++records;
+    }
+  }
+  CHECK(values > 0);
+  CHECK(records > 0);
 }

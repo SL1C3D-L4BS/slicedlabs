@@ -283,3 +283,34 @@ TEST_CASE("FAB-INV-BND-01: an observation made on an older revision rebases over
   CHECK(r.error().code == errc::conflict);
   CHECK(f.name_of(f.hero) == "hero (edited)");
 }
+
+TEST_CASE("FAB-INV-BND-01: the manager refuses a runtime observation whose transaction is not "
+          "observed (R-BND-OBSERVED)") {
+  fixture f;
+  const std::optional<digest> head = must(f.manager().head()).revision_digest();
+  const document_projection proj = f.project({"content.scene"});
+  const std::array changes{rename(f.hero, "hero (seen)")};
+  const patch p = must(propose_from_observation(proj, changes, fixture::runtime_origin()));
+  REQUIRE(p.meta.label == observation_label);
+  for (const epistemic_class c :
+       {epistemic_class::imported, epistemic_class::asserted, epistemic_class::calculated,
+        epistemic_class::inferred, epistemic_class::accepted}) {
+    transaction t = f.submit(p, fixture::runtime_origin(c));
+    const auto r = t.commit();
+    REQUIRE_FALSE(r.has_value());
+    CHECK(r.error().code == errc::validation_failed);
+    CHECK(std::ranges::any_of(t.diagnostics(), [](const diagnostic &d) {
+      return d.rule == "R-BND-OBSERVED" && d.stage == validator_stage::invariants &&
+             d.severity == severity::error && d.message.starts_with("invalid_argument: ");
+    }));
+  }
+  CHECK(must(f.manager().head()).revision_digest() == head);
+  CHECK(f.name_of(f.hero) == "hero");
+
+  // The same patch under an observed origin commits; an unlabelled edit is not a runtime one.
+  transaction ok = f.submit(p, fixture::runtime_origin());
+  static_cast<void>(must(ok.commit()));
+  CHECK(std::ranges::none_of(ok.diagnostics(),
+                             [](const diagnostic &d) { return d.rule == "R-BND-OBSERVED"; }));
+  CHECK(f.name_of(f.hero) == "hero (seen)");
+}

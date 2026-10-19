@@ -202,3 +202,40 @@ TEST_CASE("FAB-INV-MAN-01: a store with no manifest is manifest_missing") {
   REQUIRE_FALSE(none.has_value());
   CHECK(none.error().code == errc::manifest_missing);
 }
+
+TEST_CASE("FAB-INV-MAN-01: workspace::open checks the manifest's schema_set against the history") {
+  const auto fs = std::make_shared<vfs_memory>();
+  digest genesis_set;
+  {
+    auto ws = must(create_project(root(), sample(), profile(), creator(), options(fs)));
+    genesis_set = must(find_manifest(ws->store())).manifest.schema_set;
+  }
+  // An untampered project opens through both doors.
+  {
+    workspace_options o = options(fs);
+    must_ok(prepare_manifest_options(o));
+    CHECK(must(workspace::open(root(), open_mode::read_only, recovery_policy{}, std::move(o)))
+              ->mode() == open_mode::read_only);
+  }
+  // Tamper past the validator: the manifest names a schema set no revision was written with.
+  {
+    workspace_options o = options(fs);
+    must_ok(prepare_manifest_options(o));
+    auto plain = must(workspace::open(root(), open_mode::write, recovery_policy{}, std::move(o)));
+    project_manifest m = must(find_manifest(plain->store())).manifest;
+    m.schema_set.bytes[0] = static_cast<std::uint8_t>(m.schema_set.bytes[0] ^ 0xFFU);
+    must(commit_ops(*plain, creator(), {must(manifest_set_op(m))}));
+  }
+  for (const open_mode mode : {open_mode::write, open_mode::read_only}) {
+    workspace_options o = options(fs);
+    must_ok(prepare_manifest_options(o));
+    const auto plain = workspace::open(root(), mode, recovery_policy{}, std::move(o));
+    REQUIRE_FALSE(plain.has_value());
+    CHECK(plain.error().code == errc::manifest_invalid);
+    CHECK(plain.error().message.contains("schema_set"));
+    CHECK(plain.error().message.contains(genesis_set.to_hex())); // the head's set is named
+    const auto project = open_project(root(), mode, recovery_policy{}, profile(), options(fs));
+    REQUIRE_FALSE(project.has_value());
+    CHECK(project.error().code == errc::manifest_invalid);
+  }
+}

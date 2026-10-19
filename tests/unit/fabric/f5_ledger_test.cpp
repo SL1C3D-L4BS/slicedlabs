@@ -61,11 +61,16 @@ template <class Op> void step(const char *what, bool writes, workload_totals &to
   const f5::ledger after = f5::read();
   INFO(what);
   CHECK(after.bypassing == before.bypassing);
+  if constexpr (f5::enabled) { // the ledger counts nothing when F5 is compiled out (release)
+    if (writes) {
+      CHECK(after.mutations >= before.mutations + 1);
+    } else {
+      CHECK(after.mutations == before.mutations);
+    }
+  }
   if (writes) {
-    CHECK(after.mutations >= before.mutations + 1);
     ++totals.commits;
   } else {
-    CHECK(after.mutations == before.mutations);
     ++totals.refusals;
   }
 }

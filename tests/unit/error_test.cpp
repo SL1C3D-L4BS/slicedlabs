@@ -109,9 +109,9 @@ TEST_CASE("result<void> and describe()") {
 TEST_CASE("fabric error codes: domain, fixed numbers, names and describe()") {
   using sl::errc;
   struct row {
-    errc code;
+    errc code{};
     std::string_view name;
-    unsigned number;
+    unsigned number = 0;
   };
   const auto rows = std::to_array<row>({
       {.code = errc::fabric_failure, .name = "fabric_failure", .number = 5000},

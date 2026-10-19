@@ -20,8 +20,8 @@ namespace {
 
 struct int_range {
   std::string_view name;
-  std::int64_t lo;
-  std::uint64_t hi;
+  std::int64_t lo = 0;
+  std::uint64_t hi = 0;
 };
 
 // schemalib.INT_RANGES.

@@ -299,8 +299,8 @@ result<resolution> resolver::resolve_external(const reference &ref, const extern
   const resolution_scope where =
       ref.package ? resolution_scope::package : resolution_scope::project;
 
-  const record_id import_id = import_record_id_for(ext.system, ext.locator);
-  auto leaf = scope.entry(import_id);
+  const record_id import_rec = import_record_id_for(ext.system, ext.locator);
+  auto leaf = scope.entry(import_rec);
   if (!leaf) {
     return std::unexpected(leaf.error());
   }
@@ -314,29 +314,29 @@ result<resolution> resolver::resolve_external(const reference &ref, const extern
     r.package = ref.package;
     return r;
   }
-  auto e = scope.get(import_id);
+  auto e = scope.get(import_rec);
   if (!e) {
     return std::unexpected(e.error());
   }
   if (e->type != type_id_of(import_record_type_name)) {
-    return corrupt("the import record id " + import_id.to_string() +
+    return corrupt("the import record id " + import_rec.to_string() +
                    " holds a record of another type");
   }
   auto rec = import_record::from_value(e->body);
   if (!rec) {
-    return corrupt("the import record " + import_id.to_string() +
+    return corrupt("the import record " + import_rec.to_string() +
                    " does not decode: " + rec.error().message);
   }
   if (auto ok = check_import_record(*rec); !ok) {
-    return corrupt("the import record " + import_id.to_string() +
+    return corrupt("the import record " + import_rec.to_string() +
                    " is ill-formed: " + ok.error().message);
   }
   if (rec->system != ext.system || rec->locator != ext.locator) {
-    return corrupt("the import record " + import_id.to_string() +
+    return corrupt("the import record " + import_rec.to_string() +
                    " maps another system or locator");
   }
   if (rec->record.scheme() != mint_scheme::imported) {
-    return corrupt("the import record " + import_id.to_string() +
+    return corrupt("the import record " + import_rec.to_string() +
                    " names a record id outside the imported scheme");
   }
   auto r = resolve_id(ref.package, rec->record, ref.expected, from_document);

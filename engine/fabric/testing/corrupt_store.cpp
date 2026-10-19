@@ -382,7 +382,7 @@ result<void> make_checkpoint(const sample_store &s, const sample_config &cfg) {
   return {};
 }
 
-result<digest> rewrite_head(store_backend &store, std::vector<tree_change> changes,
+result<digest> rewrite_head(store_backend &store, const std::vector<tree_change> &changes,
                             std::vector<object> extra, std::string_view ref) {
   const result<digest> head = store.read_ref(ref);
   if (!head) {
@@ -411,7 +411,7 @@ result<digest> rewrite_head(store_backend &store, std::vector<tree_change> chang
     }
   }
   const tree_reader reader(store);
-  const result<subtree> records = update_tree(reader, root->records, std::move(changes), sink);
+  const result<subtree> records = update_tree(reader, root->records, changes, sink);
   if (!records) {
     return pass(records);
   }
@@ -443,7 +443,7 @@ result<digest> rewrite_head(store_backend &store, std::vector<tree_change> chang
   return id;
 }
 
-result<digest> rewrite_sample(const sample_store &s, std::vector<tree_change> changes,
+result<digest> rewrite_sample(const sample_store &s, const std::vector<tree_change> &changes,
                               std::vector<object> extra, const sample_config &cfg) {
   log_options log;
   log.sync = durability::none;
@@ -456,7 +456,7 @@ result<digest> rewrite_sample(const sample_store &s, std::vector<tree_change> ch
   if (!r->store) {
     return make_error(errc::recovery_required, "rewrite_sample: " + r->report.summary());
   }
-  return rewrite_head(*r->store, std::move(changes), std::move(extra));
+  return rewrite_head(*r->store, changes, std::move(extra));
 }
 
 result<digest> plant_record(const sample_store &s, const record_id &id, object o,
@@ -466,7 +466,7 @@ result<digest> plant_record(const sample_store &s, const record_id &id, object o
       .id = id, .entry = tree_entry{.id = id, .kind = entry_kind::record, .target = o.id}});
   std::vector<object> extra;
   extra.push_back(std::move(o));
-  return rewrite_sample(s, std::move(changes), std::move(extra), cfg);
+  return rewrite_sample(s, changes, std::move(extra), cfg);
 }
 
 result<record_object> record_at(const store_backend &store, const digest &revision,

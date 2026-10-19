@@ -369,29 +369,31 @@ TEST_CASE("FAB-INV-BND-02: a view lives as long as any copy of the projection, a
   CHECK(w.body->get({path_segment::field(1)})->as_string() == "hero");
 
   std::atomic<int> ok{0};
+  std::atomic<std::size_t> visited{0};
+  // One visitor shared by the readers, built outside them, so no reader owns a std::function
+  // across for_each (gcc -fanalyzer, WO-064).
+  const document_projection::visitor count = [&visited](const record_view &) -> sl::result<void> {
+    visited.fetch_add(1, std::memory_order_relaxed);
+    return {};
+  };
   std::vector<std::thread> readers;
   readers.reserve(4);
   for (int i = 0; i < 4; ++i) {
     readers.emplace_back([&] {
-      std::size_t n = 0;
       for (int round = 0; round < 50; ++round) {
-        if (copy.for_each([&](const record_view &) -> sl::result<void> {
-                  ++n;
-                  return {};
-                })
-                .has_value() &&
-            copy.get(f.mesh).has_value()) {
-          continue;
+        // Two statements, not one condition with a conditional temporary (gcc -fanalyzer).
+        const bool walked = copy.for_each(count).has_value();
+        const bool found = copy.get(f.mesh).has_value();
+        if (!walked || !found) {
+          return;
         }
-        return;
       }
-      if (n == 200) {
-        ++ok;
-      }
+      ++ok;
     });
   }
   for (std::thread &t : readers) {
     t.join();
   }
   CHECK(ok.load() == 4);
+  CHECK(visited.load() == 4U * 200U); // four records, 50 rounds, four readers
 }

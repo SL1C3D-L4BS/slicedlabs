@@ -52,13 +52,17 @@ static_assert(!commit_with_null_capability<memory_backend>);
 
 // ---- the capability cannot be forged ----
 
-// Derivation does not reach the private constructor.
-struct thief : mutation_capability {};
+// The passkey is final (WO-064): no subclass can exist to reach the private constructor, so a
+// `struct thief : mutation_capability {}` is ill-formed on every compiler.
+template <class C>
+concept subclassable = requires { requires std::is_class_v<C> && !std::is_final_v<C>; };
 template <class C>
 concept paren_constructible_here = requires { C(); };
-static_assert(!std::is_default_constructible_v<thief>);
-static_assert(!paren_constructible_here<thief>);
-static_assert(!std::is_constructible_v<mutation_capability, thief>);
+static_assert(std::is_final_v<mutation_capability>);
+static_assert(!subclassable<mutation_capability>);
+static_assert(subclassable<store_backend>); // the check itself works on a class that is not final
+static_assert(!std::is_default_constructible_v<mutation_capability>);
+static_assert(!paren_constructible_here<mutation_capability>);
 // No conversion from anything at hand.
 static_assert(!std::is_constructible_v<mutation_capability, int>);
 static_assert(!std::is_constructible_v<mutation_capability, std::nullptr_t>);
@@ -141,7 +145,8 @@ static_assert(!snapshot_root_assignable<snapshot>);
 TEST_CASE("FAB-INV-F5-04: commit without a capability and forged capabilities do not compile") {
   // The static_asserts above are the test; these restate two of them at run time.
   CHECK_FALSE(commit_without_capability<log_backend>);
-  CHECK_FALSE(std::is_default_constructible_v<thief>);
+  CHECK_FALSE(subclassable<mutation_capability>);
+  CHECK_FALSE(std::is_default_constructible_v<mutation_capability>);
   CHECK_FALSE(scope_from_nothing<f5::authorized_scope>);
   CHECK_FALSE(backdoor_through_workspace<workspace>);
   CHECK_FALSE(value_has_setter<value>);
