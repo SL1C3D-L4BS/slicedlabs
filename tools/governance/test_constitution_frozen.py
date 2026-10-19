@@ -22,7 +22,14 @@ def read(rel):
 
 
 PLAN = read(cc.PLAN_REL)
-DOC = read(cc.CONSTITUTION_REL)
+
+
+def draft_doc(data):
+    """The document as a Draft whatever the repository state (WO-071): status and version rewritten back."""
+    return data.replace(b"status: Approved", b"status: Draft", 1).replace(b"version: 1.0.0", b"version: 0.1.0", 1)
+
+
+DOC = draft_doc(read(cc.CONSTITUTION_REL))
 
 
 class FrozenTests(unittest.TestCase):
