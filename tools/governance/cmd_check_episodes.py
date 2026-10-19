@@ -176,7 +176,11 @@ def _m_dep_accepted(r):
 
 
 def _m_no_evidence(r):
-    ep = r["episodes"][70]
+    # The first still-Planned episode with no work orders, so the result does not depend on how far the real
+    # registry has advanced; WO-999 has no evidence file and the completion record lists none (WO-070).
+    ep = next(e for e in r["episodes"] if e["status"] == "Planned" and not e["work_orders"])
+    ep["work_orders"] = ["WO-999"]
+    ep["completion"] = None
     ep["status"] = "Demonstrated"
     ep["history"] = _hist(
         ("Planned", "Specified"),

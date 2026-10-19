@@ -59,6 +59,25 @@ class RealRegistryTests(unittest.TestCase):
             tags = {t for t, _, _ in chk.check(self.ctx, reg)}
             self.assertIn(tag, tags, label)
 
+    def test_no_evidence_mutation_survives_an_advanced_registry(self):
+        reg = copy.deepcopy(self.ctx["reg"])
+        ep = reg["episodes"][70]  # SL-EP-071 already Demonstrated with real evidence
+        ep["status"] = "Demonstrated"
+        ep["history"] = chk._hist(
+            ("Planned", "Specified"),
+            ("Specified", "InProgress"),
+            ("InProgress", "Verifying"),
+            ("Verifying", "Demonstrated"),
+        )
+        ep["work_orders"] = ["WO-052"]
+        ep["completion"] = {
+            "benchmarks": [], "evidence": ["evidence/WO-052.json"], "exceptions": [],
+            "open_defects": [], "revision": "0" * 40,
+        }
+        chk._m_no_evidence(reg)
+        tags = {t for t, _, _ in chk.check(self.ctx, reg)}
+        self.assertIn("R-NO-EVIDENCE", tags)
+
     def test_cli_prints_wall_time(self):
         status, out, _ = run(chk, [])
         self.assertEqual(status, 0, out)
@@ -72,7 +91,13 @@ class RealRegistryTests(unittest.TestCase):
         a, b = cmd_stats.render(self.ctx["reg"]), cmd_stats.render(copy.deepcopy(self.ctx["reg"]))
         self.assertEqual(a, b)
         self.assertIn("840 episodes, 42 volumes, 7 parts", a)
-        self.assertIn("Planned 840", a)
+        by_state = next(line for line in a.splitlines() if line.startswith("by state: "))
+        counts = [int(part.rsplit(" ", 1)[1]) for part in by_state[len("by state: "):].split(", ")]
+        self.assertEqual(sum(counts), 840)
+        rows = [line for line in a.splitlines() if line.startswith("SL-VOL-")]
+        self.assertEqual(len(rows), 42)
+        for row in rows:
+            self.assertEqual(sum(int(x) for x in row.split()[2:2 + len(slib.STATES)]), 20, row)
         status, out, _ = run(cmd_stats, [])
         self.assertEqual((status, out), (0, a))
         self.assertEqual(run(cmd_stats, ["--registry", "/nonexistent.json"])[0], 2)

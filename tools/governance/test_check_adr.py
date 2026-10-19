@@ -144,7 +144,7 @@ class AdrCheckTests(TreeCase):
         by_id = {a[0]: a[2] for a in adrs}
         self.assertEqual(by_id["ADR-0001"]["decision_refs"], ["D-126", "D-135", "D-141", "D-144"])
         for meta in by_id.values():
-            self.assertEqual(meta["status"], "Proposed")
+            self.assertIn(meta["status"], ("Proposed", "Accepted"))
         with open(
             os.path.join(slgov.ROOT, "docs", "adr", "ADR-0003-authoring-order-waivers.md"), encoding="utf-8"
         ) as fh:
