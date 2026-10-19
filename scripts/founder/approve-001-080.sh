@@ -6,9 +6,12 @@
 # In order, stopping at the first failure (set -e):
 #   0 preflight   main branch, clean tree (evidence/ may be untracked), registry-check, adr-check, wo-check; a summary;
 #                 one "yes" from the terminal (or --yes)
-#   1 evidence    for every work order in build/closeout/ep-map.txt without evidence/WO-NNN.json: wo-verify in the jail
-#                 (fast gate + the order's acceptance; --jobs-dir, default build/jobs; skipped with --no-verify, which
-#                 then requires the jobs evidence to exist), then scripts/evidence-record --direct; then evidence-verify
+#   1 evidence    1a untracked evidence/*.json is committed first (wo-verify refuses a tree with untracked files);
+#                 1b for every work order in build/closeout/ep-map.txt without evidence/WO-NNN.json: wo-verify in the
+#                 jail (fast gate + the order's acceptance; --jobs-dir, default build/jobs), unless the jobs evidence
+#                 already says pass true for the current work-order hash; a refused or red run STOPS the script and
+#                 is never recorded (--no-verify never runs wo-verify and requires passing jobs evidence);
+#                 1c scripts/evidence-record --direct for each; 1d evidence-verify
 #   2 ADRs        ADR-0001..ADR-0021 status Proposed -> Accepted, the ADR log regenerated, adr-check
 #   3 SL-GOV-001  front matter status Approved, its sha256 and version into registry/SL-REG-001.approvals.json,
 #                 SL-REG-001 regenerated, registry-docs-check, constitution-frozen, doc-check
@@ -80,6 +83,11 @@ step "0 preflight"
 dirty="$(git status --porcelain | grep -v '^?? evidence/' || true)"
 [ -z "$dirty" ] || die "the tree is not clean (only untracked evidence/ is allowed):"$'\n'"$dirty"
 [ -f "$ep_map" ] || die "$ep_map is missing"
+bad_evidence="$(for f in evidence/WO-*.json; do
+  [ -f "$f" ] || continue
+  python3 -I -c 'import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d.get("pass") is True else 1)' "$f" || printf '%s ' "$f"
+done)"
+[ -z "$bad_evidence" ] || die "evidence with pass=false exists (a refused run was recorded); remove it and its job, then re-run:"$'\n'"  rm -f $bad_evidence; rm -rf $(for f in $bad_evidence; do printf '%s/%s ' "$jobs_dir" "$(basename "$f" .json)"; done)"
 for a in "${adrs[@]}"; do
   ls docs/adr/"$a"-*.md >/dev/null 2>&1 || die "docs/adr/$a-*.md does not exist"
 done
@@ -130,12 +138,40 @@ fi
 # ---- 1 evidence --------------------------------------------------------------------------------------------------
 step "1 evidence (${#missing[@]} to record)"
 mkdir -p "$jobs_dir"
-for wo in "${missing[@]}"; do
-  if [ ! -f "$jobs_dir/$wo/evidence.json" ]; then
-    [ "$no_verify" -eq 0 ] || die "no jobs evidence at $jobs_dir/$wo/evidence.json and --no-verify was given"
-    run python3 -I "$wo_verify" --wo "work-orders/$wo.md" --worktree . --base main --gate fast \
-      --jobs-dir "$jobs_dir" --timeout 14400 --ac-timeout 10800
+# 1a: wo-verify refuses a tree with untracked files, so evidence recorded earlier must be committed first
+if [ -n "$(git status --porcelain -- evidence)" ]; then
+  run git add -- evidence
+  if [ "$no_sign" -eq 1 ]; then
+    run git -c commit.gpgsign=false commit -q -m "evidence: records already verified, committed before verification of the rest (approve-001-080 step 1a)"
+  else
+    run git commit -q -S -m "evidence: records already verified, committed before verification of the rest (approve-001-080 step 1a)"
   fi
+fi
+job_passed() { # <wo>: the jobs evidence says pass true for the current work-order hash
+  python3 -I - "$jobs_dir/$1/evidence.json" "work-orders/$1.md" <<'PY'
+import hashlib, json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except (OSError, ValueError):
+    sys.exit(1)
+sha = hashlib.sha256(open(sys.argv[2], "rb").read()).hexdigest()
+sys.exit(0 if d.get("pass") is True and d.get("wo_sha256") == sha else 1)
+PY
+}
+# 1b: verify every missing order while the tree is clean (evidence is recorded only after all of them pass)
+for wo in "${missing[@]}"; do
+  if job_passed "$wo"; then
+    echo "   $wo: jobs evidence already passed for this work-order hash"
+    continue
+  fi
+  [ "$no_verify" -eq 0 ] || die "no passing jobs evidence at $jobs_dir/$wo/evidence.json and --no-verify was given"
+  rm -rf "${jobs_dir:?}/$wo"
+  run python3 -I "$wo_verify" --wo "work-orders/$wo.md" --worktree . --base main --gate fast \
+    --jobs-dir "$jobs_dir" --timeout 14400 --ac-timeout 10800
+  job_passed "$wo" || die "$wo did not pass wo-verify; see $jobs_dir/$wo/evidence.json (reasons) and gate-tail.log; nothing recorded"
+done
+# 1c: record, 1d: verify
+for wo in "${missing[@]}"; do
   FACTORY_JOBS_DIR="$jobs_dir" run bash scripts/evidence-record "$wo" --direct --date "$date_val"
 done
 run just evidence-verify
