@@ -3,7 +3,7 @@ id: SL-PLAN-003
 kind: PLAN
 title: "Claude Code Work-Order Protocol and prompt templates"
 status: Draft
-version: 0.1.0
+version: 0.2.0
 owner: founder
 episodes: [012, 014, 053]
 depends_on: []
@@ -77,6 +77,11 @@ Rule ids are `PLAN3-Rnn`. Manual-mode steps, in order: 1 commander writes `work-
   and agrees with the registry, which is authoritative (master plan section 6.3 rule 1).
 - PLAN3-R16: A blocked hook means stop and ask the founder. Guard files and gate configs change only by a patch that
   the founder applies, or by a work order with `touches_gates: true` (factory design section 8, invariant 5).
+- PLAN3-R17: Per ADR-0007 and the founder's standing rules of 2026-10-19, a wave of work orders MUST pass, besides
+  each order's own acceptance commands, `just fast`, `just tidy`, `just test`, `just workflow ci-gcc` and
+  `just workflow ci-release` on the merged tree before it is committed (ADR-0007); a builder PASS without those five
+  is not a PASS (ADR-0007). Any commander change, however small, MUST have its own fast-lane work order (class S)
+  before it is committed (ADR-0007; factory design section 8).
 
 ## Measures and enforcement points
 
@@ -110,3 +115,4 @@ Templates: `docs/templates/EPISODE.md`, `prompt-builder.md`, `prompt-reviewer.md
 | Version | Date | Change |
 | :---- | :---- | :---- |
 | 0.1.0 | 2026-10-17 | First draft (WO-012). |
+| 0.2.0 | 2026-10-19 | PLAN3-R17: the per-wave gate (fast, tidy, test, ci-gcc, ci-release) and fast-lane work orders for commander changes (WO-067). |
