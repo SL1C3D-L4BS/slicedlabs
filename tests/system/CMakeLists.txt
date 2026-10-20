@@ -8,3 +8,9 @@ sl_add_system_test(NAME sandbox_banner COMMAND sl_sandbox
 sl_add_system_test(NAME fabric_demo COMMAND sl_fabric_cli
   ARGS demo ${CMAKE_CURRENT_BINARY_DIR}/fabric-demo
   PASS_REGEX "fabric-demo: ok")
+# WO-076: the Volume 05 headless gate runner, once WO-099 adds engine/runtime/tools/sl_runtime_demo.cpp.
+if(TARGET sl_runtime_demo)
+  sl_add_system_test(NAME runtime_demo COMMAND sl_runtime_demo
+    ARGS --ticks 60 --entities 1000 --evidence-dir ${CMAKE_CURRENT_BINARY_DIR}/runtime-demo
+    PASS_REGEX "runtime-demo: ok")
+endif()

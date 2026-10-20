@@ -27,6 +27,8 @@ include(SlTesting)
 add_subdirectory(engine/core)
 # Volume 04 Fabric (WO-037): sl_fabric, sl_fabric_testing and the fabric tools.
 add_subdirectory(engine/fabric)
+# Volume 05 runtime (WO-076): sl_runtime, sl_runtime_testing and the runtime tools.
+add_subdirectory(engine/runtime)
 add_subdirectory(examples/sandbox)
 # WO-025: planted-defect proofs (SL_PROOFS) and the bounds-trap tests (SL_HARDEN). Before tests/, whose last line
 # (sl_testing_finalize) writes the test registry.

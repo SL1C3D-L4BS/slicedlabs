@@ -52,8 +52,12 @@ TEST_CASE("error codes map to their domain by numeric range") {
                        errc::asset_version_mismatch}) {
     CHECK(sl::domain(c) == error_domain::asset);
   }
+  CHECK(sl::domain(errc::runtime_failure) == error_domain::runtime);
+  CHECK(sl::domain(errc::projection_stale) == error_domain::runtime);
+  CHECK(sl::domain(static_cast<errc>(7000)) == error_domain::unknown);
   CHECK(sl::domain(static_cast<errc>(9000)) == error_domain::unknown);
   CHECK(sl::to_string(error_domain::graphics) == "graphics");
+  CHECK(sl::to_string(error_domain::runtime) == "runtime");
   CHECK(sl::to_string(error_domain::none) == "none");
 }
 

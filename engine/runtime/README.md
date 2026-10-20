@@ -16,5 +16,12 @@ Layout (WO-076 writes the CMake once; later work orders only add files):
 
 Volume 05 is headless: no window, display or input-device library (ADR-0002, ADR-0028). Recipes: `just runtime-test
 <area>`, `just runtime-san <asan|ubsan|tsan> [area]`, `just runtime-gcc [area]`, `just runtime-tidy [area]`,
-`just runtime-lint`, `just runtime-contracts`, then the gate recipes listed in SL-ARCH-003. Status: documents only until
-WO-076 lands (WO-075).
+`just runtime-lint`, `just runtime-contracts`, then the gate recipes listed in SL-ARCH-003.
+
+Status (WO-076): the CMake is written. Landed targets: `sl_runtime` (`sl::runtime`; `error.hpp`, the runtime error
+domain over `sl::errc` 6000-6999, and `faults.hpp`, failpoints RFP0-RFP10 with SL_RUNTIME_FAULTS=1 in Debug and
+sanitizer builds), `sl_runtime_testing` (`sl::runtime_testing`; `testing/faults_arm.hpp`, the only arming), the tool
+globs of `tools/` (no tool yet), one `rt_<tier>_<area>` test executable per area of tests/unit/runtime and
+tests/integration/runtime with one ctest entry `runtime_<stem>` per file, and the custom target
+`sl_runtime_all_tests`. Scripts: `scripts/runtime/runtime-test.sh`, `runtime-san.sh` (fail-closed, log under
+build/runtime/san/), `runtime-gcc.sh` and `runtime-tidy.sh`. Deviations: docs/arch/deviations/vol05/WO-076.md.

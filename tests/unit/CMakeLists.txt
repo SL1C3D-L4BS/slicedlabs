@@ -8,3 +8,5 @@ target_compile_definitions(sl_tests PRIVATE SL_EXPECTED_CXX_STANDARD="${SL_CXX_S
 sl_provenance(sl_tests)
 # Fabric unit tests (WO-037): one executable per tests/unit/fabric/*_test.cpp.
 add_subdirectory(fabric)
+# Runtime unit tests (WO-076): one executable per area of tests/unit/runtime/*_test.cpp, one ctest entry per file.
+add_subdirectory(runtime)
