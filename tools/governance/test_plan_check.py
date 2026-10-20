@@ -1,4 +1,4 @@
-"""Unit tests for plan-check R-PLAN-VOL04 and the table-driven volume specs (WO-035).
+"""Unit tests for plan-check R-PLAN-VOL04, R-PLAN-VOL05 (WO-075) and the table-driven volume specs (WO-035).
 
 The WO-011 plan-check tests (R-PLAN-EP, GATE, GRAPH, VOL03, KOHI, CLEAN-ROOM) stay in test_views.py.
 """
@@ -17,6 +17,7 @@ import slgov  # noqa: E402
 REAL = slgov.ROOT
 VOL03 = "docs/vol/SL-VOL-03-SPEC.md"
 VOL04 = "docs/vol/SL-VOL-04-SPEC.md"
+VOL05 = "docs/vol/SL-VOL-05-SPEC.md"
 REC062 = '"work_orders": ["WO-035", "WO-039", "WO-045"], "primary_wo": "WO-039", "acceptance": "just fabric-test type"'
 
 
@@ -77,6 +78,15 @@ class Tree(unittest.TestCase):
         self.assertTrue(any(all(n in e for n in needles) for e in errors), (needles, errors))
         return errors
 
+    def assert_vol05(self, *needles):
+        """Every error is R-PLAN-VOL05 in SL-VOL-05-SPEC, and one error contains all needles."""
+        errors = self.errors()
+        self.assertTrue(errors, "expected R-PLAN-VOL05 errors")
+        self.assertEqual(self.rules(), ["R-PLAN-VOL05"], errors)
+        self.assertTrue(all(e.startswith(VOL05 + ":1: R-PLAN-VOL05: ") for e in errors), errors)
+        self.assertTrue(any(all(n in e for n in needles) for e in errors), (needles, errors))
+        return errors
+
 
 class Vol04Test(Tree):
     def test_clean_copy_passes(self):
@@ -87,8 +97,9 @@ class Vol04Test(Tree):
 
     def test_specs_are_table_driven(self):
         rows = {s["rule"]: s for s in cmd_plan_check.VOLUME_SPECS}
-        self.assertEqual(sorted(rows), ["R-PLAN-VOL03", "R-PLAN-VOL04"])
+        self.assertEqual(sorted(rows), ["R-PLAN-VOL03", "R-PLAN-VOL04", "R-PLAN-VOL05"])
         self.assertEqual((rows["R-PLAN-VOL04"]["first"], rows["R-PLAN-VOL04"]["last"]), (61, 80))
+        self.assertEqual((rows["R-PLAN-VOL05"]["first"], rows["R-PLAN-VOL05"]["last"]), (81, 100))
         self.assertTrue(rows["R-PLAN-VOL04"]["primary"] and not rows["R-PLAN-VOL03"]["primary"])
 
     def test_missing_record(self):
@@ -170,6 +181,48 @@ class Vol04Test(Tree):
         with open(self.path("justfile"), "a", encoding="utf-8") as fh:
             fh.write("\n# SL-EP-9999 in a comment\n")
         self.assertEqual(self.errors(), [])
+
+
+class Vol05Test(Tree):
+    """R-PLAN-VOL05 (WO-075): SL-VOL-05-SPEC gets the R-PLAN-VOL04 checks for episodes 081-100."""
+
+    def test_row_mirrors_vol04(self):
+        rows = {s["rule"]: s for s in cmd_plan_check.VOLUME_SPECS}
+        vol04, vol05 = rows["R-PLAN-VOL04"], rows["R-PLAN-VOL05"]
+        self.assertEqual(vol05["doc"], "SL-VOL-05-SPEC")
+        self.assertEqual(vol05["keys"], vol04["keys"])
+        self.assertEqual(vol05["named"], (81, 100, "WO-075 to WO-101"))
+        self.assertTrue(vol05["exact_traces"] and vol05["primary"])
+        self.assertIn("SL-VOL-05-SPEC", cmd_plan_check.EP_SCANNED)
+        self.assertEqual(cmd_plan_check.DOCS["SL-VOL-05-SPEC"], VOL05)
+
+    def test_missing_record(self):
+        path = self.path(VOL05)
+        with open(path, encoding="utf-8") as fh:
+            lines = [ln for ln in fh.read().split("\n") if '"SL-EP-090"' not in ln]
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(lines))
+        self.assert_vol05("records must cover exactly SL-EP-081 to SL-EP-100", "SL-EP-090")
+
+    def test_second_primary_for_wo090(self):
+        """The planted case of the panel's plan-2: WO-090 named primary of SL-EP-089 as well as SL-EP-093."""
+        self.edit(VOL05, '"primary_wo": "WO-084", "acceptance": "just runtime-test clock"',
+                  '"primary_wo": "WO-090", "acceptance": "just runtime-test clock"')
+        self.assert_vol05("SL-EP-089 primary_wo WO-090 is not in its work_orders")
+        self.assert_vol05("WO-090 is primary_wo of more than one episode (SL-EP-089, SL-EP-093)")
+
+    def test_acceptance_absent_from_primary(self):
+        self.edit(VOL05, '"acceptance": "just runtime-test clock"', '"acceptance": "just runtime-test frame"')
+        self.assert_vol05("SL-EP-089 acceptance 'just runtime-test frame' is not in the front-matter acceptance",
+                          "its primary_wo WO-084")
+
+    def test_tracing_work_order_must_be_listed(self):
+        self.edit(VOL05, '"work_orders": ["WO-075", "WO-078"]', '"work_orders": ["WO-078"]')
+        self.assert_vol05("WO-075 traces SL-EP-082 but the SL-EP-082 record does not list it")
+
+    def test_title_must_equal_registry(self):
+        self.edit(VOL05, '"title": "Frame scheduler"', '"title": "Scheduler"')
+        self.assert_vol05("SL-EP-090 title", "differs from the registry")
 
 
 class Vol03UnchangedTest(Tree):

@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/runtime/gate-report.schema.json",
+  "title": "The gate 100 demo report, sl-runtime-gate/1 (SL-ARCH-003 gate_evidence, master plan section 4.3, ADR-0028, WO-099)",
+  "type": "object",
+  "required": [
+    "format",
+    "seed",
+    "ticks",
+    "entities",
+    "workers",
+    "mode",
+    "phases",
+    "scheduler",
+    "recovery",
+    "fabric",
+    "final_state_hash",
+    "wall_ms"
+  ],
+  "properties": {
+    "format": {
+      "const": "sl-runtime-gate/1"
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ticks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "entities": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "workers": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mode": {
+      "enum": [
+        "serial",
+        "parallel"
+      ]
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/phase"
+      },
+      "minItems": 8
+    },
+    "scheduler": {
+      "$ref": "#/$defs/scheduler"
+    },
+    "recovery": {
+      "$ref": "#/$defs/recovery"
+    },
+    "fabric": {
+      "$ref": "#/$defs/fabric"
+    },
+    "final_state_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "wall_ms": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "required": [
+        "phase",
+        "jobs",
+        "critical_path",
+        "wall_ns"
+      ],
+      "properties": {
+        "phase": {
+          "enum": [
+            "begin_frame",
+            "apply_inputs",
+            "pre_tick",
+            "tick",
+            "post_tick",
+            "observe",
+            "present",
+            "end_frame"
+          ]
+        },
+        "jobs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "critical_path": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wall_ns": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "scheduler": {
+      "type": "object",
+      "required": [
+        "jobs_run",
+        "steals",
+        "failed_steals",
+        "parks",
+        "wakes",
+        "injection_polls",
+        "aging_promotions"
+      ],
+      "properties": {
+        "jobs_run": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "steals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_steals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wakes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "injection_polls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "aging_promotions": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "recovery": {
+      "type": "object",
+      "required": [
+        "fault_tick",
+        "restored_tick",
+        "hash_equal"
+      ],
+      "properties": {
+        "fault_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "restored_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hash_equal": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fabric": {
+      "type": "object",
+      "required": [
+        "commits",
+        "proposed_changes",
+        "rejected"
+      ],
+      "properties": {
+        "commits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "proposed_changes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rejected": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

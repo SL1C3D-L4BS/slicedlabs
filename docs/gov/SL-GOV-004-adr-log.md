@@ -9,7 +9,7 @@ owner: founder
 episodes: []
 depends_on: []
 supersedes: []
-decisions: [ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0011, ADR-0012, ADR-0013, ADR-0014, ADR-0015, ADR-0016, ADR-0017, ADR-0018, ADR-0019, ADR-0020, ADR-0021]
+decisions: [ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0011, ADR-0012, ADR-0013, ADR-0014, ADR-0015, ADR-0016, ADR-0017, ADR-0018, ADR-0019, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024, ADR-0025, ADR-0026, ADR-0027, ADR-0028]
 max_lines: 400
 ---
 # SL-GOV-004: Architecture Decision Record log
@@ -44,6 +44,13 @@ and registries). It is generated from `docs/adr/`; edit an ADR, then regenerate.
 | [ADR-0019](../adr/ADR-0019-collaboration-and-replay-seams.md) | Collaboration and replay seams frozen into patch v1 and the revision format | Accepted | 2026-10-18 | none | none |
 | [ADR-0020](../adr/ADR-0020-volume-04-acceptance-state.md) | Volume 04 acceptance state: Demonstrated cap, intra-volume order, founder-only status changes | Accepted | 2026-10-18 | none | none |
 | [ADR-0021](../adr/ADR-0021-volume-02-deferral.md) | Volume 02 deferral: Volume 05 before Volume 02, Volume 02 before Volume 07, and the mathematics allowed meanwhile | Accepted | 2026-10-19 | none | none |
+| [ADR-0022](../adr/ADR-0022-runtime-error-domain-and-fault-injection.md) | Runtime error domain and fault injection | Proposed | 2026-10-20 | none | none |
+| [ADR-0023](../adr/ADR-0023-runtime-memory-model.md) | Runtime memory model | Proposed | 2026-10-20 | none | none |
+| [ADR-0024](../adr/ADR-0024-concurrency-model-and-sanitizer-policy.md) | Concurrency model and sanitizer policy | Proposed | 2026-10-20 | none | none |
+| [ADR-0025](../adr/ADR-0025-archetype-ecs-storage.md) | Archetype ECS storage and structural change | Proposed | 2026-10-20 | none | none |
+| [ADR-0026](../adr/ADR-0026-runtime-determinism-contract.md) | Volume 05 determinism contract (D1) and replay seams | Proposed | 2026-10-20 | none | none |
+| [ADR-0027](../adr/ADR-0027-runtime-document-boundary.md) | Runtime side of the document boundary | Proposed | 2026-10-20 | none | none |
+| [ADR-0028](../adr/ADR-0028-runtime-lifecycle-recovery-and-gate.md) | Runtime lifecycle, recovery, swap protocol and the P0 gate | Proposed | 2026-10-20 | none | none |
 
 ## Normative text
 

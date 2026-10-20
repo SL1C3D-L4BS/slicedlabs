@@ -1,0 +1,13 @@
+{
+  "format": "sl-runtime-fault/1",
+  "instance": 1,
+  "frame": 451,
+  "tick": 450,
+  "kind": "system_fail",
+  "code": "runtime_failure",
+  "number": 6000,
+  "system": "lantern_flicker",
+  "job": "lantern_flicker#3",
+  "action": "restore",
+  "restored_tick": 300
+}

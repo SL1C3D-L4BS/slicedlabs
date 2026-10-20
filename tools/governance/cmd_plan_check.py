@@ -15,11 +15,13 @@ Rules (each failure line starts with the rule id):
                      work_orders differs from the WO Traces lines (both ways), or primary_wo is not exactly one
                      member of work_orders whose front-matter acceptance holds the record's acceptance command (a
                      `just` recipe in the justfile), or a work order is primary for more than one episode
+  R-PLAN-VOL05       SL-VOL-05-SPEC does not cover exactly episodes 081-100; otherwise the R-PLAN-VOL04 checks
   R-PLAN-KOHI        the SL-PLAN-005 arc table differs from the generated one, or clean_room: true is not stated
   R-PLAN-CLEAN-ROOM  SL-PLAN-005 contains a code fence (clean room: Kohi is a guide only)
 
 Stdlib only, no subprocess, no network (ADR-0004).
-Volume specifications are table driven (VOLUME_SPECS); the justfile is read as an input of R-PLAN-VOL04.
+Volume specifications are table driven (VOLUME_SPECS); the justfile is read as an input of R-PLAN-VOL04 and
+R-PLAN-VOL05.
 """
 
 import os
@@ -38,10 +40,11 @@ DOCS = {
     "SL-PLAN-005": "docs/plan/SL-PLAN-005-kohi-alignment-map.md",
     "SL-VOL-03-SPEC": "docs/vol/SL-VOL-03-SPEC.md",
     "SL-VOL-04-SPEC": "docs/vol/SL-VOL-04-SPEC.md",
+    "SL-VOL-05-SPEC": "docs/vol/SL-VOL-05-SPEC.md",
     "justfile": "justfile",
 }
 # documents scanned for SL-EP ids (R-PLAN-EP); the justfile is an input, not a plan document
-EP_SCANNED = ("SL-PLAN-002", "SL-PLAN-004", "SL-PLAN-005", "SL-VOL-03-SPEC", "SL-VOL-04-SPEC")
+EP_SCANNED = ("SL-PLAN-002", "SL-PLAN-004", "SL-PLAN-005", "SL-VOL-03-SPEC", "SL-VOL-04-SPEC", "SL-VOL-05-SPEC")
 GRAPH_REF = "registry/views/volume-graph.mmd"
 # master plan section 4.3: (phase, final volume of the phase, gate episode)
 PHASES = (
@@ -71,6 +74,16 @@ VOLUME_SPECS = (
         "last": 80,
         "keys": ("work_orders", "primary_wo", "acceptance", "kohi_ref", "seam", "performance", "release"),
         "named": (61, 80, "WO-035 to WO-063"),
+        "exact_traces": True,
+        "primary": True,
+    },
+    {
+        "doc": "SL-VOL-05-SPEC",
+        "rule": "R-PLAN-VOL05",
+        "first": 81,
+        "last": 100,
+        "keys": ("work_orders", "primary_wo", "acceptance", "kohi_ref", "seam", "performance", "release"),
+        "named": (81, 100, "WO-075 to WO-101"),
         "exact_traces": True,
         "primary": True,
     },
@@ -184,7 +197,7 @@ def wo_acceptance(root, wo):
 
 
 def primary_errors(root, path, rule, rec, eid, wos, recipes, primaries):
-    """R-PLAN-VOL04 primary_wo checks for one record; records the primary in `primaries`."""
+    """R-PLAN-VOL04/R-PLAN-VOL05 primary_wo checks for one record; records the primary in `primaries`."""
     out = []
     primary = rec.get("primary_wo")
     if not isinstance(primary, str) or not WO_RE.match(primary):

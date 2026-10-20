@@ -1,0 +1,41 @@
+{
+  "format": "sl-runtime-memreport/1",
+  "instance": 1,
+  "frame": 600,
+  "tags": [
+    {
+      "tag": "ecs.chunks",
+      "live_bytes": 4194304,
+      "live_blocks": 2,
+      "peak_bytes": 4194304,
+      "allocs": 2,
+      "frees": 0,
+      "failures": 0
+    },
+    {
+      "tag": "frame.arena",
+      "live_bytes": 10485760,
+      "live_blocks": 10,
+      "peak_bytes": 10485760,
+      "allocs": 10,
+      "frees": 0,
+      "failures": 0
+    }
+  ],
+  "allocators": [
+    {
+      "name": "ecs.chunk_pool",
+      "free_bytes": 2015232,
+      "largest_free_run": 1966080,
+      "fragmentation_permille": 25
+    }
+  ],
+  "external": [
+    {
+      "tag": "fabric.projection",
+      "bytes": 40960
+    }
+  ],
+  "leaks": [],
+  "upstream_allocs_last_frame": 0
+}

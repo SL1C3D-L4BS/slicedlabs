@@ -1,4 +1,5 @@
-"""Unit tests for cmd_registry_schema_selftest.py: every schemas/sl-*.schema.json has an instance (WO-073)."""
+"""Unit tests for cmd_registry_schema_selftest.py: every schemas/sl-*.schema.json has an instance (WO-073), and
+every schemas/runtime/*.schema.json has its example (WO-075)."""
 
 import contextlib
 import copy
@@ -40,7 +41,28 @@ class CoverageTests(unittest.TestCase):
         with contextlib.redirect_stdout(out):
             status = st.main()
         self.assertEqual(status, 0, out.getvalue())
-        self.assertIn("(%d schemas," % len(st.SCHEMAS), out.getvalue())
+        self.assertIn("(%d schemas," % (len(st.SCHEMAS) + len(st.RUNTIME_SCHEMAS)), out.getvalue())
+
+
+class RuntimeSchemaTests(unittest.TestCase):
+    def test_every_runtime_schema_file_is_listed(self):
+        paths = glob.glob(os.path.join(st.RUNTIME_SCHEMA_DIR, "*.schema.json"))
+        files = sorted(os.path.basename(p)[: -len(".schema.json")] for p in paths)
+        self.assertEqual(files, sorted(st.RUNTIME_SCHEMAS))
+        self.assertEqual(sorted(st.RUNTIME_SCHEMAS), ["fault", "gate-report", "memreport", "schedule", "stress-matrix"])
+
+    def test_examples_validate_and_a_planted_defect_does_not(self):
+        for name in st.RUNTIME_SCHEMAS:
+            schema = slib.load_schema(name, st.RUNTIME_SCHEMA_DIR)
+            self.assertEqual(slib.check_schema_subset(schema), [], name)
+            instance = slib.load_json(st.runtime_example(name))
+            self.assertEqual(slib.validate(instance, schema), [], name)
+            broken = copy.deepcopy(instance)
+            broken["x_extra"] = 1
+            self.assertNotEqual(slib.validate(broken, schema), [], name)
+            del broken["x_extra"]
+            del broken[schema["required"][0]]
+            self.assertNotEqual(slib.validate(broken, schema), [], name)
 
 
 if __name__ == "__main__":

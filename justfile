@@ -710,3 +710,103 @@ fabric-gate: fabric-contracts-strict fabric-contract-lock fabric-nothrow-check f
 # the three release checks of episodes 061-080 (fabric-gate, fabric-demo, check-full), logs 10-12 in build/acceptance/ (WO-063)
 acceptance-061-080:
     @bash scripts/acceptance-061-080
+
+# dispatch (SL-ARCH-003, WO-075): runtime-test <area>; implemented by WO-076 in scripts/runtime/runtime-test.sh
+runtime-test *args:
+    @bash scripts/runtime/runtime-test.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-san <asan|ubsan|tsan> [area]; implemented by WO-076 in scripts/runtime/runtime-san.sh
+runtime-san *args:
+    @bash scripts/runtime/runtime-san.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-gcc [area]; implemented by WO-076 in scripts/runtime/runtime-gcc.sh
+runtime-gcc *args:
+    @bash scripts/runtime/runtime-gcc.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-tidy [area]; implemented by WO-076 in scripts/runtime/runtime-tidy.sh
+runtime-tidy *args:
+    @bash scripts/runtime/runtime-tidy.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-lint ; implemented by WO-077 in scripts/runtime/runtime-lint.sh
+runtime-lint *args:
+    @bash scripts/runtime/runtime-lint.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-lint ; implemented by WO-077 in scripts/runtime/neg-runtime-lint.sh
+neg-runtime-lint *args:
+    @bash scripts/runtime/neg-runtime-lint.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-contracts ; implemented by WO-077 in scripts/runtime/runtime-contracts.sh
+runtime-contracts *args:
+    @bash scripts/runtime/runtime-contracts.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-contracts-strict ; implemented by WO-077 in scripts/runtime/runtime-contracts-strict.sh
+runtime-contracts-strict *args:
+    @bash scripts/runtime/runtime-contracts-strict.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-contracts ; implemented by WO-077 in scripts/runtime/neg-runtime-contracts.sh
+neg-runtime-contracts *args:
+    @bash scripts/runtime/neg-runtime-contracts.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-poison ; implemented by WO-081 in scripts/runtime/neg-runtime-poison.sh
+neg-runtime-poison *args:
+    @bash scripts/runtime/neg-runtime-poison.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-race ; implemented by WO-082 in scripts/runtime/neg-runtime-race.sh
+neg-runtime-race *args:
+    @bash scripts/runtime/neg-runtime-race.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-memreport-check [file]; implemented by WO-085 in scripts/runtime/runtime-memreport-check.sh
+runtime-memreport-check *args:
+    @bash scripts/runtime/runtime-memreport-check.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-leak ; implemented by WO-085 in scripts/runtime/neg-runtime-leak.sh
+neg-runtime-leak *args:
+    @bash scripts/runtime/neg-runtime-leak.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-stress ; implemented by WO-098 in scripts/runtime/runtime-stress.sh
+runtime-stress *args:
+    @bash scripts/runtime/runtime-stress.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-soak [iters]; implemented by WO-098 in scripts/runtime/runtime-soak.sh
+runtime-soak *args:
+    @bash scripts/runtime/runtime-soak.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-stress ; implemented by WO-098 in scripts/runtime/neg-runtime-stress.sh
+neg-runtime-stress *args:
+    @bash scripts/runtime/neg-runtime-stress.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-demo [flags]; implemented by WO-099 in scripts/runtime/runtime-demo.sh
+runtime-demo *args:
+    @bash scripts/runtime/runtime-demo.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-determinism ; implemented by WO-099 in scripts/runtime/runtime-determinism.sh
+runtime-determinism *args:
+    @bash scripts/runtime/runtime-determinism.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-determinism ; implemented by WO-099 in scripts/runtime/neg-runtime-determinism.sh
+neg-runtime-determinism *args:
+    @bash scripts/runtime/neg-runtime-determinism.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-contract-lock ; implemented by WO-100 in scripts/runtime/runtime-contract-lock.sh
+runtime-contract-lock *args:
+    @bash scripts/runtime/runtime-contract-lock.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-contract-lock ; implemented by WO-100 in scripts/runtime/neg-runtime-contract-lock.sh
+neg-runtime-contract-lock *args:
+    @bash scripts/runtime/neg-runtime-contract-lock.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-scorecard ; implemented by WO-100 in scripts/runtime/runtime-scorecard.sh
+runtime-scorecard *args:
+    @bash scripts/runtime/runtime-scorecard.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): neg-runtime-scorecard ; implemented by WO-100 in scripts/runtime/neg-runtime-scorecard.sh
+neg-runtime-scorecard *args:
+    @bash scripts/runtime/neg-runtime-scorecard.sh {{args}}
+
+# dispatch (SL-ARCH-003, WO-075): runtime-gate ; implemented by WO-101 in scripts/runtime/runtime-gate.sh
+runtime-gate *args:
+    @bash scripts/runtime/runtime-gate.sh {{args}}
+
+# the release check of episodes 081-100 (stub until WO-101: runtime-gate, runtime-san x3, runtime-determinism, check-full; logs 13-16 in build/acceptance/)
+acceptance-081-100:
+    @just stub acceptance-081-100

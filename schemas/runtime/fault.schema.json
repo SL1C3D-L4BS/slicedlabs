@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/runtime/fault.schema.json",
+  "title": "A runtime fault report, sl-runtime-fault/1 (SL-ARCH-003 lifecycle and recovery, episode 081, ADR-0028, WO-096)",
+  "type": "object",
+  "required": [
+    "format",
+    "instance",
+    "frame",
+    "tick",
+    "kind",
+    "code",
+    "number",
+    "system",
+    "job",
+    "action",
+    "restored_tick"
+  ],
+  "properties": {
+    "format": {
+      "const": "sl-runtime-fault/1"
+    },
+    "instance": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "frame": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "kind": {
+      "enum": [
+        "job_fatal",
+        "system_fail",
+        "playback_oom"
+      ]
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "number": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 6999
+    },
+    "system": {
+      "type": "string"
+    },
+    "job": {
+      "type": "string"
+    },
+    "action": {
+      "enum": [
+        "stop",
+        "restore"
+      ]
+    },
+    "restored_tick": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false
+}

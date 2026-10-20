@@ -170,6 +170,27 @@ def stub_target(recipe):
     return None
 
 
+def dispatch_script(name):
+    """Repo-relative script a `dispatch` recipe runs (WO-075)."""
+    return "scripts/runtime/%s.sh" % name
+
+
+def is_dispatch_body(name, recipe):
+    """True iff the recipe takes `*args` and its body is exactly `bash scripts/runtime/<name>.sh {{args}}`."""
+    body = [b.lstrip("@") for b in recipe["body"]]
+    return recipe["params"] == ["*args"] and body == ["bash %s {{args}}" % dispatch_script(name)]
+
+
+def is_dispatch_stub(root, name):
+    """True iff scripts/runtime/<name>.sh is exactly the two-line cmd_stub.py stub (a missing script is no stub)."""
+    try:
+        with open(os.path.join(root, *dispatch_script(name).split("/")), encoding="utf-8") as fh:
+            lines = fh.read().splitlines()
+    except (OSError, UnicodeDecodeError):
+        return False
+    return lines == ["#!/usr/bin/env bash", "exec python3 -I tools/governance/cmd_stub.py %s" % name]
+
+
 def closure(recipes, roots):
     """All recipes reachable from roots through dependencies (roots included)."""
     seen, todo = set(), list(roots)
@@ -191,8 +212,12 @@ def load_recipes_json(path):
     return data["recipes"]
 
 
-def consistency_errors(recipes, manifest):
-    """justfile vs recipes.json: same names, valid owner/status, stub status matches the body."""
+def consistency_errors(recipes, manifest, root=ROOT):
+    """justfile vs recipes.json: same names, valid owner/status, stub status matches the body.
+
+    Status `dispatch` (WO-075): the body is `bash scripts/runtime/<name>.sh {{args}}` and the script exists; it is a
+    stub while the script is the two-line cmd_stub.py stub (is_dispatch_stub) and implemented once the script is real.
+    """
     errors = []
     for name in sorted(set(recipes) - set(manifest)):
         errors.append("recipe '%s' is in the justfile but not in recipes.json" % name)
@@ -203,8 +228,18 @@ def consistency_errors(recipes, manifest):
         if not re.match(r"^WO-\d{3}$", str(entry.get("owner", ""))):
             errors.append("recipe '%s': owner must look like WO-001" % name)
         status = entry.get("status")
-        if status not in ("stub", "implemented"):
-            errors.append("recipe '%s': status must be 'stub' or 'implemented'" % name)
+        if status not in ("stub", "implemented", "dispatch"):
+            errors.append("recipe '%s': status must be 'stub', 'implemented' or 'dispatch'" % name)
+            continue
+        if status == "dispatch":
+            script = dispatch_script(name)
+            if not is_dispatch_body(name, recipes[name]):
+                errors.append(
+                    "recipe '%s' is marked dispatch but it does not take *args with the body `bash %s {{args}}`"
+                    % (name, script)
+                )
+            elif not os.path.isfile(os.path.join(root, *script.split("/"))):
+                errors.append("recipe '%s' is marked dispatch but %s is missing" % (name, script))
             continue
         target = stub_target(recipes[name])
         if status == "stub" and target != name:
@@ -226,15 +261,21 @@ def landed_work_orders(root):
     return landed
 
 
-def selftest_errors(recipes, manifest, landed, roots=("fast", "check")):
-    """No recipe in the closure of the gate roots may be a stub whose owner has landed."""
-    errors = consistency_errors(recipes, manifest)
-    for root in roots:
-        if root not in recipes:
-            errors.append("gate recipe '%s' is missing from the justfile" % root)
+def is_stub_entry(root, name, entry):
+    """A recipes.json entry that is still a stub: status stub, or status dispatch with the stub script."""
+    status = entry.get("status")
+    return status == "stub" or (status == "dispatch" and is_dispatch_stub(root, name))
+
+
+def selftest_errors(recipes, manifest, landed, roots=("fast", "check"), root=ROOT):
+    """No recipe in the closure of the gate roots may be a stub (or dispatch stub) whose owner has landed."""
+    errors = consistency_errors(recipes, manifest, root)
+    for gate in roots:
+        if gate not in recipes:
+            errors.append("gate recipe '%s' is missing from the justfile" % gate)
     for name in sorted(closure(recipes, roots)):
         entry = manifest.get(name, {})
-        if entry.get("status") == "stub" and entry.get("owner") in landed:
+        if is_stub_entry(root, name, entry) and entry.get("owner") in landed:
             errors.append(
                 "recipe '%s' is a stub in the gate closure but its owner %s has landed"
                 % (name, entry.get("owner"))

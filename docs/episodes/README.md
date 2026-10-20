@@ -16,7 +16,13 @@ change a status. `docs/templates/EPISODE.md` is the full per-episode template (W
   corruption, generated tooling, conformance, release), in the same five sub-headings, with honest limits (simulated
   durability, Windows unverified, big-endian untested, wall time unmeasured, seams S1-S16), then the acceptance of
   `just acceptance-061-080` (`build/acceptance/10-*.log` to `12-*.log`).
-- Gate: `just episodes-doc-check 041-048`, `just episodes-doc-check 049-060` and `just episodes-doc-check 061-080` (`tools/governance/cmd_episodes_doc_check.py`; rules `R-EPDOC-RANGE`,
+- `081-100.md` (WO-101, not yet written): SL-EP-081 to SL-EP-100, the native runtime (lifecycle, platform boundary,
+  memory contracts, allocators, diagnostics, jobs, synchronization, work stealing, clocks, frame scheduler, entities,
+  archetype storage, queries, systems, change tracking, reflection, events, snapshots, stress, the runtime gate), in the
+  same five sub-headings, with honest limits (determinism class D1 only, clang versus gcc recorded, Linux only,
+  headless, wall time recorded not gated, Demonstrated cap of ADR-0021), then the acceptance of
+  `just acceptance-081-100` (`build/acceptance/13-*.log` to `16-*.log`).
+- Gate: `just episodes-doc-check 041-048`, `just episodes-doc-check 049-060`, `just episodes-doc-check 061-080` and `just episodes-doc-check 081-100` (WO-101) (`tools/governance/cmd_episodes_doc_check.py`; rules `R-EPDOC-RANGE`,
   `R-EPDOC-FILE`, `R-EPDOC-SECTION`, `R-EPDOC-HEADINGS`, `R-EPDOC-ACCEPT`, `R-EPDOC-DECISIONS`;
   `python3 -I tools/governance/cmd_episodes_doc_check.py --selftest` plants one defect per rule).
 - Episodes 001 to 020 get their records with the Volume 01 work orders.

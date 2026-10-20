@@ -153,6 +153,72 @@ class RecipesJsonTests(unittest.TestCase):
         self.assertEqual(slgov.closure(recipes, ["fast"]) & stubs, set())
 
 
+class DispatchTests(unittest.TestCase):
+    """Recipe status `dispatch` (WO-075): `bash scripts/runtime/<name>.sh {{args}}`, stub while the script is."""
+
+    STUB = "#!/usr/bin/env bash\nexec python3 -I tools/governance/cmd_stub.py %s\n"
+    TEXT = "fast: r\n    @echo f\nr *args:\n    @bash scripts/runtime/r.sh {{args}}\n"
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = self._tmp.name
+        os.makedirs(os.path.join(self.root, "scripts", "runtime"))
+        self.recipes = slgov.parse_justfile(self.TEXT)
+        self.manifest = {
+            "fast": {"owner": "WO-001", "status": "implemented"},
+            "r": {"owner": "WO-076", "status": "dispatch"},
+        }
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def script(self, text):
+        with open(os.path.join(self.root, "scripts", "runtime", "r.sh"), "w", encoding="utf-8") as fh:
+            fh.write(text)
+
+    def test_dispatch_body(self):
+        self.assertTrue(slgov.is_dispatch_body("r", self.recipes["r"]))
+        self.assertFalse(slgov.is_dispatch_body("s", self.recipes["r"]))
+        other = slgov.parse_justfile("r args:\n    @bash scripts/runtime/r.sh {{args}}\n")
+        self.assertFalse(slgov.is_dispatch_body("r", other["r"]))
+
+    def test_stub_script_is_a_stub_and_a_real_script_is_not(self):
+        self.assertFalse(slgov.is_dispatch_stub(self.root, "r"))
+        self.script(self.STUB % "r")
+        self.assertTrue(slgov.is_dispatch_stub(self.root, "r"))
+        self.script(self.STUB % "other")
+        self.assertFalse(slgov.is_dispatch_stub(self.root, "r"))
+        self.script("#!/usr/bin/env bash\nset -euo pipefail\necho real\n")
+        self.assertFalse(slgov.is_dispatch_stub(self.root, "r"))
+
+    def test_consistency_accepts_dispatch_with_script(self):
+        self.script(self.STUB % "r")
+        self.assertEqual(slgov.consistency_errors(self.recipes, self.manifest, self.root), [])
+
+    def test_consistency_flags_missing_script_and_wrong_body(self):
+        errors = slgov.consistency_errors(self.recipes, self.manifest, self.root)
+        self.assertEqual(errors, ["recipe 'r' is marked dispatch but scripts/runtime/r.sh is missing"])
+        recipes = slgov.parse_justfile("fast:\n    @echo f\nr *args:\n    @bash scripts/other.sh {{args}}\n")
+        errors = slgov.consistency_errors(recipes, self.manifest, self.root)
+        self.assertTrue(any("marked dispatch but it does not take *args" in e for e in errors), errors)
+
+    def test_selftest_treats_a_dispatch_stub_like_a_stub(self):
+        self.script(self.STUB % "r")
+        errors = slgov.selftest_errors(self.recipes, self.manifest, {"WO-076"}, roots=("fast",), root=self.root)
+        self.assertEqual(errors, ["recipe 'r' is a stub in the gate closure but its owner WO-076 has landed"])
+        self.assertEqual(slgov.selftest_errors(self.recipes, self.manifest, set(), ("fast",), self.root), [])
+        self.script("#!/usr/bin/env bash\nset -euo pipefail\necho real\n")
+        self.assertEqual(slgov.selftest_errors(self.recipes, self.manifest, {"WO-076"}, ("fast",), self.root), [])
+
+    def test_real_dispatch_recipes(self):
+        manifest = slgov.load_recipes_json(RECIPES_JSON)
+        recipes = real_recipes()
+        dispatch = sorted(n for n, e in manifest.items() if e["status"] == "dispatch")
+        self.assertEqual(len(dispatch), 24)
+        for name in dispatch:
+            self.assertTrue(slgov.is_dispatch_body(name, recipes[name]), name)
+        self.assertEqual(slgov.closure(recipes, ["fast", "check"]) & set(dispatch), set())
+
 class LayoutTests(unittest.TestCase):
     def test_real_repo_layout(self):
         import json

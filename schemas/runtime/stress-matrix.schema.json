@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/runtime/stress-matrix.schema.json",
+  "title": "The stress matrix result, sl-runtime-stress-matrix/1 (SL-ARCH-003 stress_matrix, episode 099, WO-098)",
+  "type": "object",
+  "required": [
+    "format",
+    "scale",
+    "cells"
+  ],
+  "properties": {
+    "format": {
+      "const": "sl-runtime-stress-matrix/1"
+    },
+    "scale": {
+      "type": "number",
+      "minimum": 0
+    },
+    "cells": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/cell"
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "cell": {
+      "type": "object",
+      "required": [
+        "cell",
+        "preset",
+        "test",
+        "pass",
+        "wall_s",
+        "seed"
+      ],
+      "properties": {
+        "cell": {
+          "type": "string",
+          "pattern": "^S([1-9]|10)$"
+        },
+        "preset": {
+          "enum": [
+            "debug",
+            "ci-asan",
+            "ci-ubsan",
+            "ci-tsan"
+          ]
+        },
+        "test": {
+          "type": "string",
+          "pattern": "^tests/integration/runtime/stress_[a-z0-9_]+_test\\.cpp$"
+        },
+        "pass": {
+          "type": "boolean"
+        },
+        "wall_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

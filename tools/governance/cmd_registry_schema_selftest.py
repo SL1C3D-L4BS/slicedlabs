@@ -1,6 +1,7 @@
 """registry-schema-selftest: the schemas, the subset validator and the rule fixtures agree.
 
-1. Every schemas/sl-*.schema.json loads and stays inside the supported keyword subset (slib).
+1. Every schemas/sl-*.schema.json and schemas/runtime/*.schema.json loads and stays inside the supported
+   keyword subset (slib); each runtime schema validates its schemas/runtime/examples/<name>.json (WO-075).
 2. The inline validator cases give the expected verdict.
 3. The good fixture passes every rule; each bad-<rule>.json fails with exactly that rule id;
    every rule id has a fixture.
@@ -81,6 +82,16 @@ INSTANCES = {
     },
 }
 REPO_INSTANCES = (("sl-deps", "deps/deps.json"), ("sl-deps-lock", "deps/deps.lock.json"))
+# WO-075: the Volume 05 runtime schemas (SL-ARCH-003), keyed "runtime/<name>", each with one example instance.
+RUNTIME_SCHEMA_DIR = os.path.join(slib.SCHEMA_DIR, "runtime")
+RUNTIME_SCHEMAS = ("memreport", "fault", "gate-report", "stress-matrix", "schedule")
+
+
+def runtime_example(name):
+    """Path of the valid example instance of schemas/runtime/<name>.schema.json."""
+    return os.path.join(RUNTIME_SCHEMA_DIR, "examples", name + ".json")
+
+
 # Instances of the good bundle and the schema each one is checked against.
 BUNDLE_PARTS = (("registry", "sl-reg-002"), ("documents", "sl-reg-001"))
 WRONG_VALUES = (None, True, 0, 1.5, "", "x", [], {})
@@ -152,11 +163,31 @@ def main():
     for name in extra:
         if name not in SCHEMAS:
             errors.append("schemas/%s.schema.json: not covered by the selftest" % name)
+    for name in RUNTIME_SCHEMAS:
+        key = "runtime/" + name
+        try:
+            schemas[key] = slib.load_schema(name, RUNTIME_SCHEMA_DIR)
+        except slib.LoadError as exc:
+            errors.append(str(exc))
+            continue
+        for e in slib.check_schema_subset(schemas[key]):
+            errors.append("schemas/%s.schema.json: %s" % (key, e))
+        if schemas[key].get("$schema") != "https://json-schema.org/draft/2020-12/schema":
+            errors.append("schemas/%s.schema.json: $schema must be the 2020-12 meta-schema" % key)
+    for path in sorted(glob.glob(os.path.join(RUNTIME_SCHEMA_DIR, "*.schema.json"))):
+        name = os.path.basename(path)[: -len(".schema.json")]
+        if name not in RUNTIME_SCHEMAS:
+            errors.append("schemas/runtime/%s.schema.json: not covered by the selftest" % name)
 
     instances = dict(INSTANCES)
     for name, rel in REPO_INSTANCES:
         try:
             instances[name] = slib.load_json(os.path.join(slib.ROOT, rel))
+        except slib.LoadError as exc:
+            errors.append(str(exc))
+    for name in RUNTIME_SCHEMAS:
+        try:
+            instances["runtime/" + name] = slib.load_json(runtime_example(name))
         except slib.LoadError as exc:
             errors.append(str(exc))
     for name, instance in sorted(instances.items()):

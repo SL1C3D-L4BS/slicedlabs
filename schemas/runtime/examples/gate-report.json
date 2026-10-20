@@ -1,0 +1,79 @@
+{
+  "format": "sl-runtime-gate/1",
+  "seed": 1,
+  "ticks": 600,
+  "entities": 50000,
+  "workers": 3,
+  "mode": "parallel",
+  "phases": [
+    {
+      "phase": "begin_frame",
+      "jobs": 0,
+      "critical_path": 0,
+      "wall_ns": 0
+    },
+    {
+      "phase": "apply_inputs",
+      "jobs": 12,
+      "critical_path": 3,
+      "wall_ns": 0
+    },
+    {
+      "phase": "pre_tick",
+      "jobs": 12,
+      "critical_path": 3,
+      "wall_ns": 0
+    },
+    {
+      "phase": "tick",
+      "jobs": 12,
+      "critical_path": 3,
+      "wall_ns": 0
+    },
+    {
+      "phase": "post_tick",
+      "jobs": 12,
+      "critical_path": 3,
+      "wall_ns": 0
+    },
+    {
+      "phase": "observe",
+      "jobs": 12,
+      "critical_path": 3,
+      "wall_ns": 0
+    },
+    {
+      "phase": "present",
+      "jobs": 0,
+      "critical_path": 0,
+      "wall_ns": 0
+    },
+    {
+      "phase": "end_frame",
+      "jobs": 0,
+      "critical_path": 0,
+      "wall_ns": 0
+    }
+  ],
+  "scheduler": {
+    "jobs_run": 72000,
+    "steals": 5100,
+    "failed_steals": 800,
+    "parks": 1200,
+    "wakes": 1180,
+    "injection_polls": 1180,
+    "aging_promotions": 0
+  },
+  "recovery": {
+    "fault_tick": 450,
+    "restored_tick": 300,
+    "hash_equal": true
+  },
+  "fabric": {
+    "commits": 600,
+    "proposed_changes": 153600,
+    "rejected": 0
+  },
+  "final_state_hash": "sha256:3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f",
+  "wall_ms": 41000
+}

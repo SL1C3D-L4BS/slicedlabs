@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/runtime/schedule.schema.json",
+  "title": "An exported system schedule, sl-runtime-schedule/1 (SL-ARCH-003 system scheduling, episode 094, WO-094)",
+  "type": "object",
+  "required": [
+    "format",
+    "policy",
+    "phases"
+  ],
+  "properties": {
+    "format": {
+      "const": "sl-runtime-schedule/1"
+    },
+    "policy": {
+      "enum": [
+        "parallel",
+        "serial_canonical"
+      ]
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/phase"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "required": [
+        "phase",
+        "systems"
+      ],
+      "properties": {
+        "phase": {
+          "enum": [
+            "begin_frame",
+            "apply_inputs",
+            "pre_tick",
+            "tick",
+            "post_tick",
+            "observe",
+            "present",
+            "end_frame"
+          ]
+        },
+        "systems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/system"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "system": {
+      "type": "object",
+      "required": [
+        "index",
+        "name",
+        "access",
+        "after"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "access": {
+          "$ref": "#/$defs/access"
+        },
+        "after": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "access": {
+      "type": "object",
+      "required": [
+        "component_reads",
+        "component_writes",
+        "resource_reads",
+        "resource_writes",
+        "structural",
+        "exclusive"
+      ],
+      "properties": {
+        "component_reads": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "component_writes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "resource_reads": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "resource_writes": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "structural": {
+          "type": "boolean"
+        },
+        "exclusive": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

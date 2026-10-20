@@ -581,6 +581,106 @@
     "acceptance-061-080": {
       "owner": "WO-063",
       "status": "implemented"
+    },
+    "runtime-test": {
+      "owner": "WO-076",
+      "status": "dispatch"
+    },
+    "runtime-san": {
+      "owner": "WO-076",
+      "status": "dispatch"
+    },
+    "runtime-gcc": {
+      "owner": "WO-076",
+      "status": "dispatch"
+    },
+    "runtime-tidy": {
+      "owner": "WO-076",
+      "status": "dispatch"
+    },
+    "runtime-lint": {
+      "owner": "WO-077",
+      "status": "dispatch"
+    },
+    "neg-runtime-lint": {
+      "owner": "WO-077",
+      "status": "dispatch"
+    },
+    "runtime-contracts": {
+      "owner": "WO-077",
+      "status": "dispatch"
+    },
+    "runtime-contracts-strict": {
+      "owner": "WO-077",
+      "status": "dispatch"
+    },
+    "neg-runtime-contracts": {
+      "owner": "WO-077",
+      "status": "dispatch"
+    },
+    "neg-runtime-poison": {
+      "owner": "WO-081",
+      "status": "dispatch"
+    },
+    "neg-runtime-race": {
+      "owner": "WO-082",
+      "status": "dispatch"
+    },
+    "runtime-memreport-check": {
+      "owner": "WO-085",
+      "status": "dispatch"
+    },
+    "neg-runtime-leak": {
+      "owner": "WO-085",
+      "status": "dispatch"
+    },
+    "runtime-stress": {
+      "owner": "WO-098",
+      "status": "dispatch"
+    },
+    "runtime-soak": {
+      "owner": "WO-098",
+      "status": "dispatch"
+    },
+    "neg-runtime-stress": {
+      "owner": "WO-098",
+      "status": "dispatch"
+    },
+    "runtime-demo": {
+      "owner": "WO-099",
+      "status": "dispatch"
+    },
+    "runtime-determinism": {
+      "owner": "WO-099",
+      "status": "dispatch"
+    },
+    "neg-runtime-determinism": {
+      "owner": "WO-099",
+      "status": "dispatch"
+    },
+    "runtime-contract-lock": {
+      "owner": "WO-100",
+      "status": "dispatch"
+    },
+    "neg-runtime-contract-lock": {
+      "owner": "WO-100",
+      "status": "dispatch"
+    },
+    "runtime-scorecard": {
+      "owner": "WO-100",
+      "status": "dispatch"
+    },
+    "neg-runtime-scorecard": {
+      "owner": "WO-100",
+      "status": "dispatch"
+    },
+    "runtime-gate": {
+      "owner": "WO-101",
+      "status": "dispatch"
+    },
+    "acceptance-081-100": {
+      "owner": "WO-101",
+      "status": "stub"
     }
   }
 }

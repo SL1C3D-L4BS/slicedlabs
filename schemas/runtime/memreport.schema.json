@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/runtime/memreport.schema.json",
+  "title": "A runtime memory report, sl-runtime-memreport/1 (SL-ARCH-003 allocation diagnostics, episode 085, ADR-0023, WO-085)",
+  "type": "object",
+  "required": [
+    "format",
+    "instance",
+    "frame",
+    "tags",
+    "allocators",
+    "external",
+    "leaks",
+    "upstream_allocs_last_frame"
+  ],
+  "properties": {
+    "format": {
+      "const": "sl-runtime-memreport/1"
+    },
+    "instance": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "frame": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/tag"
+      }
+    },
+    "allocators": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/allocator"
+      }
+    },
+    "external": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/external"
+      }
+    },
+    "leaks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/leak"
+      }
+    },
+    "upstream_allocs_last_frame": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "tag": {
+      "type": "object",
+      "required": [
+        "tag",
+        "live_bytes",
+        "live_blocks",
+        "peak_bytes",
+        "allocs",
+        "frees",
+        "failures"
+      ],
+      "properties": {
+        "tag": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_*]+)*$"
+        },
+        "live_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "live_blocks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peak_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allocs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "frees": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failures": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "allocator": {
+      "type": "object",
+      "required": [
+        "name",
+        "free_bytes",
+        "largest_free_run",
+        "fragmentation_permille"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "free_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "largest_free_run": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fragmentation_permille": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "additionalProperties": false
+    },
+    "external": {
+      "type": "object",
+      "required": [
+        "tag",
+        "bytes"
+      ],
+      "properties": {
+        "tag": {
+          "type": "string",
+          "pattern": "^(gpu|fabric)\\.[a-z0-9_.]+$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "leak": {
+      "type": "object",
+      "required": [
+        "tag",
+        "site",
+        "size"
+      ],
+      "properties": {
+        "tag": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_*]+)*$"
+        },
+        "site": {
+          "type": "string",
+          "minLength": 1
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "format": "sl-runtime-schedule/1",
+  "policy": "parallel",
+  "phases": [
+    {
+      "phase": "tick",
+      "systems": [
+        {
+          "index": 0,
+          "name": "lantern_drift",
+          "access": {
+            "component_reads": [
+              "lantern_velocity"
+            ],
+            "component_writes": [
+              "lantern_position"
+            ],
+            "resource_reads": [],
+            "resource_writes": [],
+            "structural": false,
+            "exclusive": false
+          },
+          "after": []
+        },
+        {
+          "index": 1,
+          "name": "lantern_glow_sum",
+          "access": {
+            "component_reads": [
+              "lantern_energy"
+            ],
+            "component_writes": [],
+            "resource_reads": [],
+            "resource_writes": [
+              3
+            ],
+            "structural": false,
+            "exclusive": false
+          },
+          "after": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "format": "sl-runtime-stress-matrix/1",
+  "scale": 1.0,
+  "cells": [
+    {
+      "cell": "S1",
+      "preset": "debug",
+      "test": "tests/integration/runtime/stress_jobs_test.cpp",
+      "pass": true,
+      "wall_s": 11.2,
+      "seed": 1
+    },
+    {
+      "cell": "S10",
+      "preset": "ci-tsan",
+      "test": "tests/integration/runtime/stress_events_test.cpp",
+      "pass": true,
+      "wall_s": 9.8,
+      "seed": 10
+    }
+  ]
+}
