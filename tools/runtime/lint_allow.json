@@ -1,0 +1,10 @@
+{
+  "allow": [
+    {
+      "path": "engine/runtime/src/faults.cpp",
+      "rule": "R-RT-GLOBAL",
+      "symbol": "*",
+      "reason": "the failpoint registry RFP0-RFP10 (ARCH3-R008, WO-076): the one mutable static state of the runtime; WO-076 decides its name, so the entry names the file and WO-100 may narrow it"
+    }
+  ]
+}

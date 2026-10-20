@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-exec python3 -I tools/governance/cmd_stub.py neg-runtime-lint
+# neg-runtime-lint (WO-077): one planted defect per runtime-lint rule must fail and be named
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+exec bash tests/gates/neg_runtime_lint.sh "$@"
