@@ -71,6 +71,7 @@ UNPLACED_KINDS = ("ARCH", "OPS")
 ARCH_SLUGS = {
     "SL-ARCH-001": "canonical-project-model",
     "SL-ARCH-002": "transaction-undo-recovery",
+    "SL-ARCH-003": "runtime-execution",  # WO-075 wrote it, WO-102 placed it
 }
 
 _ROW = re.compile(r"^\|\s*(SL-(GOV|ARCH|PLAN|OPS|REG)-(\d{3}))\s*\|(.+)\|(.+)\|\s*$")

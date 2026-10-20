@@ -241,7 +241,7 @@
       "title": "Runtime and Execution Architecture",
       "aliases": [],
       "kind": "ARCH",
-      "path": null,
+      "path": "docs/arch/SL-ARCH-003-runtime-execution.md",
       "status": "Planned",
       "version": null,
       "sha256": null,

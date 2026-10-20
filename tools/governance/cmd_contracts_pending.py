@@ -37,7 +37,9 @@ def recipe_state(root):
         manifest = {}
     for name, recipe in recipes.items():
         owner = manifest.get(name, {}).get("owner", "?")
-        is_stub = slgov.stub_target(recipe) is not None or manifest.get(name, {}).get("status") == "stub"
+        status = manifest.get(name, {}).get("status")
+        is_stub = slgov.stub_target(recipe) is not None or status == "stub"
+        is_stub = is_stub or (status == "dispatch" and slgov.is_dispatch_stub(root, name))  # WO-102
         state[name] = (is_stub, owner)
     return state
 

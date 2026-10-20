@@ -19,12 +19,17 @@ JUSTFILE = """real-recipe:
 
 stub-recipe *args:
     @{{just_executable()}} stub stub-recipe
+
+disp *args:
+    @bash scripts/runtime/disp.sh {{args}}
 """
+DISPATCH_STUB = "#!/usr/bin/env bash\nexec python3 -I tools/governance/cmd_stub.py disp\n"
 RECIPES = {
     "schema": "sl-recipes/1",
     "note": "fixture",
     "recipes": {"real-recipe": {"owner": "WO-001", "status": "implemented"},
-                "stub-recipe": {"owner": "WO-099", "status": "stub"}},
+                "stub-recipe": {"owner": "WO-099", "status": "stub"},
+                "disp": {"owner": "WO-076", "status": "dispatch"}},
 }
 
 
@@ -52,6 +57,19 @@ class ContractsTest(unittest.TestCase):
         found, warnings = cmd_contracts_pending.pending_contracts(self.root)
         self.assertEqual(warnings, [])
         return dict(found)
+
+    def test_dispatch_stub_is_pending_until_its_script_is_real(self):
+        """WO-102: a `dispatch` recipe whose script is the cmd_stub.py stub counts as a stub."""
+        self.write("scripts/runtime/disp.sh", DISPATCH_STUB)
+        self.write("docs/arch/SL-ARCH-900-x.md", doc([{"id": "RT-INV-X-01", "verified_by": "just disp a"}]))
+        self.assertEqual(
+            self.found(),
+            {"docs/arch/SL-ARCH-900-x.md RT-INV-X-01 (verified_by)": "recipe disp is a stub (owner WO-076)"},
+        )
+        self.assertEqual(cmd_contracts_pending.recipe_state(self.root)["disp"], (True, "WO-076"))
+        self.write("scripts/runtime/disp.sh", "#!/usr/bin/env bash\nset -euo pipefail\necho real\n")
+        self.assertEqual(cmd_contracts_pending.recipe_state(self.root)["disp"], (False, "WO-076"))
+        self.assertEqual(self.found(), {})
 
     def test_arch_contracts_are_scanned(self):
         self.write("docs/arch/SL-ARCH-900-x.md", doc([{"id": "FAB-INV-X-01", "verified_by": "pending"}]))

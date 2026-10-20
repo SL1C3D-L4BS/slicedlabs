@@ -117,7 +117,8 @@ class GeneratorTests(TreeCase):
     def test_deferred_documents_and_episodes(self):
         arch = self.doc("SL-ARCH-001")  # placed by WO-035 (ARCH_SLUGS); later ARCH ids stay unplaced
         self.assertEqual(arch["path"], "docs/arch/SL-ARCH-001-canonical-project-model.md")
-        self.assertIsNone(self.doc("SL-ARCH-003")["path"])
+        self.assertEqual(self.doc("SL-ARCH-003")["path"], "docs/arch/SL-ARCH-003-runtime-execution.md")  # WO-102
+        self.assertIsNone(self.doc("SL-ARCH-004")["path"])
         self.assertEqual(arch["episodes"], ["SL-EP-%03d" % n for n in range(61, 81)])
         self.assertEqual(self.doc("SL-PLAN-001")["episodes"], [])
         self.assertEqual(self.doc("SL-GOV-003")["episodes"], ["SL-EP-005", "SL-EP-006", "SL-EP-017"])
