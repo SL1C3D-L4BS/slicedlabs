@@ -209,7 +209,9 @@ class null_record_sink final : public record_sink {};
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members): a view of objects the host owns
 /// The platform a runtime uses; the host owns every member and keeps them alive longer than the
-/// runtime (`ownership`, platform).
+/// runtime (`ownership`, platform). An aggregate: every construction names all eight members
+/// (designated initialisers), so cppcheck's uninitMemberVarNoCtor does not apply.
+// cppcheck-suppress-begin uninitMemberVarNoCtor
 struct platform {
   clock_source &clock;
   wall_clock &wall;
@@ -220,6 +222,7 @@ struct platform {
   record_sink &sink;
   std::uint32_t instance_id;
 };
+// cppcheck-suppress-end uninitMemberVarNoCtor
 // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
 
 /// The digest record_file_read passes: SHA-256 of the bytes.
