@@ -2,7 +2,7 @@
 // (1e4 jobs scaled by SL_RUNTIME_STRESS_SCALE, fan-in up to 8 earlier jobs, every 97th job also
 // gated on the job_counter of the jobs before it) runs exactly once and only after all of its
 // dependencies, on 0, 1, 2 and 8 workers and under RFP4 worker stalls; locked_deque passes the
-// queue contract suite, and make_ws_queue is unsupported until WO-086 (start fails with it).
+// queue contract suite, and make_ws_queue (WO-086) builds a queue that start accepts.
 
 #include "sl/core/error.hpp"
 #include "sl/runtime/faults.hpp"
@@ -200,14 +200,17 @@ TEST_CASE("RT-INV-JOB-01: locked_deque passes the queue contract suite") {
   CHECK(jobs::make_locked_queue(0).error().code == sl::errc::invalid_argument);
 }
 
-TEST_CASE("RT-INV-JOB-01: make_ws_queue is unsupported until WO-086 and start fails with it") {
-  CHECK(jobs::make_ws_queue(16).error().code == sl::errc::unsupported);
+TEST_CASE("RT-INV-JOB-01: make_ws_queue builds a work-stealing queue and start succeeds with it") {
+  auto ws = jobs::make_ws_queue(16);
+  REQUIRE(ws);
+  REQUIRE(*ws);
+  CHECK((*ws)->capacity() == 16);
   rtt::scripted_platform plat;
   jobs::job_config c = config(1);
   c.make_queue = jobs::make_ws_queue;
   auto js = jobs::job_system::start(plat.get(), std::move(c));
-  REQUIRE_FALSE(js);
-  CHECK(js.error().code == sl::errc::unsupported);
+  REQUIRE(js);
+  REQUIRE((*js)->stop());
   auto policy = jobs::make_reference_policy();
   REQUIRE(policy);
   policy->on_start(4, 1);

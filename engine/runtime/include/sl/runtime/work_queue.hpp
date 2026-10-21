@@ -4,9 +4,9 @@
 // 086). The job system takes its per-worker queues through `work_queue` (built by a queue
 // factory) and its victim, injection-poll, aging and park decisions through `scheduler_policy`.
 // `locked_deque` (a mutex and a ring; src/queue_locked.cpp) with the reference policy
-// (src/policy_simple.cpp) is the default; make_ws_queue (src/queue_ws.cpp) returns unsupported
-// until WO-086 builds the Chase-Lev deque and the stealing policy. Layer L3: includes only L0
-// runtime headers.
+// (src/policy_simple.cpp) is the default; make_ws_queue (src/queue_ws.cpp) builds the Chase-Lev
+// ws_deque and make_steal_policy (scheduler_stats.hpp) the stealing policy (WO-086). Layer L3:
+// includes only L0 runtime headers.
 //
 // Thread safety (`thread_safety`): work_queue push and pop are worker-only (the owner worker of
 // the queue), steal any-thread; locked_deque accepts every call from any thread (it is also the
@@ -78,7 +78,8 @@ using queue_factory = std::function<result<std::unique_ptr<work_queue>>(std::siz
 /// be allocated.
 [[nodiscard]] result<std::unique_ptr<work_queue>> make_locked_queue(std::size_t capacity) noexcept;
 
-/// The work-stealing deque; unsupported until WO-086 (src/queue_ws.cpp).
+/// The work-stealing deque (ws_deque.hpp, src/queue_ws.cpp): at most min(bit_ceil(capacity),
+/// 65536) indices; invalid_argument for 0, out_of_memory when the ring cannot be allocated.
 [[nodiscard]] result<std::unique_ptr<work_queue>> make_ws_queue(std::size_t capacity) noexcept;
 
 /// Per-worker scheduler counters (diagnostic; never asserted as times).
