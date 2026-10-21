@@ -3,6 +3,7 @@
 The WO-011 plan-check tests (R-PLAN-EP, GATE, GRAPH, VOL03, KOHI, CLEAN-ROOM) stay in test_views.py.
 """
 
+import json
 import os
 import shutil
 import sys
@@ -18,7 +19,6 @@ REAL = slgov.ROOT
 VOL03 = "docs/vol/SL-VOL-03-SPEC.md"
 VOL04 = "docs/vol/SL-VOL-04-SPEC.md"
 VOL05 = "docs/vol/SL-VOL-05-SPEC.md"
-REC062 = '"work_orders": ["WO-035", "WO-039", "WO-045"], "primary_wo": "WO-039", "acceptance": "just fabric-test type"'
 
 
 class Tree(unittest.TestCase):
@@ -52,16 +52,55 @@ class Tree(unittest.TestCase):
         with open(self.path(rel), "w", encoding="utf-8", newline="") as fh:
             fh.write(text.replace(old, new, 1))
 
-    def edit_record(self, eid, old, new):
-        """Replace old with new on the SL-VOL-04-SPEC record line of episode eid."""
-        with open(self.path(VOL04), encoding="utf-8", newline="") as fh:
+    def edit_record(self, eid, old, new, rel=VOL04):
+        """Replace old with new on the specification record line of episode eid (SL-VOL-04-SPEC by default)."""
+        with open(self.path(rel), encoding="utf-8", newline="") as fh:
             lines = fh.read().split("\n")
         hits = [i for i, ln in enumerate(lines) if '"episode": "%s"' % eid in ln]
         self.assertEqual(len(hits), 1)
         self.assertIn(old, lines[hits[0]])
         lines[hits[0]] = lines[hits[0]].replace(old, new, 1)
-        with open(self.path(VOL04), "w", encoding="utf-8", newline="") as fh:
+        with open(self.path(rel), "w", encoding="utf-8", newline="") as fh:
             fh.write("\n".join(lines))
+
+    def record(self, rel, eid):
+        """The record of episode eid in the specification file under test, derived rather than hardcoded.
+
+        Returns the parsed record plus `wos_text` (its work_orders list as written), `head` (the work_orders,
+        primary_wo and acceptance span as written) and `tracing` (the work orders whose Traces line names eid).
+        """
+        with open(self.path(rel), encoding="utf-8") as fh:
+            hits = [ln for ln in fh.read().split("\n") if '"episode": "%s"' % eid in ln]
+        self.assertEqual(len(hits), 1, eid)
+        rec = json.loads(hits[0].strip().rstrip(","))
+        rec["wos_text"] = '"work_orders": %s' % json.dumps(rec["work_orders"])
+        rec["head"] = '%s, "primary_wo": %s, "acceptance": %s' % (
+            rec["wos_text"],
+            json.dumps(rec["primary_wo"]),
+            json.dumps(rec["acceptance"]),
+        )
+        self.assertIn(rec["head"], hits[0])
+        tr = cmd_plan_check.traces(self.root)
+        rec["tracing"] = sorted(wo for wo, eps in tr.items() if eid in eps)
+        return rec
+
+    def tracing_non_primary(self, rec):
+        """A listed work order that traces the episode and is not its primary_wo."""
+        candidates = [wo for wo in rec["work_orders"] if wo in rec["tracing"] and wo != rec["primary_wo"]]
+        self.assertTrue(candidates, rec["episode"])
+        return candidates[-1]
+
+    def work_order_not_tracing(self, eid):
+        """A work order with a file in work-orders/ whose Traces line does not name eid."""
+        tr = cmd_plan_check.traces(self.root)
+        candidates = sorted(wo for wo, eps in tr.items() if eid not in eps)
+        self.assertTrue(candidates, eid)
+        return candidates[-1]
+
+    def unknown_work_order(self):
+        """A work order id with no file in work-orders/."""
+        tr = cmd_plan_check.traces(self.root)
+        return "WO-%03d" % (max(int(wo[3:]) for wo in tr) + 1)
 
     def errors(self):
         return cmd_plan_check.plan_errors(self.root)
@@ -133,41 +172,68 @@ class Vol04Test(Tree):
         self.assert_vol04("SL-EP-069 kohi_ref differs from the registry")
 
     def test_primary_not_in_work_orders(self):
-        self.edit(VOL04, REC062, REC062.replace('"primary_wo": "WO-039"', '"primary_wo": "WO-036"'))
-        self.assert_vol04("SL-EP-062 primary_wo WO-036 is not in its work_orders")
+        rec = self.record(VOL04, "SL-EP-062")
+        other = self.work_order_not_tracing("SL-EP-062")
+        self.assertNotIn(other, rec["work_orders"])
+        self.edit_record("SL-EP-062", '"primary_wo": %s' % json.dumps(rec["primary_wo"]), '"primary_wo": "%s"' % other)
+        self.assert_vol04("SL-EP-062 primary_wo %s is not in its work_orders" % other)
 
     def test_primary_must_be_one_id(self):
-        self.edit(VOL04, REC062, REC062.replace('"primary_wo": "WO-039"', '"primary_wo": ["WO-039", "WO-045"]'))
+        rec = self.record(VOL04, "SL-EP-062")
+        two = [rec["primary_wo"], self.tracing_non_primary(rec)]
+        self.edit_record("SL-EP-062", '"primary_wo": %s' % json.dumps(rec["primary_wo"]),
+                         '"primary_wo": %s' % json.dumps(two))
         self.assert_vol04("SL-EP-062 primary_wo must be exactly one work order id")
 
     def test_acceptance_absent_from_primary(self):
-        self.edit(VOL04, REC062, REC062.replace("just fabric-test type", "just fabric-test codec"))
+        rec = self.record(VOL04, "SL-EP-062")
+        self.edit_record("SL-EP-062", '"acceptance": %s' % json.dumps(rec["acceptance"]),
+                         '"acceptance": "just fabric-test codec"')
         self.assert_vol04("SL-EP-062 acceptance 'just fabric-test codec' is not in the front-matter acceptance",
-                          "its primary_wo WO-039")
+                          "its primary_wo %s" % rec["primary_wo"])
 
     def test_acceptance_recipe_must_exist(self):
-        self.edit(VOL04, REC062, REC062.replace("just fabric-test type", "just no-such-recipe"))
+        rec = self.record(VOL04, "SL-EP-062")
+        self.edit_record("SL-EP-062", '"acceptance": %s' % json.dumps(rec["acceptance"]),
+                         '"acceptance": "just no-such-recipe"')
         self.assert_vol04("SL-EP-062 acceptance 'just no-such-recipe' is not `just <recipe>` for a recipe in the "
                           "justfile")
 
     def test_tracing_work_order_must_be_listed(self):
-        self.edit(VOL04, REC062, REC062.replace('"WO-035", "WO-039", "WO-045"', '"WO-035", "WO-039"'))
-        self.assert_vol04("WO-045 traces SL-EP-062 but the SL-EP-062 record does not list it")
+        rec = self.record(VOL04, "SL-EP-062")
+        dropped = self.tracing_non_primary(rec)
+        kept = [wo for wo in rec["work_orders"] if wo != dropped]
+        self.edit_record("SL-EP-062", rec["wos_text"], '"work_orders": %s' % json.dumps(kept))
+        self.assert_vol04("%s traces SL-EP-062 but the SL-EP-062 record does not list it" % dropped)
 
     def test_listed_work_order_must_trace(self):
-        self.edit_record("SL-EP-062", '"WO-045"]', '"WO-045", "WO-044"]')
-        self.assert_vol04("SL-EP-062 lists WO-044 but its Traces line does not name SL-EP-062")
+        rec = self.record(VOL04, "SL-EP-062")
+        extra = self.work_order_not_tracing("SL-EP-062")
+        self.edit_record("SL-EP-062", rec["wos_text"], '"work_orders": %s' % json.dumps(rec["work_orders"] + [extra]))
+        self.assert_vol04("SL-EP-062 lists %s but its Traces line does not name SL-EP-062" % extra)
 
     def test_unknown_work_order(self):
-        self.edit_record("SL-EP-062", '"WO-045"]', '"WO-045", "WO-999"]')
-        self.assert_vol04("SL-EP-062 lists WO-999 which has no file in work-orders/")
+        rec = self.record(VOL04, "SL-EP-062")
+        unknown = self.unknown_work_order()
+        self.edit_record("SL-EP-062", rec["wos_text"], '"work_orders": %s' % json.dumps(rec["work_orders"] + [unknown]))
+        self.assert_vol04("SL-EP-062 lists %s which has no file in work-orders/" % unknown)
 
     def test_a_work_order_is_primary_for_at_most_one_episode(self):
-        self.edit("work-orders/WO-039.md", "Traces: ", "Traces: SL-EP-061 ")
-        self.edit(VOL04, '"work_orders": ["WO-035", "WO-037", "WO-058", "WO-062"], "primary_wo": "WO-037"',
-                  '"work_orders": ["WO-035", "WO-037", "WO-039", "WO-058", "WO-062"], "primary_wo": "WO-039"')
-        self.edit(VOL04, '"acceptance": "just fabric-test id"', '"acceptance": "just fabric-test value"')
-        self.assert_vol04("WO-039 is primary_wo of more than one episode (SL-EP-061, SL-EP-062)")
+        rec61 = self.record(VOL04, "SL-EP-061")
+        rec62 = self.record(VOL04, "SL-EP-062")
+        moved = rec62["primary_wo"]
+        self.assertNotIn(moved, rec61["work_orders"])
+        cmds, err = cmd_plan_check.wo_acceptance(self.root, moved)
+        self.assertIsNone(err)
+        cmds = [c for c in cmds if c != rec62["acceptance"]] or cmds
+        self.edit("work-orders/%s.md" % moved, "Traces: ", "Traces: SL-EP-061 ")
+        self.edit_record(
+            "SL-EP-061",
+            rec61["head"],
+            '"work_orders": %s, "primary_wo": "%s", "acceptance": %s'
+            % (json.dumps(sorted(rec61["work_orders"] + [moved])), moved, json.dumps(cmds[0])),
+        )
+        self.assert_vol04("%s is primary_wo of more than one episode (SL-EP-061, SL-EP-062)" % moved)
 
     def test_unparsable_spec(self):
         self.edit(VOL04, '"volume": "SL-VOL-04",', '"volume": "SL-VOL-04",,')
@@ -205,20 +271,28 @@ class Vol05Test(Tree):
         self.assert_vol05("records must cover exactly SL-EP-081 to SL-EP-100", "SL-EP-090")
 
     def test_second_primary_for_wo090(self):
-        """The planted case of the panel's plan-2: WO-090 named primary of SL-EP-089 as well as SL-EP-093."""
-        self.edit(VOL05, '"primary_wo": "WO-084", "acceptance": "just runtime-test clock"',
-                  '"primary_wo": "WO-090", "acceptance": "just runtime-test clock"')
-        self.assert_vol05("SL-EP-089 primary_wo WO-090 is not in its work_orders")
-        self.assert_vol05("WO-090 is primary_wo of more than one episode (SL-EP-089, SL-EP-093)")
+        """The planted case of the panel's plan-2: SL-EP-093's primary (WO-090) named primary of SL-EP-089 too."""
+        rec89 = self.record(VOL05, "SL-EP-089")
+        second = self.record(VOL05, "SL-EP-093")["primary_wo"]
+        self.assertNotIn(second, rec89["work_orders"])
+        self.edit_record("SL-EP-089", '"primary_wo": %s' % json.dumps(rec89["primary_wo"]),
+                         '"primary_wo": "%s"' % second, VOL05)
+        self.assert_vol05("SL-EP-089 primary_wo %s is not in its work_orders" % second)
+        self.assert_vol05("%s is primary_wo of more than one episode (SL-EP-089, SL-EP-093)" % second)
 
     def test_acceptance_absent_from_primary(self):
-        self.edit(VOL05, '"acceptance": "just runtime-test clock"', '"acceptance": "just runtime-test frame"')
+        rec = self.record(VOL05, "SL-EP-089")
+        self.edit_record("SL-EP-089", '"acceptance": %s' % json.dumps(rec["acceptance"]),
+                         '"acceptance": "just runtime-test frame"', VOL05)
         self.assert_vol05("SL-EP-089 acceptance 'just runtime-test frame' is not in the front-matter acceptance",
-                          "its primary_wo WO-084")
+                          "its primary_wo %s" % rec["primary_wo"])
 
     def test_tracing_work_order_must_be_listed(self):
-        self.edit(VOL05, '"work_orders": ["WO-075", "WO-078"]', '"work_orders": ["WO-078"]')
-        self.assert_vol05("WO-075 traces SL-EP-082 but the SL-EP-082 record does not list it")
+        rec = self.record(VOL05, "SL-EP-082")
+        dropped = self.tracing_non_primary(rec)
+        kept = [wo for wo in rec["work_orders"] if wo != dropped]
+        self.edit_record("SL-EP-082", rec["wos_text"], '"work_orders": %s' % json.dumps(kept), VOL05)
+        self.assert_vol05("%s traces SL-EP-082 but the SL-EP-082 record does not list it" % dropped)
 
     def test_title_must_equal_registry(self):
         self.edit(VOL05, '"title": "Frame scheduler"', '"title": "Scheduler"')
