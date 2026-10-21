@@ -180,14 +180,19 @@ private:
     void (*destroy)(void *self) noexcept;
   };
 
+  // Named functions rather than captureless lambdas: gcc -fanalyzer models a lambda's function
+  // pointer conversion as a call of operator() on a null closure (WO-107).
+  template <class T> static void invoke_as(void *self, job_context &ctx) noexcept {
+    (*static_cast<T *>(self))(ctx);
+  }
+  template <class T> static void relocate_as(void *dst, void *src) noexcept {
+    ::new (dst) T(std::move(*static_cast<T *>(src)));
+    static_cast<T *>(src)->~T();
+  }
+  template <class T> static void destroy_as(void *self) noexcept { static_cast<T *>(self)->~T(); }
+
   template <class T>
-  static constexpr fn_ops ops_for{
-      [](void *self, job_context &ctx) noexcept { (*static_cast<T *>(self))(ctx); },
-      [](void *dst, void *src) noexcept {
-        ::new (dst) T(std::move(*static_cast<T *>(src)));
-        static_cast<T *>(src)->~T();
-      },
-      [](void *self) noexcept { static_cast<T *>(self)->~T(); }};
+  static constexpr fn_ops ops_for{&invoke_as<T>, &relocate_as<T>, &destroy_as<T>};
 
   void reset() noexcept {
     if (ops_ != nullptr) {
