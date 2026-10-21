@@ -11,6 +11,7 @@
 
 #include <doctest/doctest.h>
 
+#include <array>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -26,6 +27,7 @@ namespace mem = sl::runtime::mem;
 namespace rtt = sl::runtime::testing;
 
 constexpr std::uint32_t threads = 8;
+constexpr std::size_t max_held = 64;
 constexpr std::uint64_t base_seed = 0x5EED0840005ULL;
 
 class stream {
@@ -72,7 +74,11 @@ struct churn_result {
   std::atomic<std::uint64_t> corrupt{0};
 };
 
+// A slot without a block is never intact: the check does not depend on how the slot was filled.
 bool intact(const held &h) {
+  if (h.p == nullptr) {
+    return false;
+  }
   const auto *b = static_cast<const unsigned char *>(h.p);
   for (std::size_t i = 0; i < mem::effective_size(h.bytes); ++i) {
     if (b[i] != h.pattern) {
@@ -82,14 +88,14 @@ bool intact(const held &h) {
   return true;
 }
 
-// One thread's churn: seeded allocate, verify and release with at most 64 blocks held.
+// One thread's churn: seeded allocate, verify and release with at most max_held blocks held.
 void churn(mem::resource &r, std::uint64_t seed, std::uint32_t operations, std::size_t max_bytes,
            std::uint32_t max_align_log2, churn_result &out) {
   stream rng(seed);
-  std::vector<held> live;
-  live.reserve(64);
+  std::array<held, max_held> live{}; // every slot starts as {nullptr, 0, 0, 0}
+  std::size_t count = 0;
   for (std::uint32_t op = 0; op < operations; ++op) {
-    if (live.empty() || (live.size() < 64 && rng.next() % 2U == 0U)) {
+    if (count == 0 || (count < max_held && rng.next() % 2U == 0U)) {
       held h{.p = nullptr,
              .bytes = static_cast<std::size_t>(rng.next() % (max_bytes + 1)),
              .align = std::size_t{1} << (rng.next() % (max_align_log2 + 1)),
@@ -101,20 +107,24 @@ void churn(mem::resource &r, std::uint64_t seed, std::uint32_t operations, std::
       }
       h.p = *got;
       std::memset(h.p, h.pattern, mem::effective_size(h.bytes));
-      live.push_back(h);
+      live.at(count) = h;
+      ++count;
       out.allocs.fetch_add(1);
     } else {
-      const auto i = static_cast<std::size_t>(rng.next() % live.size());
-      if (!intact(live[i])) {
+      const auto i = static_cast<std::size_t>(rng.next() % count);
+      const held h = live.at(i);
+      if (!intact(h)) {
         out.corrupt.fetch_add(1);
       }
-      r.release(live[i].p, live[i].bytes, live[i].align);
-      live[i] = live.back();
-      live.pop_back();
+      r.release(h.p, h.bytes, h.align);
+      --count;
+      live.at(i) = live.at(count);
+      live.at(count) = held{};
       out.frees.fetch_add(1);
     }
   }
-  for (const held &h : live) {
+  for (std::size_t i = 0; i < count; ++i) {
+    const held h = live.at(i);
     if (!intact(h)) {
       out.corrupt.fetch_add(1);
     }
