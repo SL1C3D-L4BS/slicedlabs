@@ -8,6 +8,7 @@ import io
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cmd_registry_schema_selftest as st  # noqa: E402
@@ -46,10 +47,21 @@ class CoverageTests(unittest.TestCase):
 
 class RuntimeSchemaTests(unittest.TestCase):
     def test_every_runtime_schema_file_is_listed(self):
+        # The expected set is derived from the schema files themselves (WO-110), never pinned.
         paths = glob.glob(os.path.join(st.RUNTIME_SCHEMA_DIR, "*.schema.json"))
         files = sorted(os.path.basename(p)[: -len(".schema.json")] for p in paths)
+        self.assertTrue(files)
         self.assertEqual(files, sorted(st.RUNTIME_SCHEMAS))
-        self.assertEqual(sorted(st.RUNTIME_SCHEMAS), ["fault", "gate-report", "memreport", "schedule", "stress-matrix"])
+
+    def test_a_runtime_schema_file_not_covered_fails_the_selftest(self):
+        dropped = sorted(st.RUNTIME_SCHEMAS)[0]
+        kept = tuple(n for n in st.RUNTIME_SCHEMAS if n != dropped)
+        out = io.StringIO()
+        with mock.patch.object(st, "RUNTIME_SCHEMAS", kept), contextlib.redirect_stdout(out), \
+                contextlib.redirect_stderr(out):
+            status = st.main()
+        self.assertNotEqual(status, 0)
+        self.assertIn("schemas/runtime/%s.schema.json: not covered by the selftest" % dropped, out.getvalue())
 
     def test_examples_validate_and_a_planted_defect_does_not(self):
         for name in st.RUNTIME_SCHEMAS:
