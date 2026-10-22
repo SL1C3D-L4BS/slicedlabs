@@ -1,0 +1,729 @@
+{
+  "format": "sl-runtime-contract-lock/1",
+  "sha256": "381aad1baa3b24ca817a6156e566e7dc5a77de425abf3b94a94db523ddacfa7a",
+  "contract": {
+    "boundary_slots": [
+      "fault_check",
+      "observation_flush",
+      "projection_rebase",
+      "snapshot",
+      "swap",
+      "lifecycle_requests",
+      "retire_after",
+      "arena_flip",
+      "diagnostics"
+    ],
+    "error_codes": [
+      {
+        "area": "general",
+        "name": "runtime_failure",
+        "number": 6000
+      },
+      {
+        "area": "lifecycle",
+        "name": "invalid_state",
+        "number": 6001
+      },
+      {
+        "area": "lifecycle",
+        "name": "wrong_thread",
+        "number": 6002
+      },
+      {
+        "area": "lifecycle",
+        "name": "restart_required",
+        "number": 6003
+      },
+      {
+        "area": "lifecycle",
+        "name": "recovery_failed",
+        "number": 6004
+      },
+      {
+        "area": "lifecycle",
+        "name": "swap_rejected",
+        "number": 6005
+      },
+      {
+        "area": "lifecycle",
+        "name": "runtime_faulted",
+        "number": 6006
+      },
+      {
+        "area": "platform",
+        "name": "thread_spawn_failed",
+        "number": 6010
+      },
+      {
+        "area": "platform",
+        "name": "platform_unavailable",
+        "number": 6011
+      },
+      {
+        "area": "memory",
+        "name": "out_of_memory",
+        "number": 6020
+      },
+      {
+        "area": "memory",
+        "name": "bad_alignment",
+        "number": 6021
+      },
+      {
+        "area": "memory",
+        "name": "arena_exhausted",
+        "number": 6022
+      },
+      {
+        "area": "memory",
+        "name": "leak_detected",
+        "number": 6023
+      },
+      {
+        "area": "memory",
+        "name": "tag_registry_frozen",
+        "number": 6024
+      },
+      {
+        "area": "memory",
+        "name": "tag_reserved",
+        "number": 6025
+      },
+      {
+        "area": "jobs",
+        "name": "job_capacity",
+        "number": 6030
+      },
+      {
+        "area": "jobs",
+        "name": "job_cancelled",
+        "number": 6031
+      },
+      {
+        "area": "jobs",
+        "name": "job_failed",
+        "number": 6032
+      },
+      {
+        "area": "jobs",
+        "name": "scheduler_stopped",
+        "number": 6033
+      },
+      {
+        "area": "jobs",
+        "name": "deadlock_suspected",
+        "number": 6034
+      },
+      {
+        "area": "jobs",
+        "name": "stale_job",
+        "number": 6035
+      },
+      {
+        "area": "time",
+        "name": "invalid_tick_rate",
+        "number": 6040
+      },
+      {
+        "area": "frame",
+        "name": "schedule_frozen",
+        "number": 6045
+      },
+      {
+        "area": "ecs",
+        "name": "stale_entity",
+        "number": 6050
+      },
+      {
+        "area": "ecs",
+        "name": "entity_capacity",
+        "number": 6051
+      },
+      {
+        "area": "ecs",
+        "name": "component_unknown",
+        "number": 6052
+      },
+      {
+        "area": "ecs",
+        "name": "component_missing",
+        "number": 6053
+      },
+      {
+        "area": "ecs",
+        "name": "component_exists",
+        "number": 6054
+      },
+      {
+        "area": "ecs",
+        "name": "component_invalid",
+        "number": 6055
+      },
+      {
+        "area": "ecs",
+        "name": "component_registry_frozen",
+        "number": 6056
+      },
+      {
+        "area": "ecs",
+        "name": "archetype_limit",
+        "number": 6057
+      },
+      {
+        "area": "ecs",
+        "name": "structural_change_forbidden",
+        "number": 6058
+      },
+      {
+        "area": "ecs",
+        "name": "query_invalid",
+        "number": 6059
+      },
+      {
+        "area": "scheduling",
+        "name": "schedule_cycle",
+        "number": 6070
+      },
+      {
+        "area": "scheduling",
+        "name": "undeclared_access",
+        "number": 6071
+      },
+      {
+        "area": "scheduling",
+        "name": "access_conflict",
+        "number": 6072
+      },
+      {
+        "area": "scheduling",
+        "name": "system_unknown",
+        "number": 6073
+      },
+      {
+        "area": "reflection",
+        "name": "type_unknown",
+        "number": 6080
+      },
+      {
+        "area": "reflection",
+        "name": "field_unknown",
+        "number": 6081
+      },
+      {
+        "area": "reflection",
+        "name": "reflect_mismatch",
+        "number": 6082
+      },
+      {
+        "area": "reflection",
+        "name": "type_registry_frozen",
+        "number": 6083
+      },
+      {
+        "area": "reflection",
+        "name": "component_schema_mismatch",
+        "number": 6084
+      },
+      {
+        "area": "events",
+        "name": "event_overflow",
+        "number": 6090
+      },
+      {
+        "area": "events",
+        "name": "event_type_unknown",
+        "number": 6091
+      },
+      {
+        "area": "events",
+        "name": "event_payload_invalid",
+        "number": 6092
+      },
+      {
+        "area": "snapshot",
+        "name": "snapshot_corrupt",
+        "number": 6100
+      },
+      {
+        "area": "snapshot",
+        "name": "snapshot_version",
+        "number": 6101
+      },
+      {
+        "area": "snapshot",
+        "name": "snapshot_schema_mismatch",
+        "number": 6102
+      },
+      {
+        "area": "snapshot",
+        "name": "snapshot_mid_tick",
+        "number": 6103
+      },
+      {
+        "area": "snapshot",
+        "name": "snapshot_abi_mismatch",
+        "number": 6104
+      },
+      {
+        "area": "snapshot",
+        "name": "snapshot_contributor_unknown",
+        "number": 6105
+      },
+      {
+        "area": "link",
+        "name": "link_observation_rejected",
+        "number": 6110
+      },
+      {
+        "area": "link",
+        "name": "link_transient_component",
+        "number": 6111
+      },
+      {
+        "area": "link",
+        "name": "projection_stale",
+        "number": 6112
+      }
+    ],
+    "failpoints": [
+      {
+        "id": "RFP0",
+        "name": "alloc.fail",
+        "site": "mem::resource::try_allocate (Nth call or per tag)"
+      },
+      {
+        "id": "RFP1",
+        "name": "thread.spawn",
+        "site": "platform thread_factory::spawn"
+      },
+      {
+        "id": "RFP2",
+        "name": "job.error",
+        "site": "jobs::job_system before running a job body"
+      },
+      {
+        "id": "RFP3",
+        "name": "job.fatal",
+        "site": "jobs::job_system before running a job body"
+      },
+      {
+        "id": "RFP4",
+        "name": "worker.stall",
+        "site": "jobs worker loop at before_pop, after_steal, before_complete and in_wait"
+      },
+      {
+        "id": "RFP5",
+        "name": "system.fail",
+        "site": "ecs::system_scheduler before a system body"
+      },
+      {
+        "id": "RFP6",
+        "name": "clock.jump",
+        "site": "time::frame_clock::sample"
+      },
+      {
+        "id": "RFP7",
+        "name": "event.overflow",
+        "site": "event_channel<E>::write"
+      },
+      {
+        "id": "RFP8",
+        "name": "snapshot.io",
+        "site": "snapshot::save through file_access::atomic_write, after each storage primitive"
+      },
+      {
+        "id": "RFP9",
+        "name": "suspend.request",
+        "site": "runtime at each boundary slot and mid-phase"
+      },
+      {
+        "id": "RFP10",
+        "name": "entity.exhaust",
+        "site": "ecs::entity_allocator::create"
+      }
+    ],
+    "gate_evidence": [
+      {
+        "file": "../scorecard.json",
+        "format": "sl-runtime-scorecard/1"
+      },
+      {
+        "file": "demo-report.json",
+        "format": "sl-runtime-gate/1"
+      },
+      {
+        "file": "f5.json",
+        "format": "sl-runtime-f5/1"
+      },
+      {
+        "file": "fault-450.json",
+        "format": "sl-runtime-fault/1"
+      },
+      {
+        "file": "hash-matrix.json",
+        "format": "sl-runtime-hash-matrix/1"
+      },
+      {
+        "file": "hashes.json",
+        "format": "sl-runtime-hashes/1"
+      },
+      {
+        "file": "memreport.json",
+        "format": "sl-runtime-memreport/1"
+      },
+      {
+        "file": "schedule.json",
+        "format": "sl-runtime-schedule/1"
+      },
+      {
+        "file": "stress-matrix.json",
+        "format": "sl-runtime-stress-matrix/1"
+      }
+    ],
+    "layers": [
+      {
+        "headers": [
+          "error.hpp",
+          "faults.hpp"
+        ],
+        "layer": "L0"
+      },
+      {
+        "headers": [
+          "platform.hpp",
+          "headless_platform.hpp",
+          "memory.hpp"
+        ],
+        "layer": "L1"
+      },
+      {
+        "headers": [
+          "sync.hpp",
+          "allocators.hpp",
+          "memdiag.hpp",
+          "time.hpp",
+          "replay.hpp"
+        ],
+        "layer": "L2"
+      },
+      {
+        "headers": [
+          "jobs.hpp",
+          "work_queue.hpp",
+          "ws_deque.hpp",
+          "scheduler_stats.hpp"
+        ],
+        "layer": "L3"
+      },
+      {
+        "headers": [
+          "frame.hpp",
+          "reflect.hpp"
+        ],
+        "layer": "L4"
+      },
+      {
+        "headers": [
+          "ecs/entity.hpp",
+          "ecs/component.hpp",
+          "ecs/world.hpp"
+        ],
+        "layer": "L5"
+      },
+      {
+        "headers": [
+          "ecs/query.hpp",
+          "ecs/command_buffer.hpp"
+        ],
+        "layer": "L6"
+      },
+      {
+        "headers": [
+          "ecs/change.hpp",
+          "ecs/system.hpp",
+          "events.hpp"
+        ],
+        "layer": "L7"
+      },
+      {
+        "headers": [
+          "snapshot.hpp"
+        ],
+        "layer": "L8"
+      },
+      {
+        "headers": [
+          "runtime.hpp",
+          "bridge.hpp"
+        ],
+        "layer": "L9"
+      }
+    ],
+    "limits": {
+      "aging_limit": 64,
+      "arena_block_bytes_default": 65536,
+      "change_tick_bits": 32,
+      "change_tick_max_age": 1073741823,
+      "change_tick_sweep_every": 1073741824,
+      "chunk_alignment": 64,
+      "chunk_bytes": 16384,
+      "chunk_pool_slab_alignment": 4096,
+      "chunk_pool_slab_bytes": 2097152,
+      "column_alignment": 64,
+      "command_buffer_block_alignment": 64,
+      "command_buffer_block_bytes": 16384,
+      "debug_fill_freed": "0xDD",
+      "debug_fill_fresh": "0xCD",
+      "entity_generation_bits": 32,
+      "entity_generation_first": 1,
+      "entity_generation_retire": 4294967295,
+      "entity_index_bits": 32,
+      "entity_page_records": 4096,
+      "entity_reuse_fifo_threshold": 1024,
+      "error_code_table_version": 1,
+      "event_capacity_default": 65536,
+      "failpoint_table_version": 1,
+      "fault_stall_max_us": 2000,
+      "frame_arena_block_bytes": 1048576,
+      "gate_fault_tick": 450,
+      "gate_lanterns": 50000,
+      "gate_max_recoveries": 3,
+      "gate_records": 256,
+      "gate_snapshot_every": 300,
+      "gate_ticks": 600,
+      "health_ticks_default": 60,
+      "injection_poll_every": 61,
+      "input_payload_bytes": 48,
+      "job_capacity_default": 65536,
+      "job_capacity_max": 16777216,
+      "job_inline_payload_bytes": 48,
+      "job_max_dependencies": 8,
+      "job_nested_wait_depth": 64,
+      "job_payload_alignment": 16,
+      "job_record_alignment": 64,
+      "job_record_bytes": 128,
+      "last_run_slots": 2048,
+      "max_alignment": 4096,
+      "max_archetypes": 4096,
+      "max_catchup": 8,
+      "max_component_alignment": 64,
+      "max_component_size": 2048,
+      "max_component_types": 1024,
+      "max_components_per_archetype": 32,
+      "max_entities_default": 4194304,
+      "max_fields_per_type": 64,
+      "max_frame_delta": 250,
+      "max_memory_tags": 256,
+      "max_method_arity": 4,
+      "max_projections_held": 2,
+      "max_query_terms": 32,
+      "max_recoveries": 3,
+      "max_rows_per_chunk": 1024,
+      "max_systems_per_phase": 256,
+      "max_tasks_per_phase": 256,
+      "max_workers": 64,
+      "ordered_key_layout_version": 1,
+      "par_batch_min_rows": 4096,
+      "pool_min_block_bytes": 16,
+      "pool_slab_bytes": 65536,
+      "recovery_window_ticks": 600,
+      "report_interval_frames": 600,
+      "reserved_threads_default": 0,
+      "snapshot_major": 1,
+      "snapshot_minor": 0,
+      "spin_limit": 64,
+      "steal_aging_limit": 64,
+      "steal_spin_limit": 64,
+      "tick_rate_default": "60/1",
+      "warmup_frames": 10,
+      "watchdog_ms": 5000,
+      "watchdog_period_ms": 100,
+      "ws_deque_initial_cells": 4096,
+      "ws_deque_max_cells": 65536
+    },
+    "phases": [
+      {
+        "index": 0,
+        "phase": "begin_frame"
+      },
+      {
+        "index": 1,
+        "phase": "apply_inputs"
+      },
+      {
+        "index": 2,
+        "phase": "pre_tick"
+      },
+      {
+        "index": 3,
+        "phase": "tick"
+      },
+      {
+        "index": 4,
+        "phase": "post_tick"
+      },
+      {
+        "index": 5,
+        "phase": "observe"
+      },
+      {
+        "index": 6,
+        "phase": "present"
+      },
+      {
+        "index": 7,
+        "phase": "end_frame"
+      }
+    ],
+    "rt_states": {
+      "events": [
+        "start",
+        "start_ok",
+        "start_fail",
+        "run_frame",
+        "suspend",
+        "resume",
+        "stop",
+        "fault",
+        "recover",
+        "recover_ok",
+        "recover_fail",
+        "stopped"
+      ],
+      "states": [
+        "Created",
+        "Starting",
+        "Ready",
+        "Running",
+        "Suspended",
+        "Stopping",
+        "Stopped",
+        "Faulted",
+        "Recovering"
+      ],
+      "transitions": [
+        [
+          "Created",
+          "start",
+          "Starting"
+        ],
+        [
+          "Faulted",
+          "recover",
+          "Recovering"
+        ],
+        [
+          "Faulted",
+          "stop",
+          "Stopping"
+        ],
+        [
+          "Ready",
+          "run_frame",
+          "Running"
+        ],
+        [
+          "Ready",
+          "stop",
+          "Stopping"
+        ],
+        [
+          "Recovering",
+          "recover_fail",
+          "Stopping"
+        ],
+        [
+          "Recovering",
+          "recover_ok",
+          "Running"
+        ],
+        [
+          "Running",
+          "fault",
+          "Faulted"
+        ],
+        [
+          "Running",
+          "stop",
+          "Stopping"
+        ],
+        [
+          "Running",
+          "suspend",
+          "Suspended"
+        ],
+        [
+          "Starting",
+          "start_fail",
+          "Created"
+        ],
+        [
+          "Starting",
+          "start_ok",
+          "Ready"
+        ],
+        [
+          "Stopping",
+          "stopped",
+          "Stopped"
+        ],
+        [
+          "Suspended",
+          "resume",
+          "Running"
+        ],
+        [
+          "Suspended",
+          "stop",
+          "Stopping"
+        ]
+      ]
+    },
+    "stress_matrix": [
+      {
+        "cell": "S1",
+        "test": "tests/integration/runtime/stress_jobs_test.cpp"
+      },
+      {
+        "cell": "S2",
+        "test": "tests/integration/runtime/stress_deque_test.cpp"
+      },
+      {
+        "cell": "S3",
+        "test": "tests/integration/runtime/stress_jobs_test.cpp"
+      },
+      {
+        "cell": "S4",
+        "test": "tests/integration/runtime/stress_alloc_test.cpp"
+      },
+      {
+        "cell": "S5",
+        "test": "tests/integration/runtime/stress_alloc_test.cpp"
+      },
+      {
+        "cell": "S6",
+        "test": "tests/integration/runtime/stress_ecs_test.cpp"
+      },
+      {
+        "cell": "S7",
+        "test": "tests/integration/runtime/stress_det_matrix_test.cpp"
+      },
+      {
+        "cell": "S8",
+        "test": "tests/integration/runtime/stress_lifecycle_test.cpp"
+      },
+      {
+        "cell": "S9",
+        "test": "tests/integration/runtime/stress_lifecycle_test.cpp"
+      },
+      {
+        "cell": "S10",
+        "test": "tests/integration/runtime/stress_events_test.cpp"
+      }
+    ],
+    "table_versions": {
+      "error_codes": 1,
+      "failpoints": 1
+    }
+  }
+}

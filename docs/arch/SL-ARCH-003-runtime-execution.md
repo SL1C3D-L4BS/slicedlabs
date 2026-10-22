@@ -3,13 +3,13 @@ id: SL-ARCH-003
 kind: ARCH
 title: "Runtime and Execution Architecture"
 status: Draft
-version: 0.1.0
+version: 0.2.0
 owner: founder
 episodes: [81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 depends_on: [SL-ARCH-001, SL-ARCH-002]
 supersedes: []
 decisions: [ADR-0001, ADR-0002, ADR-0009, ADR-0015, ADR-0017, ADR-0021, ADR-0022, ADR-0023, ADR-0024, ADR-0025, ADR-0026, ADR-0027, ADR-0028]
-max_lines: 940
+max_lines: 1000
 ---
 # SL-ARCH-003: Runtime and Execution Architecture
 
@@ -28,7 +28,7 @@ is hashed. The document side of the boundary stays in SL-ARCH-001 (ARCH1-R60 to 
 
 ## Status and decisions
 
-Draft 0.1.0, written by WO-075 before any Volume 05 code (master plan, Authoring order). Binding decisions:
+Draft 0.2.0: written by WO-075 before any Volume 05 code (master plan, Authoring order) and reconciled with the code by WO-100 (the builders' decisions are under "Code reconciliation (WO-100)", code still to change is an open issue naming its order). Binding decisions:
 ADR-0001 (layout), ADR-0002 (dependencies: none added; no SDL3 or windowing, the volume is headless), ADR-0009
 (errors are values), ADR-0015 (failpoint pattern), ADR-0017 (authority), ADR-0021 (Volume 05 before Volume 02, the
 mathematics allowed meanwhile, the Demonstrated cap), and the Volume 05 records ADR-0022 (error domain and fault
@@ -113,7 +113,7 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"name": "stale_job", "number": 6035, "area": "jobs", "returned_by": "jobs::job_system::status on a handle whose generation was reused"},
 {"name": "invalid_tick_rate", "number": 6040, "area": "time", "returned_by": "time::fixed_stepper::make with num or den 0"},
 {"name": "schedule_frozen", "number": 6045, "area": "frame", "returned_by": "frame::frame_scheduler::add_task and ecs::system_scheduler::add after build"},
-{"name": "stale_entity", "number": 6050, "area": "ecs", "returned_by": "ecs::world checked accessors; ecs::entity_map lookups of a dead entity"},
+{"name": "stale_entity", "number": 6050, "area": "ecs", "returned_by": "ecs::world checked accessors; ecs::entity_allocator::check and destroy (entity_map answers not_found, never stale_entity)"},
 {"name": "entity_capacity", "number": 6051, "area": "ecs", "returned_by": "ecs::world::create and command playback beyond max_entities (RFP10)"},
 {"name": "component_unknown", "number": 6052, "area": "ecs", "returned_by": "ecs::world add, get and remove of an unregistered component"},
 {"name": "component_missing", "number": 6053, "area": "ecs", "returned_by": "ecs::world::get and remove of a component the entity lacks"},
@@ -127,8 +127,8 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"name": "undeclared_access", "number": 6071, "area": "scheduling", "returned_by": "the Debug access guard, through job_context::fail of the offending system"},
 {"name": "access_conflict", "number": 6072, "area": "scheduling", "returned_by": "ecs::system_scheduler::add when a system's queries need access its access_set lacks"},
 {"name": "system_unknown", "number": 6073, "area": "scheduling", "returned_by": "ecs::system_scheduler::build for an unknown before/after name"},
-{"name": "type_unknown", "number": 6080, "area": "reflection", "returned_by": "type_registry::find and method lookup"},
-{"name": "field_unknown", "number": 6081, "area": "reflection", "returned_by": "type_info::field lookup by name"},
+{"name": "type_unknown", "number": 6080, "area": "reflection", "returned_by": "type_registry::find and type_registry::method (static)"},
+{"name": "field_unknown", "number": 6081, "area": "reflection", "returned_by": "type_registry::field (static) lookup by name"},
 {"name": "reflect_mismatch", "number": 6082, "area": "reflection", "returned_by": "method_info invoke with wrong argument kinds"},
 {"name": "type_registry_frozen", "number": 6083, "area": "reflection", "returned_by": "type_registry::add and event_registry::add after freeze"},
 {"name": "component_schema_mismatch", "number": 6084, "area": "reflection", "returned_by": "fabric_binding::bind against the frozen schema_registry"},
@@ -166,17 +166,17 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 
 ```sl-data
 {"failpoints": [
-{"id": "RFP0", "name": "alloc.fail", "site": "mem::resource::try_allocate (Nth call or per tag)", "outcome": "out_of_memory; the operation leaves its object unchanged; inside playback the frame faults"},
+{"id": "RFP0", "name": "alloc.fail", "site": "mem::resource::try_allocate (Nth call or per tag)", "outcome": "out_of_memory; the operation leaves its object unchanged; inside playback the frame faults; testing::failing_resource injects without visiting RFP0"},
 {"id": "RFP1", "name": "thread.spawn", "site": "platform thread_factory::spawn", "outcome": "thread_spawn_failed; runtime::start unwinds to Created with no thread left"},
 {"id": "RFP2", "name": "job.error", "site": "jobs::job_system before running a job body", "outcome": "the job fails with job_failed; dependents job_cancelled; runtime state unchanged"},
 {"id": "RFP3", "name": "job.fatal", "site": "jobs::job_system before running a job body", "outcome": "fail_fatal: job_failed, the worker continues, the runtime moves to Faulted at end_frame"},
-{"id": "RFP4", "name": "worker.stall", "site": "jobs worker loop at before_pop, after_steal, before_complete and in_wait", "outcome": "a bounded stall (0-2 ms, seeded); results and state hashes unchanged"},
-{"id": "RFP5", "name": "system.fail", "site": "ecs::system_scheduler before a system body", "outcome": "the system fails; Faulted at end_frame without playback; recovery per policy"},
+{"id": "RFP4", "name": "worker.stall", "site": "jobs worker loop at before_pop, after_steal, before_complete and in_wait", "outcome": "a stall of min(param, 2000) us; results and state hashes unchanged"},
+{"id": "RFP5", "name": "system.fail", "site": "ecs::system_scheduler before a system body", "outcome": "visited after the system body returns: the system job fails with job_failed; Faulted at end_frame; recovery per policy"},
 {"id": "RFP6", "name": "clock.jump", "site": "time::frame_clock::sample", "outcome": "a backward jump gives delta 0 and non_monotonic + 1; a hitch is clamped to max_frame_delta"},
-{"id": "RFP7", "name": "event.overflow", "site": "event_channel<E>::write", "outcome": "the channel behaves as full: the newest event is dropped and counted"},
-{"id": "RFP8", "name": "snapshot.io", "site": "snapshot::save through file_access::atomic_write, after each storage primitive", "outcome": "a simulated crash; the old or the new snapshot stays loadable"},
-{"id": "RFP9", "name": "suspend.request", "site": "runtime at each boundary slot and mid-phase", "outcome": "request_suspend issued there; it takes effect at end_frame and the hash is unchanged"},
-{"id": "RFP10", "name": "entity.exhaust", "site": "ecs::entity_allocator::create", "outcome": "forces entity_capacity, or fast-forwards a slot's generation to saturation so it retires"}
+{"id": "RFP7", "name": "event.overflow", "site": "event_channel<E>::write", "outcome": "visited by write and try_write: the channel behaves as full, the event is dropped and counted (try_write returns event_overflow)"},
+{"id": "RFP8", "name": "snapshot.io", "site": "snapshot::save through file_access::atomic_write, after each storage primitive", "outcome": "one visit per save before atomic_write: io_error and no primitive runs (the old snapshot loads); a crash after each primitive comes from the faulty vfs"},
+{"id": "RFP9", "name": "suspend.request", "site": "runtime at each boundary slot and mid-phase", "outcome": "visited in every boundary slot and at every phase end: request_suspend issued there; it takes effect at end_frame and the hash is unchanged"},
+{"id": "RFP10", "name": "entity.exhaust", "site": "ecs::entity_allocator::create", "outcome": "param 1 fast-forwards the chosen slot to generation 0xFFFFFFFE so it retires; any other param forces entity_capacity"}
 ],
 "compiled": "SL_RUNTIME_FAULTS=1 in debug, gcc-debug, ci-asan, ci-ubsan, ci-tsan; 0 in release presets",
 "armed_by": "sl::runtime::testing::arm(failpoint, at_visit, sticky, param) in engine/runtime/testing/faults_arm.hpp",
@@ -232,7 +232,7 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 ### Allocation diagnostics (episode 085)
 
 - ARCH3-R052: `memory_report` MUST give per tag live bytes and blocks, peak bytes, allocation and failure counts, per allocator fragmentation in per-mille (1000 - 1000 x largest free run / total free, 0 with no free space), and the external tags separately (ADR-0023; master plan, Volume 05, episode 085).
-- ARCH3-R053: Reports MUST serialize as sl-runtime-memreport/1 valid against schemas/runtime.memreport.schema.json, and the runtime MUST emit one log event of system `runtime.mem` every report_interval frames and at shutdown (master plan section 3, F6; section 5.1, row Memory subsystem).
+- ARCH3-R053: Reports MUST serialize as sl-runtime-memreport/1 valid against schemas/runtime/memreport.schema.json, and the runtime MUST emit one log event of system `runtime.mem` every report_interval frames and at shutdown (master plan section 3, F6; section 5.1, row Memory subsystem).
 - ARCH3-R054: Leak reports MUST list each live block's tag, site and size sorted by (tag, site, size), byte-identical across runs and worker counts (ADR-0026).
 - ARCH3-R055: Counters MUST be relaxed atomics or per-thread; reading a report MUST NOT block allocation, and Release tracking costs at most one relaxed atomic add per counter per call (ADR-0024).
 - ARCH3-R056: Memory the runtime does not allocate MUST be reported through `report_external(tag, bytes)` under a reserved tag (fabric.projection, gpu.*) and never counted in tracked live bytes (ADR-0023; ADR-0027).
@@ -471,9 +471,10 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"file": "memreport.json", "format": "sl-runtime-memreport/1", "holds": "leaks 0, steady upstream allocations per frame 0"},
 {"file": "fault-450.json", "format": "sl-runtime-fault/1", "holds": "the RFP5 fault report"},
 {"file": "schedule.json", "format": "sl-runtime-schedule/1", "holds": "the exported schedule"},
+{"file": "hashes.json", "format": "sl-runtime-hashes/1", "holds": "per-step state hashes of each run, the input of determinism_check (no schema yet)"},
 {"file": "hash-matrix.json", "format": "sl-runtime-hash-matrix/1", "holds": "workers x mode x resume x replay, all equal (D1); clang vs gcc recorded"},
 {"file": "stress-matrix.json", "format": "sl-runtime-stress-matrix/1", "holds": "cells S1-S10 x presets, pass, wall seconds, seed"},
-{"file": "san-asan.log, san-ubsan.log, san-tsan.log", "format": "text", "holds": "zero sanitizer reports (check-full only)"},
+{"file": "../san/<asan|ubsan|tsan>-<area|all>.log", "format": "text", "holds": "zero sanitizer report lines (runtime-san; check-full only)"},
 {"file": "../scorecard.json", "format": "sl-runtime-scorecard/1", "holds": "build/runtime/scorecard.json"},
 {"file": "../../acceptance/13-runtime-gate.log .. 16-check-full.log", "format": "text", "holds": "just acceptance-081-100"}
 ],
@@ -483,6 +484,8 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 ### Limits (every number; ADR-0025, ADR-0024, ADR-0023)
 
 - ARCH3-R174: Builders MUST take every size, capacity, timeout and scale from the `limits` table and MUST NOT choose another; a value that does not fit is a deviation (ADR-0028; master plan section 6.3, rule 4).
+
+Every row is bound to a constant or default of the code by `just runtime-contract-lock`, except the rows marked `"bound": false` (formulas, test tiers, CMake values and constants private to one source file), which the lock skips and the code does not export.
 
 ```sl-data
 {"limits": [
@@ -495,6 +498,7 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"name": "max_component_size", "value": 2048, "unit": "bytes", "note": "ADR-0025"},
 {"name": "max_component_alignment", "value": 64, "unit": "bytes", "note": "ADR-0025"},
 {"name": "max_archetypes", "value": 4096, "unit": "per world", "note": "ADR-0025"},
+{"name": "max_query_terms", "value": 32, "unit": "terms", "note": "= max_components_per_archetype"},
 {"name": "entity_index_bits", "value": 32, "unit": "bits", "note": "ADR-0025; runtime ABI"},
 {"name": "entity_generation_bits", "value": 32, "unit": "bits", "note": "ADR-0025; runtime ABI"},
 {"name": "entity_generation_first", "value": 1, "unit": "", "note": "0 is null"},
@@ -503,32 +507,42 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"name": "entity_page_records", "value": 4096, "unit": "records", "note": "pages never move"},
 {"name": "max_entities_default", "value": 4194304, "unit": "entities", "note": "runtime_config.max_entities"},
 {"name": "job_capacity_default", "value": 65536, "unit": "records", "note": "runtime_config.job_capacity"},
+{"name": "job_capacity_max", "value": 16777216, "unit": "records", "note": "2^24; start refuses more (invalid_argument)"},
 {"name": "job_record_bytes", "value": 128, "unit": "bytes, aligned 64", "note": "ADR-0024"},
+{"name": "job_record_alignment", "value": 64, "unit": "bytes", "note": "ADR-0024"},
 {"name": "job_inline_payload_bytes", "value": 48, "unit": "bytes", "note": "ADR-0024"},
+{"name": "job_payload_alignment", "value": 16, "unit": "bytes", "note": "job_fn and task_fn inline storage"},
 {"name": "job_max_dependencies", "value": 8, "unit": "per submit", "note": "ADR-0024"},
 {"name": "job_nested_wait_depth", "value": 64, "unit": "levels", "note": "tested"},
 {"name": "ws_deque_initial_cells", "value": 4096, "unit": "cells", "note": "doubles"},
 {"name": "ws_deque_max_cells", "value": 65536, "unit": "cells", "note": "= job_capacity_default"},
-{"name": "injection_queue_capacity", "value": 65536, "unit": "per priority", "note": "frame and background"},
+{"name": "injection_queue_capacity", "value": "job_capacity", "unit": "per queue", "note": "frame, background and main-affinity locked_deque rings take runtime_config.job_capacity; no constant of its own", "bound": false},
 {"name": "injection_poll_every", "value": 61, "unit": "local pops", "note": "starvation bound"},
-{"name": "steal_attempts_per_round", "value": "2 x workers", "unit": "attempts", "note": ""},
+{"name": "steal_attempts_per_round", "value": "2 x workers", "unit": "attempts", "note": "a formula in policy_steal.cpp (attempt >= 2 x workers skips)", "bound": false},
 {"name": "spin_limit", "value": 64, "unit": "iterations", "note": "then park"},
+{"name": "steal_spin_limit", "value": 64, "unit": "iterations", "note": "steal_options default"},
 {"name": "aging_limit", "value": 64, "unit": "scheduler rounds", "note": "background promotion"},
+{"name": "steal_aging_limit", "value": 64, "unit": "scheduler rounds", "note": "steal_options default"},
 {"name": "max_workers", "value": 64, "unit": "threads", "note": "runtime_config.workers"},
-{"name": "workers_default", "value": "hardware_concurrency - 1 - reserved_threads, at least 1", "unit": "", "note": "owner thread helps"},
+{"name": "workers_default", "value": "hardware_concurrency - 1 - reserved_threads, at least 1", "unit": "", "note": "a formula in jobs::default_workers()", "bound": false},
 {"name": "reserved_threads_default", "value": 0, "unit": "threads", "note": "Volume 07 render submit and I/O"},
 {"name": "watchdog_ms", "value": 5000, "unit": "ms", "note": "Debug and sanitizer builds"},
+{"name": "watchdog_period_ms", "value": 100, "unit": "ms", "note": "watchdog poll period"},
 {"name": "tick_rate_default", "value": "60/1", "unit": "ticks per second", "note": "rational num/den"},
 {"name": "max_frame_delta", "value": 250, "unit": "ms", "note": "excess counted in dropped_ns"},
 {"name": "max_catchup", "value": 8, "unit": "ticks per frame", "note": "beyond: dropped_ticks"},
 {"name": "change_tick_bits", "value": 32, "unit": "bits", "note": "wrap sweep"},
 {"name": "change_tick_sweep_every", "value": 1073741824, "unit": "ticks (2^30)", "note": "clamps ticks older than 2^31"},
+{"name": "change_tick_max_age", "value": 1073741823, "unit": "ticks (2^30 - 1)", "note": "sweep_ticks clamps older stamps to now - max_age"},
+{"name": "last_run_slots", "value": 2048, "unit": "slots", "note": "last_run_ticks: phase x 256 + system index"},
 {"name": "frame_arena_block_bytes", "value": 1048576, "unit": "bytes per worker per buffer", "note": "grows only in warm-up"},
 {"name": "command_buffer_block_bytes", "value": 16384, "unit": "bytes", "note": "from the frame arena"},
+{"name": "command_buffer_block_alignment", "value": 64, "unit": "bytes", "note": ""},
 {"name": "warmup_frames", "value": 10, "unit": "frames", "note": "before zero-upstream counting"},
 {"name": "event_capacity_default", "value": 65536, "unit": "events per channel per frame", "note": "RFP7"},
 {"name": "par_batch_min_rows", "value": 4096, "unit": "rows", "note": "whole chunks"},
 {"name": "max_systems_per_phase", "value": 256, "unit": "systems", "note": ""},
+{"name": "max_tasks_per_phase", "value": 256, "unit": "tasks", "note": "frame_scheduler"},
 {"name": "max_fields_per_type", "value": 64, "unit": "fields", "note": "reflection"},
 {"name": "max_method_arity", "value": 4, "unit": "arguments", "note": "reflection"},
 {"name": "report_interval_frames", "value": 600, "unit": "frames", "note": "runtime.mem log event"},
@@ -543,23 +557,32 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"name": "pool_min_block_bytes", "value": 16, "unit": "bytes", "note": ""},
 {"name": "arena_block_bytes_default", "value": 65536, "unit": "bytes", "note": ""},
 {"name": "chunk_pool_slab_bytes", "value": 2097152, "unit": "bytes, aligned 4096", "note": "tag ecs.chunks"},
+{"name": "chunk_pool_slab_alignment", "value": 4096, "unit": "bytes", "note": ""},
 {"name": "debug_fill_fresh", "value": "0xCD", "unit": "byte", "note": ""},
 {"name": "debug_fill_freed", "value": "0xDD", "unit": "byte", "note": ""},
-{"name": "canonical_nan_f32", "value": "0x7FC00000", "unit": "bits", "note": "ADR-0026"},
-{"name": "canonical_nan_f64", "value": "0x7FF8000000000000", "unit": "bits", "note": "ADR-0026"},
-{"name": "unit_case_cap", "value": 1, "unit": "s per case", "note": "unit tier"},
-{"name": "unit_entry_timeout", "value": 10, "unit": "s per ctest entry", "note": "unit tier"},
-{"name": "integration_entry_timeout", "value": 60, "unit": "s per ctest entry", "note": "integration tier"},
-{"name": "stress_file_cap", "value": 20, "unit": "s Debug at scale 1", "note": "stress area"},
-{"name": "gate_test_cap", "value": 15, "unit": "s Debug at scale 1", "note": "gate area"},
-{"name": "SL_RUNTIME_STRESS_SCALE_default", "value": 1.0, "unit": "factor", "note": "0.1 when SL_SANITIZE is set; iteration counts floor at 1"},
+{"name": "input_payload_bytes", "value": 48, "unit": "bytes", "note": "platform input event payload"},
+{"name": "os_thread_name_bytes", "value": 15, "unit": "bytes", "note": "Linux pthread name limit, private to platform_threads.cpp; thread_handle::name() keeps the full name", "bound": false},
+{"name": "error_code_table_version", "value": 1, "unit": "", "note": "error_codes table_version; runtime_abi_digest input"},
+{"name": "failpoint_table_version", "value": 1, "unit": "", "note": "failpoints table_version; runtime_abi_digest input"},
+{"name": "ordered_key_layout_version", "value": 1, "unit": "", "note": "runtime_abi_digest input"},
+{"name": "snapshot_major", "value": 1, "unit": "", "note": "SLRS/1"},
+{"name": "snapshot_minor", "value": 0, "unit": "", "note": "SLRS/1"},
+{"name": "canonical_nan_f32", "value": "0x7FC00000", "unit": "bits", "note": "ADR-0026; a constant private to reflect_codec.cpp and replay.hpp state_hasher", "bound": false},
+{"name": "canonical_nan_f64", "value": "0x7FF8000000000000", "unit": "bits", "note": "ADR-0026; a constant private to reflect_codec.cpp and replay.hpp state_hasher", "bound": false},
+{"name": "unit_case_cap", "value": 1, "unit": "s per case", "note": "unit tier; test policy, not code", "bound": false},
+{"name": "unit_entry_timeout", "value": 10, "unit": "s per ctest entry", "note": "unit tier; ctest TIMEOUT", "bound": false},
+{"name": "integration_entry_timeout", "value": 60, "unit": "s per ctest entry", "note": "integration tier; ctest TIMEOUT", "bound": false},
+{"name": "stress_file_cap", "value": 20, "unit": "s Debug at scale 1", "note": "stress area; ctest TIMEOUT", "bound": false},
+{"name": "gate_test_cap", "value": 15, "unit": "s Debug at scale 1", "note": "gate area; ctest TIMEOUT", "bound": false},
+{"name": "SL_RUNTIME_STRESS_SCALE_default", "value": 1.0, "unit": "factor", "note": "0.1 when SL_SANITIZE is set; iteration counts floor at 1; a CMake environment value", "bound": false},
 {"name": "gate_records", "value": 256, "unit": "content.scene records", "note": "gate scene"},
 {"name": "gate_lanterns", "value": 50000, "unit": "entities", "note": "gate scene"},
-{"name": "gate_systems", "value": 8, "unit": "systems over 4 phases", "note": "gate scene"},
+{"name": "gate_systems", "value": 8, "unit": "systems over 4 phases", "note": "gate scene: 7 scene systems (demo/systems.cpp) plus the link's observe system; no constant", "bound": false},
 {"name": "gate_ticks", "value": 600, "unit": "ticks at 60 Hz", "note": "gate scene"},
 {"name": "gate_snapshot_every", "value": 300, "unit": "ticks", "note": "gate scene"},
 {"name": "gate_fault_tick", "value": 450, "unit": "tick", "note": "RFP5"},
-{"name": "gate_test_scale", "value": 0.1, "unit": "of the scene", "note": "gate_*_test"}
+{"name": "gate_max_recoveries", "value": 3, "unit": "per window", "note": "gate scene recovery bound"},
+{"name": "gate_test_scale", "value": 0.1, "unit": "of the scene", "note": "gate_*_test; scaled(gate_lanterns / 10), no constant", "bound": false}
 ]}
 ```
 
@@ -577,7 +600,7 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"api": "platform clock_source::now, wall_clock::now", "header": "platform.hpp", "class": "any-thread", "note": ""},
 {"api": "platform thread_factory::spawn", "header": "platform.hpp", "class": "owner-thread", "note": "called by job_system::start"},
 {"api": "platform input_source::poll, window::*", "header": "platform.hpp", "class": "owner-thread", "note": ""},
-{"api": "platform file_access::*", "header": "platform.hpp", "class": "any-thread", "note": "one call per handle at a time"},
+{"api": "platform file_access::*", "header": "platform.hpp", "class": "any-thread", "note": "one call per path at a time; no state of its own, the vfs is thread-safe"},
 {"api": "platform record_sink::*", "header": "platform.hpp", "class": "owner-thread", "note": "called in begin_frame"},
 {"api": "make_headless_platform, testing::scripted_platform", "header": "headless_platform.hpp", "class": "owner-thread", "note": "construction"},
 {"api": "mem::tag_registry::add, reserve_external, freeze", "header": "memory.hpp", "class": "owner-thread", "note": "before freeze"},
@@ -586,7 +609,8 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"api": "arena_resource, stack_resource, pool_resource, frame_arena", "header": "allocators.hpp", "class": "owner-thread", "note": "Debug owner assertion; frame_arena has one buffer pair per worker, each worker-only"},
 {"api": "frame_arena::flip", "header": "allocators.hpp", "class": "owner-thread", "note": "end_frame slot arena_flip"},
 {"api": "synchronized_resource, general_resource", "header": "allocators.hpp", "class": "any-thread", "note": ""},
-{"api": "make_report, report_external, to_json, from_json", "header": "memdiag.hpp", "class": "any-thread", "note": "never blocks allocation"},
+{"api": "make_report, report_external, to_json, from_json", "header": "memdiag.hpp", "class": "any-thread", "note": "never blocks allocation; allocator free space is sampled on the owner thread at add and end_frame"},
+{"api": "diagnostics add, on_frame_end", "header": "memdiag.hpp", "class": "owner-thread", "note": "add before any other thread reads reports"},
 {"api": "leak report at shutdown", "header": "memdiag.hpp", "class": "owner-thread", "note": ""},
 {"api": "cpu_fence, job_counter, event_count, counting_semaphore", "header": "sync.hpp", "class": "any-thread", "note": "job_counter::reset only without waiters"},
 {"api": "jobs::job_system::start, stop, drain_results", "header": "jobs.hpp", "class": "owner-thread", "note": ""},
@@ -602,7 +626,7 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"api": "det::rng_stream", "header": "replay.hpp", "class": "worker-only", "note": "a value with one owner (one per system or chunk key), never shared"},
 {"api": "det::state_hasher, merge_ordered, ordered_buffer", "header": "replay.hpp", "class": "any-thread", "note": "a buffer has one writer job"},
 {"api": "det::snapshot_contributor capture, restore", "header": "replay.hpp", "class": "owner-thread", "note": "end_frame only"},
-{"api": "frame::frame_scheduler add_task, build, add_boundary_hook, retire_after", "header": "frame.hpp", "class": "owner-thread", "note": "add_task before build"},
+{"api": "frame_scheduler add_task, build, add_boundary_hook, add_phase_end_hook, retire_after, run_frame", "header": "frame.hpp", "class": "owner-thread", "note": "add_task before build; retire_after returns result<void> (wrong_thread elsewhere); hooks added during run_frame are ignored"},
 {"api": "frame tasks", "header": "frame.hpp", "class": "worker-only", "note": "run as frame jobs"},
 {"api": "reflect type_registry add, freeze", "header": "reflect.hpp", "class": "owner-thread", "note": "before freeze"},
 {"api": "reflect find, encode, decode, hash_into, dump", "header": "reflect.hpp", "class": "any-thread", "note": "after freeze; reentrant"},
@@ -611,12 +635,13 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"api": "ecs::component_registry add, freeze", "header": "ecs/component.hpp", "class": "owner-thread", "note": "before freeze"},
 {"api": "ecs::world create, destroy, add, remove, set (structural)", "header": "ecs/world.hpp", "class": "owner-thread", "note": "outside phases; inside phases use command buffers"},
 {"api": "ecs::world get<T>, column access", "header": "ecs/world.hpp", "class": "worker-only", "note": "inside a system with the declared access; owner thread outside phases"},
-{"api": "ecs::query for_each, for_each_chunk, par_for_each", "header": "ecs/query.hpp", "class": "worker-only", "note": "inside a system with matching declared access"},
+{"api": "ecs::query for_each, for_each_chunk, par_for_each", "header": "ecs/query.hpp", "class": "worker-only", "note": "inside a system with matching declared access; one query object is never iterated from two threads at once"},
+{"api": "ecs::command_queue open", "header": "ecs/command_buffer.hpp", "class": "any-thread", "note": "under the queue mutex; open(base, worker) binds the worker's frame arena"},
 {"api": "ecs::command_buffer record", "header": "ecs/command_buffer.hpp", "class": "worker-only", "note": "one buffer per job, single writer"},
 {"api": "ecs::command_buffer playback", "header": "ecs/command_buffer.hpp", "class": "owner-thread", "note": "phase boundary"},
 {"api": "ecs::system_scheduler add, build, export_json", "header": "ecs/system.hpp", "class": "owner-thread", "note": ""},
 {"api": "system bodies", "header": "ecs/system.hpp", "class": "worker-only", "note": "exclusive systems run on the owner thread"},
-{"api": "ecs::mark_changed, last_run_ticks", "header": "ecs/change.hpp", "class": "worker-only", "note": "mark_changed needs write access; last_run_ticks owner-thread at boundaries"},
+{"api": "ecs::mark_changed, last_run_ticks", "header": "ecs/change.hpp", "class": "worker-only", "note": "mark_changed needs write access, distinct rows from parallel batches; last_run_ticks owner-thread at boundaries"},
 {"api": "ecs::structural_log read", "header": "ecs/change.hpp", "class": "owner-thread", "note": "boundary"},
 {"api": "event_registry add, freeze", "header": "events.hpp", "class": "owner-thread", "note": "before freeze"},
 {"api": "event_channel<E> write, try_write, read", "header": "events.hpp", "class": "worker-only", "note": "systems that declare the event access"},
@@ -701,6 +726,36 @@ The panel verdict this draft implements is build/design/vol05-judges.json (criti
 {"id": "V26-1", "volume": "26", "seam": "Windows and macOS platforms (ADR-0006)", "api": "platform interfaces", "wo": "WO-078"}
 ]}
 ```
+
+### Code reconciliation (WO-100)
+
+What the Volume 05 code does where version 0.1.0 was silent or said otherwise, from the 312 entries of docs/arch/deviations/vol05/WO-076.md to WO-099.md; each item is descriptive and the rules above stand. Items the code still has to change are open issues below, each naming its order or volume.
+
+- Errors and failpoints (WO-076): the runtime `to_string(errc)` cases live in sl/core/error.hpp (constexpr), grouped by `// runtime <area>` comments; `is_runtime_code` is false for reserved numbers; `make_error` has a `const char *` overload so unqualified calls are not ambiguous by ADL; the table rows are `error_code_info {name, number, area}` and `failpoint_info {id, name, site}` (no outcome column) with `error_code_table_version`, `failpoint_table_version` and `failpoint_count = 11`. The registry is a function-local `static constinit` array in src/faults.cpp (one 64-byte slot per point, allow-listed for R-RT-GLOBAL); `testing::fault_arming` is the only friend of `detail::fault_registry_hooks`; `arm(point, at_visit, sticky, param)` counts visits from the arm call, re-arming replaces, `disarm(point)` and `scoped_arm::status()` exist; SL_RUNTIME_FAULTS is always defined (1 in Debug and every sanitizer build); RT-INV-ERR-03's golden also forbids new numbers below 6000; runtime-san runs ctest with -V into build/runtime/san/<san>-<area|all>.log.
+- Guardrails (WO-077): tools/runtime is a Python package (WO-103); lint_allow.json excuses the whole of src/faults.cpp for R-RT-GLOBAL; a malformed allow-list is R-RT-ALLOW; R-RT-LAYER checks only headers in the `layers` table; R-RT-FABRIC, R-RT-MATH, R-RT-GLOBAL, R-RT-ORDER, R-RT-DIST, R-RT-PLATFORM, R-RT-NOEXCEPT and R-RT-OUTPUT are text scanners with the scopes documented in tools/runtime/runtime_lint.py; contracts_check also reads the work-order files (R-RT-WO); the LINT rows keep their verified_by recipes while their tests run under `just tools-test`.
+- Platform (WO-078): `thread_group` releases newest first; threads are created with pthread_create behind a pimpl, named `slrt<instance>-<name>` with the OS name cut to its first 15 bytes (`os_thread_name_bytes`); the interfaces share `platform_interface` and the headless types are public in headless_platform.hpp; `file_access` takes string_view paths relative to `root()`, maps every vfs code except not_found to io_error and is any-thread with one call per path at a time; `window` is headless(), width(), height(); the recording helpers and `content_digest` live in platform.hpp; `input_payload_bytes = 48`; `struct platform` stays an aggregate of references under scoped NOLINT and cppcheck suppressions (WO-104); atomic_write visits no failpoint; the RFP1 branch is compiled only with SL_RUNTIME_FAULTS.
+- Memory (WO-079): `tracking_resource` takes a backing resource and `set_upstream` sets a separate pmr fallback, whose blocks are remembered; the pmr path is the public `forward_allocate` and the `do_*` overrides are final; every tracked block carries a 16-byte header {size, tag, log2 align, magic}; `try_allocate_from` and `release_to` give nothrow allocation from any upstream; tag ids are 1..256 (0 untagged), checked against the registry; tag_registry checks frozen, grammar, reserved, duplicate, capacity in that order; tracking_resource fills 0xCD and 0xDD but leaves poisoning to recycling resources; the leak report is sorted by (tag label, file, line, size); failing_resource injects without visiting RFP0.
+- Synchronization (WO-080): `spin_limit = 64` is a named constant of sync.hpp; a spin step is `std::this_thread::yield()`; every atomic of the primitives is seq_cst; `cpu_fence(0)` is released at construction and over-signals clamp; `event_count` always advances its epoch; `job_counter::waiters()` exists; the sync area visits no failpoint.
+- Allocators (WO-081): arena, stack, pool and frame_arena derive `owner_thread_resource` (a Debug owner check that synchronized_resource lifts); stack_resource enforces LIFO only inside marker scopes and defers out-of-order releases outside them; the allocators visit no failpoint and pass upstream errors through; blocks, entries and strides are as documented in allocators.hpp; the four size constants carry the `limits` names; the churn test holds blocks in a fixed array (WO-108).
+- Jobs (WO-082): background results are `jobs::background_result` delivered after every earlier background job completes; `current_job_priority` is a member found by thread id; `fatal_report` and `job_config::on_fatal` carry fatal failures; RFP2 fails before the body, RFP3 through on_fatal, RFP4 stalls min(param, 2000) us; every aging_limit-th round polls the background queue first; the frame, background and main-affinity queues are locked_deque rings of job_capacity cells and only the per-worker queues come from make_queue; wakeups notify_all; counter and fence dependencies are polled gates; only workers and the owner help in wait; an inline run at capacity and a failed `submit` return the null handle; a stale predecessor counts as satisfied; records are 128 bytes with a cold side array; names are pointer plus 16-bit length; workers are 0..64 and capacity 1..2^24 (`job_capacity_max`); job_fn checks by static_assert and its ops table uses named static functions (WO-107).
+- Entities (WO-083): `entity::bits()` puts the index in the high word; a page is 33,280 bytes (generations, intrusive FIFO links, alive bits) and the page table is sized once; pages carry the resource's default tag; RFP10 param 1 fast-forwards to 0xFFFFFFFE, any other param forces entity_capacity; the allocator has no owner-thread check (phases guarantee it); capture and restore validate before changing anything; stale_entity comes from the world's checked accessors and `entity_allocator::check` and `destroy`, while `entity_map` answers not_found and never stale_entity; `assume_alive` is an NDEBUG-gated SL_DEBUG_ASSERT.
+- Clocks and determinism (WO-084): `frame_clock::frame_index()` counts samples; every clock has `state` capture and restore; `frame_time` is {frame_index, now, delta, a {num, den}} with plain members; the stepper reduces the rate by gcd and uses a two-word product; a non-monotonic sample keeps the highest baseline, freeze and thaw return 0; tick_scope asserts the `runtime/` prefix; state_hasher tags str 0x31 and bool 0x40; merge_ordered takes a span of buffer pointers and skips nulls; rng_stream restore parses into a copy and refuses malformed text with snapshot_corrupt; the runtime.clock and runtime.rng contributor layouts are documented in replay.hpp; the goldens come from an independent stdlib script.
+- Diagnostics (WO-085): `report_external` returns result<void> and replaces the value; allocator free space is sampled on the owner thread at add and on_frame_end (the WO-081 owner-check item is closed); reports list every registered tag sorted by name and stay monotone under concurrency; leaks are taken at shutdown only, site `<file>:<line>`; `upstream_allocs_last_frame` is the tracked-allocation delta; the runtime.mem event fires every report_interval frames (0 means 600) and the shutdown event is the runtime's (WO-096); to_json writes the layout of schemas/runtime/examples/memreport.json and from_json is strict.
+- Work stealing (WO-086): `make_ws_queue` rounds up to a power of two capped at 65536 cells, starting at 4096; `ws_deque::create`, `cells()` and `retired_rings()` exist; the owner worker is the first thread that pushes or pops (Debug check); retired rings live in a 17-slot in-object array freed at quiesce with no reader; only push's cell store (relaxed) and bottom store (release) are weaker than seq_cst; slot seeds are splitmix64(seed ^ job seed ^ i); the owner thread has its own policy slot; injection polls once per non-zero multiple of 61; jobs_run reads 0 from the stealing policy; make_steal_policy refuses 0 for injection_poll_every and aging_limit. Since WO-096 the runtime defaults to `queue_kind::work_stealing` (ws_deque with the stealing policy) while `job_config` alone still defaults to locked_deque (R070 and R073 describe the WO-082 starting point; WO-106 fixed the stale make_ws_queue statements).
+- Reflection (WO-087): a type is transient when it binds no field; add copies every string and checks the layout; the registry's owner thread adds and freezes, reads are any-thread once frozen; `type_registry::method` and `type_registry::field` are static lookups (type_unknown, field_unknown); the encoding has no header and walks fields selected by flag in declaration order; bind needs a frozen registry and a matching struct record type; every function of reflect.hpp is noexcept and an allocation failure terminates.
+- Storage (WO-088): `component_info` carries a type key and the registry maps types to ids; add_raw refuses in the order frozen, empty name, size, alignment, null hooks, the 1024-type limit, then duplicates; `world::set_job_system` enables the background-job assertion; the world's owner is the thread that called make, and the guard order is owner, iteration guard, phase; `set` adds a missing component (structural) and document writes stamp changed 0; chunks use tag ecs.chunks when registered; every world allocation goes through try_allocate; empty chunks stay until `release_empty_chunks()`; `world_stats::last_rows_moved` counts moved rows.
+- Frame scheduler (WO-089): every frame type is in `sl::runtime`; `retire_after` returns result<void> (wrong_thread, invalid_argument for 0 frames or an empty fn); task_fn is a non-consuming 48-byte inline body; task names are copied; tasks go only to apply_inputs through observe; a second build is ok; hooks added during run_frame are ignored; `boundary_context` is {slot, frame_index, tick} and each slot runs the scheduler's action, then its hooks; phase end hooks run after every phase but end_frame; `wall` is two platform clock reads per phase; after warmup_frames a non-zero upstream delta logs a warning; background results become frame inputs keyed at begin_frame; a failed task does not fail run_frame (the runtime raises the fault from the system scheduler's failures, WO-096); the runtime visits RFP9 in every boundary slot (WO-096).
+- Queries (WO-090): read, write and optional pass arguments, with, without, changed and added are filters; reads include the change filters' tick columns; contradictory terms beyond the brief are query_invalid and an unregistered type component_unknown; change filters combine with AND and read ticks before write terms stamp; for_each_chunk passes runs of selected rows; the match cache holds creation indices reserved for max_archetypes; `max_query_terms = 32`; par_for_each batches close at par_batch_min_rows counting every row of a chunk; one query object is never iterated from two threads at once; bodies are nothrow by static_assert; the query area visits no failpoint.
+- Command buffers (WO-091, WO-094): `pending_entity {buffer, seq}` holds the buffer's open index within the queue, so the pending values depend on which worker opened first, while the entities they resolve to are the same for every worker count because playback and resolution run in ordered_key order (R118 and R119 hold for resolution; a pending handle is not itself a deterministic value). open is any-thread under a mutex and binds the worker's frame arena; blocks are 16384 bytes aligned 64 (`command_buffer_block_alignment`); recording failures are sticky; playback skips stale targets and reports `skipped_stale` and `skipped_refused`; flush destroys every payload; a set that adds is reported as `set`; structural systems record on their worker's buffer and par_for_each batches get none.
+- Events (WO-092): `writer_key` is the ordered_key without local_seq and the channel numbers events per writer; writer buffers live in the channel under a mutex and are cleared, never erased; capacity is enforced per writer and again at the merge; `dropped()` counts every refused event; one overflow warning per frame at end_frame; RFP7 is visited by write and try_write; deliver runs as a phase end hook and the older list is dropped in arena_flip; `read_refs` gives event refs; `channel_key` uses the reserved base 0x45560000; Debug validation refuses non-finite floats; the runtime.events contributor writes both lists; export goes through one publish_batch per frame.
+- Change tracking (WO-093, WO-094): `tick_after` is the query filter rule; `mark_changed` returns result<void> and finds the row by scanning chunks; `last_run_ticks` has 2048 slots keyed phase x 256 + index with a floor of 0xFFFFFFFF; exactly-once needs the change tick to advance between conflicting runs, which the system scheduler guarantees by writing at change_tick + 1 + system_index and keeping each system's last_run in its own record (it does not use last_run_ticks); the structural log emits archetype_created first, then one signal per applied op, and a set that adds a component gives no signal; the sweep clamps stamps older than `change_tick_max_age` (2^30 - 1) every 2^30 ticks, which also covers a document stamp of 0.
+- Systems (WO-094): the scheduler is built on a job system and binds frame scheduler, world and queue at build; `system_desc::queries` lists the queries a body runs and add refuses one the access_set does not cover; access sets are normalised; names are unique across phases; Kahn's algorithm uses a min-heap on registration index and a cycle names only its members; edges join only conflicting systems, transitively reduced; exclusive systems run through an owner job; serial_canonical is one inline chain; the scheduler marks the world phase-active through post_tick; RFP5 fails a system job after its body; the Debug access guard fails a system once with undeclared_access.
+- Snapshots (WO-095): restore rebuilds values from zero bytes and the encoded snapshot fields, so snapshotted components are trivially relocatable; component-typed resources are snapshotted and runtime-owned resources stay in the target world; RFP8 is one visit per save before atomic_write; the type digest covers name, size, alignment, relocatability and the reflected fields, and the trailer is checked first; contributors are sorted by name, checked, backed up and restored before the world, and rolled back when `world::restore_from` refuses; invalid_argument from restore_from becomes snapshot_corrupt; the runtime computes runtime_abi_digest (WO-096).
+- Runtime (WO-096): `runtime_config::queue` defaults to work_stealing; systems and contributors are staged in Created and handed over at start; start runs platform check, memory root, tag freeze, registry freezes, jobs, frames and the world, unwinding in reverse; restore and shutdown discard undelivered background results (`discarded_results()`, no epoch counter); a faulted frame clears the command queue after a fatal report; system_fail names `<name>#<index>`; `request_swap` stays void with `swap_status()` and `swap_code()`; requests take effect in the lifecycle_requests slot; the runtime emits the shutdown runtime.mem event; `next_state` and `rt_event` exist, and the `rt_states` table equals `next_state` (bound by the lock).
+- Link (WO-097): `post_projection` returns result<void> (projection_stale, invalid_argument); `link_config::projection_tag` is reserved external and attach checks it and the lifetime token; link.observe reads every bound component and observe_component selects; bound components are trivially copyable of their reflected size, at most 2048 bytes; spawn values start from zero bytes and rebase keeps runtime-only bytes; ingest spawns through one command buffer in load_plan order; the outbox orders by record id, then path_segment ordering; body bytes are a payload measure; records of no document come first; a faulted frame clears the outbox.
+- Stress (WO-098): S1 runs 20 DAG iterations over 8 seeds on the ws queue; S4 checks first and last bytes; S5 sweeps RFP0 over a 2000-operation batch; S6 pre-warms frame arenas; S7 runs 20 ticks per cell; the watchdog's spawn visits RFP1, so tests arm RFP1 inside the watched body; checks run on the test thread; RFP0 is armed at the memory root or around world operations only; stress-matrix.json is written by stress_report.py, one cell per S row.
+- Gate (WO-099): `sl_runtime_demo` composes the runtime's public pieces with the link itself (runtime::start exposes no attach point) and recovers as runtime_recovery.cpp does; frame arenas are warmed before the first frame; the CLI cannot arm failpoints, so the runner plants a scripted fail through lantern.decay at tick 450 and gate_recovery_test arms the real RFP5; hashes are world state hashes indexed by applied steps, written to hashes.json; the change tick is moved above every system's last run after a restore; `wall_ns` is 0 under the manual clock; the scene has 7 systems plus the link's observe system; the 5 x 2 matrix runs the gcc-release demo and one Debug run is the cross-compiler record.
+- Contract lock and scorecard (WO-100): `sl_runtime_dump_contract` prints the contract to stdout (R-RT-PLATFORM keeps file output out of engine/runtime) and runtime-contract-lock.sh writes it to build/runtime/contract-dump.json; contract_lock.py adds the sections the Python tools own (stress_matrix from stress_report.py, the hash-matrix, stress-matrix and scorecard formats, the header files for `layers`); rt_states compare as (from, event, to) triples, failpoints by id, name and site, gate_evidence by its non-text rows; the scorecard treats sanitizer logs and hash-matrix.json as optional (`not_run`) and the demo report, memory report, F5 ledger and stress matrix as required; runtime-scorecard.sh reruns runtime_gate_fabric_test in Debug so f5.json comes from a build with the F5 ledger.
 
 ### Invariants
 
@@ -877,6 +932,8 @@ order owns at most 8 rows; heavy sweeps live in tests/integration and scale with
 - Memory: leaks at shutdown 0 and upstream allocations per steady frame 0 (RT-INV-FRAME-04, RT-INV-GATE-03); `just runtime-memreport-check` validates sl-runtime-memreport/1.
 - Performance (master plan section 6.1): work-bound counters only (archetypes visited per new archetype, chunk visits, steals, upstream allocations per steady frame, log events per steady frame); wall times are recorded in docs/episodes/081-100.md, never asserted; benchmarks are Volume 16.
 - Gate 100 (ARCH3-R172): `just runtime-gate` composes all of the above and every neg-runtime-* test; `just acceptance-081-100` adds runtime-san x3, runtime-determinism and check-full (WO-101).
+- Scorecard (ARCH3-R171): `just runtime-scorecard` writes build/runtime/scorecard.json (sl-runtime-scorecard/1) from the gate evidence; an absent optional input (sanitizer logs, hash-matrix.json outside check-full) is `not_run`, never a pass; `just neg-runtime-scorecard`.
+- Wall times measured at reconciliation: `just runtime-demo` about 500 s in Debug and `just runtime-determinism` about 820 s, so both belong in check-full or the gate composition, never in `fast` (WO-101).
 - Every work order: the acceptance commands of its file; wo-verify runs runtime orders with --ac-timeout 1800 and WO-101 with --timeout 9000 --ac-timeout 7200.
 
 ## Traceability
@@ -898,10 +955,23 @@ failpoints, stress matrix, gate) and the verdict build/design/vol05-judges.json.
 - A shared job system across runtimes (editor plus preview) is a named Volume 06 seam; each runtime owns its job system.
 - Wall-time performance is unmeasured as a gate (Volume 16); a shared 4-core machine makes timing floors flaky.
 - Episodes 081-100 stay Demonstrated until 021-040 are Accepted (ADR-0021).
-- Builder deviations: none yet; each builder writes docs/arch/deviations/vol05/WO-0nn.md and WO-100 reconciles them here.
+- Code reconciliation (WO-100): every entry of the WO-076 to WO-099 deviation files is recorded above; the items below are what the code, tests or tooling still have to change. "Class-S fix order" means an order the commander files from the WO-100 report.
+- Component layout digest (R113, R032): `component_registry::layout_digest` hashes a u32 0 where the reflected field layout belongs (WO-087, WO-088, WO-095), so runtime_abi_digest misses field changes; class-S fix order (read `component_info::reflect` fields, offset, size and kind).
+- Events of a faulted frame (R028): `attach` drops the older event list in arena_flip whether or not the frame faulted (WO-092); under restore_snapshot the restore puts the events back, under stop the flip stands; class-S fix order (skip deliver and flip after a fault).
+- Restore and logical time (R029, R145): a restore does not rewind the frame clock's logical tick (WO-096, WO-089), per-system last_run is not rewound (WO-096), and the gate therefore hashes by applied steps and moves the change tick after a restore (WO-099 D-099-4, D-099-5); class-S fix order for the runtime, with the replay orchestration itself in Volume 17 (SL-ARCH-012).
+- Tick-0 snapshot (R029): the runtime's first snapshot is taken before the host fills the world, so a recovery to it restores an empty world (WO-096); class-S fix order (first snapshot after the first host frame, or a host call).
+- Startup unwind coverage (R025): life_startup_unwind_test fires RFP0 only at the memory root, not at every later allocation of start (WO-096); class-S fix order (test sweep).
+- Set-that-adds signal (R129): a `set` that adds a missing component is reported as `set` in flush_report and gives no component_added signal although the world version moves (WO-091, WO-093); class-S fix order, or R129 amended at InReview (WO-101).
+- Last-run storage (R128): the system scheduler keeps each system's last_run in its own record and does not use `ecs::last_run_ticks` (WO-094); R128 is amended at InReview (WO-101) or the scheduler moves to last_run_ticks (class-S fix order).
+- Failpoint site strings: `failpoint_table()` says RFP5 is visited "before a system body" and RFP8 "after each storage primitive", while the code visits RFP5 after the body and RFP8 once before atomic_write (WO-094, WO-095); the outcomes above say what the code does; class-S fix order for the two site strings (the lock then moves with them).
+- sim_fixture warm-up: on more than one worker it logs the steady-frame upstream warning after frame 10 (first use of a worker arena) (WO-098); class-S fix order (pre-warm the arenas as the gate stack does).
+- Gate evidence: hashes.json has no schema under schemas/runtime and no committed final-hash golden exists (WO-099); class-S fix order for the schema, the golden with WO-101 or Volume 17.
+- Tooling: `just runtime-tidy <area>` maps areas to src/ prefixes and skips engine/runtime/testing files such as scripted_platform.cpp, which only the full `just tidy` checks (WO-078); cppcheck style notes (not gated: `just analyze` enables warning, performance, portability) at jobs.hpp:128 (noExplicitConstructor, job_fn is implicit by design) and memory.hpp:218 (shadowFunction, `set_upstream(upstream)`); WO-101 or a class-S fix order.
+- Wall time: `just runtime-demo` takes about 500 s and `just runtime-determinism` about 820 s in this environment; WO-101 places them in the gate composition and check-full, never in `fast`.
 
 ## Change log
 
 | Version | Date | Change |
 | :---- | :---- | :---- |
 | 0.1.0 | 2026-10-20 | First draft before any Volume 05 code (WO-075), from the panel verdict build/design/vol05-judges.json. |
+| 0.2.0 | 2026-10-22 | Reconciled with the Volume 05 code (WO-100): "Code reconciliation (WO-100)" records the 312 entries of the WO-076 to WO-099 deviation files; `limits` gains 20 rows and marks 14 `"bound": false`; `gate_evidence` gains hashes.json; error_codes, failpoints and thread_safety prose corrected; every contract table bound by `just runtime-contract-lock` and schemas/runtime/contract.lock.json; code still to change listed as open issues; nothing retired, rules unchanged except the R053 schema path. |
