@@ -2,7 +2,8 @@
 // and equal the flush_report history. Each flush of a command_queue (buffers opened out of key
 // order) is appended to a structural_log; the signals of the batch equal, in order, the
 // archetypes created since the previous append (creation order) followed by one signal per
-// applied spawn, destroy, add and remove of the report (a set gives none), each naming the
+// applied spawn, destroy, add and remove of the report (a set gives component_added when it
+// added the missing component, WO-109, and none otherwise), each naming the
 // entity's archetype at the boundary as world::has finds it; the batches accumulate in flush
 // order until clear(). Seeded command streams, the buffer open order, another world and
 // restore_from are covered too.
@@ -143,7 +144,11 @@ std::vector<ecs::change_signal> expected(const ecs::flush_report &report, const 
       k = kind::component_removed;
       break;
     case op_kind::set:
-      continue;
+      if (!op.added) {
+        continue;
+      }
+      k = kind::component_added;
+      break;
     }
     out.push_back({.kind = k,
                    .target = op.target,
@@ -320,6 +325,41 @@ TEST_CASE("RT-INV-CHG-03: seeded command streams give the flush_report history")
     CHECK(unknown == 0);
     CHECK(history.size() > 60);
   }
+}
+
+TEST_CASE("RT-INV-CHG-03: a set that adds a missing component signals component_added") {
+  rig r;
+  auto a = r.w->create_with(pos{.x = 1});
+  REQUIRE(a.has_value());
+  ecs::structural_log log;
+  log.append(ecs::flush_report{}, *r.w); // announce the existing archetypes
+  const auto announced = static_cast<std::uint32_t>(r.w->archetypes().size());
+  ecs::command_buffer &k1 = r.queue->open(key(1, 0));
+  ecs::command_buffer &k0 = r.queue->open(key(0, 0));
+  k1.set(*a, pos{.x = 2}); // a write: no signal
+  k1.remove<vel>(*a);      // by then a has vel: component_removed
+  k0.set(*a, vel{.v = 3}); // a lacks vel: the set adds it
+  k0.set(*a, vel{.v = 4}); // a has vel now: a write
+  const ecs::flush_report report = r.flush();
+  REQUIRE(report.applied.size() == 4);
+  CHECK(report.applied[0].kind == op_kind::set);
+  CHECK(report.applied[0].added);
+  CHECK_FALSE(report.applied[1].added);
+  const std::size_t before = log.signals().size();
+  log.append(report, *r.w);
+  const auto got = tail(log, before);
+  CHECK(got == expected(report, *r.w, announced));
+  std::vector<kind> kinds;
+  for (const ecs::change_signal &s : got) {
+    if (s.kind != kind::archetype_created) {
+      kinds.push_back(s.kind);
+    }
+  }
+  CHECK(kinds == std::vector<kind>{kind::component_added, kind::component_removed});
+  const auto added = std::ranges::find(got, kind::component_added, &ecs::change_signal::kind);
+  REQUIRE(added != got.end());
+  CHECK(added->target == *a);
+  CHECK(added->component == r.vel_id);
 }
 
 TEST_CASE("RT-INV-CHG-03: the signals do not depend on the buffer open order") {

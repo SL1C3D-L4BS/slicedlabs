@@ -8,6 +8,7 @@
 // commands nor its events survive. Each fault gives exactly one runtime.fault event, last_fault
 // carries the same report, and to_json reproduces schemas/runtime/examples/fault.json byte for
 // byte. fail_fatal (job_fatal), RFP5 (system.fail) and RFP3 (job.fatal) give the same isolation.
+// Under stop the faulted frame's events are never delivered and the older list is kept (WO-109).
 
 #include "sl/core/error.hpp"
 #include "sl/core/log.hpp"
@@ -337,6 +338,32 @@ TEST_CASE("RT-INV-LIFE-05: under policy stop the faulted frame applies no comman
   REQUIRE(g.r->shutdown().has_value());
 }
 
+TEST_CASE("RT-INV-LIFE-05: under policy stop the faulted frame's events are neither delivered nor "
+          "flipped") {
+  rig g(503, rt::recovery_policy::stop);
+  for (int i = 0; i < 5; ++i) {
+    REQUIRE(g.frame().has_value());
+  }
+  // The events readable after a frame: the envelopes' ticks, in delivery order.
+  const auto readable = [&g] {
+    std::vector<rt::time::tick> ticks;
+    g.channel->read([&ticks](const rt::event_envelope &env, const ping & /*p*/) noexcept {
+      ticks.push_back(env.tick);
+    });
+    return ticks;
+  };
+  const std::vector<rt::time::tick> before = readable();
+  REQUIRE_FALSE(before.empty());
+  g.ctl.fail.store(true);
+  const auto ran = g.frame();
+  REQUIRE_FALSE(ran.has_value());
+  CHECK(ran.error().code == sl::errc::runtime_faulted);
+  CHECK(g.r->frames().frame_faulted());
+  // The faulted frame's ping (written in its tick phase) was never delivered; the older list stays.
+  CHECK(readable() == before);
+  REQUIRE(g.r->shutdown().has_value());
+}
+
 TEST_CASE("RT-INV-LIFE-05: under restore the faulted frame's commands and events are undone") {
   const auto ref = reference(12);
   auto sink = std::make_shared<sl::log::memory_sink>(4096);
@@ -356,7 +383,7 @@ TEST_CASE("RT-INV-LIFE-05: under restore the faulted frame's commands and events
   const rt::fault_report last = g.r->last_fault().value_or(rt::fault_report{});
   CHECK(last.action == "restore");
   REQUIRE(last.restored_tick.has_value());
-  CHECK(last.restored_tick.value_or(0) == g.now() - 1);
+  CHECK(last.restored_tick.value_or(0) == g.now()); // the logical tick is rewound (WO-109)
   REQUIRE(ref.contains(last.restored_tick.value_or(0)));
   CHECK(g.hash() == ref.at(last.restored_tick.value_or(0)));
   CHECK(g.observed.back());

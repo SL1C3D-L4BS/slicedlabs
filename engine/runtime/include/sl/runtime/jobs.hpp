@@ -125,7 +125,7 @@ public:
   template <class F>
     requires(!std::same_as<std::remove_cvref_t<F>, job_fn>)
   // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions,bugprone-forwarding-reference-overload)
-  job_fn(F &&f) noexcept {
+  job_fn(F &&f) noexcept { // cppcheck-suppress noExplicitConstructor ; implicit by design
     using T = std::remove_cvref_t<F>;
     static_assert(std::is_nothrow_invocable_v<T &, job_context &>,
                   "a job body must be noexcept-invocable with job_context& (ARCH3-R061)");

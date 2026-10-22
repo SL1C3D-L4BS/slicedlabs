@@ -103,6 +103,7 @@ result<frame_stats> frame_scheduler::run_frame() noexcept {
     return make_error(errc::invalid_state, "frame_scheduler::run_frame inside a running frame");
   }
   in_frame_ = true;
+  frame_faulted_ = false;
   const std::uint64_t upstream_before = upstream_count();
   frame_stats stats;
   begin_frame(stats);
@@ -129,6 +130,19 @@ void frame_scheduler::freeze_clocks() noexcept {
   SL_DEBUG_ASSERT(is_owner(), "frame_scheduler::freeze_clocks off the owner thread");
   if (is_owner()) {
     frame_clock_.freeze();
+  }
+}
+
+void frame_scheduler::set_frame_faulted(bool faulted) noexcept {
+  SL_DEBUG_ASSERT(is_owner(), "frame_scheduler::set_frame_faulted off the owner thread");
+  frame_faulted_ = faulted;
+}
+
+void frame_scheduler::rewind_logical(time::tick t) noexcept {
+  SL_DEBUG_ASSERT(is_owner(), "frame_scheduler::rewind_logical off the owner thread");
+  if (is_owner()) {
+    logical_.restore(t);
+    current_.now = t;
   }
 }
 

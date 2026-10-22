@@ -84,7 +84,7 @@ INSTANCES = {
 REPO_INSTANCES = (("sl-deps", "deps/deps.json"), ("sl-deps-lock", "deps/deps.lock.json"))
 # WO-075: the Volume 05 runtime schemas (SL-ARCH-003), keyed "runtime/<name>", each with one example instance.
 RUNTIME_SCHEMA_DIR = os.path.join(slib.SCHEMA_DIR, "runtime")
-RUNTIME_SCHEMAS = ("memreport", "fault", "gate-report", "stress-matrix", "schedule")
+RUNTIME_SCHEMAS = ("memreport", "fault", "gate-report", "stress-matrix", "schedule", "hashes")
 
 
 def runtime_example(name):

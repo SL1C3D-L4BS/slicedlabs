@@ -5,7 +5,11 @@
 // error) and the empty memory report. RFP1 fires at each worker spawn k (and the watchdog's in
 // SL_RUNTIME_FAULTS builds), thread spawn k fails through the scripted thread factory, and RFP0
 // fires at each tracked allocation of start from the root block on; after every failure a retry
-// of start on the same runtime succeeds.
+// of start on the same runtime succeeds. The sweep (WO-109) counts start's RFP0 visits and fails
+// each one start can unwind from: the root block (visit 1) and the world's location page table
+// (visit 3). Visit 2, the entity allocator's page list, goes through std::pmr, where out_of_memory
+// is fatal by design (ADR-0023, WO-088), and the job system allocates nothing tracked; both limits
+// are recorded in SL-ARCH-003 ARCH3-R025.
 
 #include "sl/core/error.hpp"
 #include "sl/core/log.hpp"
@@ -247,6 +251,42 @@ TEST_CASE("RT-INV-LIFE-02: RFP0 at the memory root unwinds to Created") {
         check_unwound(g, baseline, *sink);
         started = g.r->start();
       }
+    }
+    REQUIRE_FALSE(started.has_value());
+    CHECK(started.error().code == sl::errc::out_of_memory);
+    check_unwound(g, baseline, *sink);
+    check_retry(g, baseline);
+  }
+  CHECK(live_block_reports(*sink) == 0);
+}
+
+TEST_CASE("RT-INV-LIFE-02: RFP0 at every unwindable allocation visit of start unwinds") {
+  if (!rt::faults_compiled) {
+    MESSAGE("failpoints compiled out");
+    return;
+  }
+  auto sink = std::make_shared<sl::log::memory_sink>(4096);
+  const attached guard(sink);
+  const std::size_t baseline = idle_thread_count();
+  std::uint64_t visits = 0;
+  {
+    rig clean(230);
+    const std::uint64_t before = rt::visits(rt::failpoint::rfp0);
+    REQUIRE(clean.r->start().has_value());
+    visits = rt::visits(rt::failpoint::rfp0) - before;
+    REQUIRE(clean.r->shutdown().has_value());
+  }
+  // The root block, the entity allocator's pmr page list (not swept: fatal by design), the
+  // location page table. A change here means start's allocations changed: revisit the sweep.
+  REQUIRE(visits == 3);
+  for (const std::uint64_t k : {std::uint64_t{1}, std::uint64_t{3}}) {
+    INFO("visit " << k);
+    rig g(static_cast<std::uint32_t>(230U + k));
+    sl::result<void> started;
+    {
+      const rtt::scoped_arm arm(rt::failpoint::rfp0, k);
+      REQUIRE(arm.status().has_value());
+      started = g.r->start();
     }
     REQUIRE_FALSE(started.has_value());
     CHECK(started.error().code == sl::errc::out_of_memory);

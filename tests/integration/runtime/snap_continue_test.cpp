@@ -4,27 +4,37 @@
 // contributor, so the restored world draws the same seeds. The original world A runs a prefix,
 // is snapshotted at the tick boundary and restored into a fresh world B; then both run 300 ticks
 // and agree on the state hash and on world_gen's hash after each, and on the oracle at the end.
-// Operations per tick scale with SL_RUNTIME_STRESS_SCALE (0.1 under the sanitizers, floored at 1).
+// A runtime recovery continues the same way (WO-109): the restore rewinds the logical tick and
+// every system's last run, so after a fault the run hashes equal to a fault-free run at the same
+// logical tick, a changed<T> reader included. Operations per tick scale with
+// SL_RUNTIME_STRESS_SCALE (0.1 under the sanitizers, floored at 1).
 
 #include "sl/core/error.hpp"
 #include "sl/fabric/digest.hpp"
 #include "sl/runtime/ecs/component.hpp"
 #include "sl/runtime/ecs/entity.hpp"
+#include "sl/runtime/ecs/query.hpp"
+#include "sl/runtime/ecs/system.hpp"
 #include "sl/runtime/ecs/world.hpp"
 #include "sl/runtime/memory.hpp"
 #include "sl/runtime/reflect.hpp"
 #include "sl/runtime/replay.hpp"
+#include "sl/runtime/runtime.hpp"
 #include "sl/runtime/snapshot.hpp"
 
+#include "../../../engine/runtime/testing/scripted_platform.hpp"
 #include "../../../engine/runtime/testing/world_gen.hpp"
 
 #include <doctest/doctest.h>
 
 #include <algorithm>
 #include <array>
+#include <atomic>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <map>
 #include <memory>
 #include <optional>
 #include <span>
@@ -213,4 +223,169 @@ TEST_CASE("RT-INV-SNAP-02: 300 ticks after restore equal 300 ticks of the origin
   check_continue(0x5EED0098'0001ULL, 0, ops);
   check_continue(0x5EED0098'0002ULL, 37, ops);
   check_continue(0x5EED0098'0003ULL, 120, ops);
+}
+
+namespace {
+
+namespace runtime_continue {
+
+struct counter {
+  std::uint64_t value = 0;
+};
+
+struct tally {
+  std::uint64_t seen = 0;
+};
+
+struct writer_body {
+  ecs::query<ecs::write<counter>> q;
+  void operator()(ecs::system_context &ctx) noexcept {
+    ctx.for_each(q, [](ecs::entity /*e*/, counter &c) noexcept { c.value = (c.value * 31U) + 7U; });
+  }
+};
+
+// Counts the rows changed since its last run: after a restore that kept a later last run it
+// would see none.
+struct reader_body {
+  ecs::query<ecs::read<counter>, ecs::changed<counter>> changed;
+  ecs::query<ecs::write<tally>> out;
+  void operator()(ecs::system_context &ctx) noexcept {
+    std::uint64_t n = 0;
+    ctx.for_each(changed, [&n](ecs::entity /*e*/, const counter & /*c*/) noexcept { ++n; });
+    ctx.for_each(out, [n](ecs::entity /*e*/, tally &t) noexcept { t.seen += n; });
+  }
+};
+
+struct faulty_body {
+  std::atomic<bool> *fail = nullptr;
+  void operator()(ecs::system_context &ctx) const noexcept {
+    if (fail->exchange(false)) {
+      ctx.fail(sl::errc::job_failed);
+    }
+  }
+};
+
+struct rig {
+  explicit rig(std::uint32_t id) : plat(id) {
+    rt::runtime_config cfg;
+    cfg.instance_id = id;
+    cfg.workers = 2;
+    cfg.rate = {.num = 50, .den = 1};
+    cfg.recovery = rt::recovery_policy::restore_snapshot;
+    cfg.snapshot_every = 5;
+    auto made = rt::runtime::create(plat.get(), cfg);
+    REQUIRE(made.has_value());
+    r = std::move(*made);
+    rt::type_builder<counter> cb("cont.counter");
+    SL_RT_FIELD(cb, counter, value, kept);
+    auto ct = r->types().add(cb.build());
+    REQUIRE(ct.has_value());
+    REQUIRE(r->components().add<counter>("cont.counter", *ct).has_value());
+    rt::type_builder<tally> tb("cont.tally");
+    SL_RT_FIELD(tb, tally, seen, kept);
+    auto tt = r->types().add(tb.build());
+    REQUIRE(tt.has_value());
+    REQUIRE(r->components().add<tally>("cont.tally", *tt).has_value());
+
+    auto wq = ecs::query<ecs::write<counter>>::make(r->components());
+    REQUIRE(wq.has_value());
+    ecs::access_set wa;
+    ecs::add_query_access(wa, wq->access());
+    const ecs::component_access wneeded = wq->access();
+    REQUIRE(r->add_system(ecs::system_desc{.name = "cont.writer",
+                                           .ph = rt::phase::tick,
+                                           .access = std::move(wa),
+                                           .before = {},
+                                           .after = {},
+                                           .fn = writer_body{.q = std::move(*wq)},
+                                           .chunked = false,
+                                           .queries = {wneeded}})
+                .has_value());
+    auto cq = ecs::query<ecs::read<counter>, ecs::changed<counter>>::make(r->components());
+    auto oq = ecs::query<ecs::write<tally>>::make(r->components());
+    REQUIRE(cq.has_value());
+    REQUIRE(oq.has_value());
+    ecs::access_set ra;
+    ecs::add_query_access(ra, cq->access());
+    ecs::add_query_access(ra, oq->access());
+    const ecs::component_access cneeded = cq->access();
+    const ecs::component_access oneeded = oq->access();
+    REQUIRE(r->add_system(ecs::system_desc{
+                              .name = "cont.reader",
+                              .ph = rt::phase::tick,
+                              .access = std::move(ra),
+                              .before = {},
+                              .after = {},
+                              .fn = reader_body{.changed = std::move(*cq), .out = std::move(*oq)},
+                              .chunked = false,
+                              .queries = {cneeded, oneeded}})
+                .has_value());
+    REQUIRE(r->add_system(ecs::system_desc{.name = "cont.faulty",
+                                           .ph = rt::phase::tick,
+                                           .access = {},
+                                           .before = {},
+                                           .after = {},
+                                           .fn = faulty_body{.fail = &fail},
+                                           .chunked = false,
+                                           .queries = {}})
+                .has_value());
+    REQUIRE(r->start().has_value());
+    for (std::uint32_t i = 0; i < 64; ++i) {
+      REQUIRE(r->world().create_with(counter{.value = i}).has_value());
+    }
+    REQUIRE(r->world().create_with(tally{}).has_value());
+  }
+
+  sl::result<rt::frame_stats> frame() {
+    plat.clock().advance(std::chrono::milliseconds(20));
+    return r->run_frame();
+  }
+
+  [[nodiscard]] rt::time::tick now() const { return r->frames().current().now; }
+
+  [[nodiscard]] sl::fabric::digest hash() const {
+    auto h = rt::state_hash(r->world(), r->components(), r->types(),
+                            std::span<const det::snapshot_contributor *const>{});
+    REQUIRE(h.has_value());
+    return *h;
+  }
+
+  rtt::scripted_platform plat;
+  std::atomic<bool> fail{false};
+  std::unique_ptr<rt::runtime> r;
+};
+
+} // namespace runtime_continue
+
+} // namespace
+
+TEST_CASE(
+    "RT-INV-SNAP-02: after a runtime recovery the run equals a fault-free run tick for tick") {
+  constexpr rt::time::tick end_tick = 40;
+  std::map<rt::time::tick, sl::fabric::digest> reference;
+  {
+    runtime_continue::rig g(901);
+    while (g.now() < end_tick) {
+      REQUIRE(g.frame().has_value());
+      reference[g.now()] = g.hash();
+    }
+    REQUIRE(g.r->shutdown().has_value());
+  }
+  runtime_continue::rig g(902);
+  while (g.now() < 13) {
+    REQUIRE(g.frame().has_value());
+    CHECK(g.hash() == reference.at(g.now()));
+  }
+  g.fail.store(true);
+  REQUIRE(g.frame().has_value());
+  REQUIRE(g.r->frame_faulted());
+  CHECK(g.r->recoveries() == 1);
+  CHECK(g.now() == 10); // the newest snapshot at or before the fault tick
+  CHECK(g.hash() == reference.at(g.now()));
+  while (g.now() < end_tick) {
+    REQUIRE(g.frame().has_value());
+    INFO("tick " << g.now());
+    CHECK(g.hash() == reference.at(g.now()));
+  }
+  REQUIRE(g.r->shutdown().has_value());
 }

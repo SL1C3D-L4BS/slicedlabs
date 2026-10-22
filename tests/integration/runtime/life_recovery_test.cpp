@@ -1,12 +1,14 @@
 // RT-INV-LIFE-06 (SL-ARCH-003 ARCH3-R029, ADR-0028): restore_snapshot recovery ends with the
 // fault-free hash, more than max_recoveries faults in a window stop with recovery_failed, and the
 // default policy is stop. A world of counters steps every tick; a system fails on request. Each
-// recovery restores the newest snapshot at or before the fault tick; the logical tick is not
-// rewound (WO-089), so the run is compared by applied ticks: after every frame the world hashes
-// equal to a fault-free run after as many applied ticks. Faults beyond max_recoveries inside
-// recovery_window_ticks end in recovery_failed (state Stopping); faults spaced wider than the
-// window all recover; with no snapshot the restore is refused (recovery_failed); the default
-// configuration stops (runtime_faulted). The fault sweep scales with SL_RUNTIME_STRESS_SCALE.
+// recovery restores the newest snapshot at or before the fault tick with its logical tick and
+// every system's last run (WO-109), and the run is compared by applied ticks: after every frame
+// the world hashes equal to a fault-free run after as many applied ticks. The first snapshot is
+// the baseline at the end of the first host frame, so a recovery to it gives the host-filled world.
+// Faults beyond max_recoveries inside recovery_window_ticks end in recovery_failed (state
+// Stopping); faults spaced wider than the window all recover; with no snapshot the restore is
+// refused (recovery_failed); the default configuration stops (runtime_faulted). The fault sweep
+// scales with SL_RUNTIME_STRESS_SCALE.
 
 #include "sl/core/error.hpp"
 #include "sl/fabric/digest.hpp"
@@ -30,6 +32,7 @@
 #include <memory>
 #include <span>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -287,4 +290,59 @@ TEST_CASE("RT-INV-LIFE-06: the default policy is stop, and a restore without sna
     CHECK(g.r->state() == rt::rt_state::stopping);
     REQUIRE(g.r->shutdown().has_value());
   }
+}
+
+TEST_CASE("RT-INV-LIFE-06: recovery to the baseline restores the host-filled world") {
+  rt::runtime_config cfg = restoring(620);
+  cfg.snapshot_every = 1000; // only the baseline within this run
+  rig g(cfg);
+  CHECK(g.r->snapshot_ticks().empty()); // start takes none: the host has not filled the world
+  REQUIRE(g.frame().has_value());
+  const std::vector<rt::time::tick> ticks = g.r->snapshot_ticks();
+  REQUIRE(ticks.size() == 1);
+  const rt::time::tick base_tick = g.now();
+  CHECK(ticks.front() == base_tick);
+  const sl::fabric::digest baseline = g.hash();
+  for (int i = 0; i < 3; ++i) {
+    REQUIRE(g.frame().has_value());
+  }
+  CHECK(g.hash() != baseline);
+  g.ctl.fail.store(true);
+  REQUIRE(g.frame().has_value());
+  REQUIRE(g.r->frame_faulted());
+  CHECK(g.r->recoveries() == 1);
+  CHECK(g.r->world().entities().alive() == 512);
+  CHECK(g.hash() == baseline);
+  CHECK(g.now() == base_tick);
+  REQUIRE(g.r->shutdown().has_value());
+}
+
+TEST_CASE("RT-INV-LIFE-06: a restore puts back the snapshot's logical tick and last runs") {
+  rig g(restoring(621));
+  using runs = std::vector<ecs::last_run_ticks::entry>;
+  runs at_snapshot;
+  rt::time::tick snapshot_tick = 0;
+  for (int guard = 0; guard < 40 && snapshot_tick < 10; ++guard) {
+    REQUIRE(g.frame().has_value());
+    const std::vector<rt::time::tick> kept_ticks = g.r->snapshot_ticks();
+    if (!kept_ticks.empty() && kept_ticks.back() == g.now()) {
+      snapshot_tick = g.now();
+      at_snapshot = g.r->systems().last_runs().entries();
+    }
+  }
+  REQUIRE(snapshot_tick >= 10);
+  REQUIRE(at_snapshot.size() == 2);
+  for (int i = 0; i < 2; ++i) {
+    REQUIRE(g.frame().has_value());
+  }
+  CHECK(g.now() == snapshot_tick + 2);
+  CHECK(g.r->systems().last_runs().entries() != at_snapshot);
+  g.ctl.fail.store(true);
+  REQUIRE(g.frame().has_value());
+  REQUIRE(g.r->frame_faulted());
+  REQUIRE(g.r->last_fault().has_value());
+  CHECK(g.r->last_fault().value_or(rt::fault_report{}).restored_tick == snapshot_tick);
+  CHECK(g.now() == snapshot_tick);
+  CHECK(g.r->systems().last_runs().entries() == at_snapshot);
+  REQUIRE(g.r->shutdown().has_value());
 }

@@ -223,7 +223,7 @@ TEST_CASE("RT-INV-CHG-04: through flushes the deltas equal the structural_log si
   }
 }
 
-TEST_CASE("RT-INV-CHG-04: a set that adds moves the version without a signal") {
+TEST_CASE("RT-INV-CHG-04: a set that adds moves the version by its component_added signal") {
   rig r;
   auto e = r.w->create_with(pos{.x = 1});
   REQUIRE(e.has_value());
@@ -237,8 +237,11 @@ TEST_CASE("RT-INV-CHG-04: a set that adds moves the version without a signal") {
   REQUIRE(report.has_value());
   log.append(*report, *r.w);
   CHECK(p.step(1) == 1);
-  REQUIRE(log.signals().size() == 1); // the new archetype only (a set entry gives no signal)
+  // The new archetype, then the set's component_added (WO-109): one entity signal, one version.
+  REQUIRE(log.signals().size() == 2);
   CHECK(log.signals()[0].kind == ecs::change_signal_kind::archetype_created);
+  CHECK(log.signals()[1].kind == ecs::change_signal_kind::component_added);
+  CHECK(log.signals()[1].target == *e);
 }
 
 TEST_CASE("RT-INV-CHG-04: restore_from moves the version and the generation") {

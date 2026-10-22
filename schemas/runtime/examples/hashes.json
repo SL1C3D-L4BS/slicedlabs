@@ -1,0 +1,23 @@
+{
+  "format": "sl-runtime-hashes/1",
+  "compiler": "clang",
+  "seed": 7,
+  "ticks": 3,
+  "entities": 200,
+  "workers": 2,
+  "mode": "serial",
+  "resume_tick": 1,
+  "fresh": [
+    "sha256:40843ec844c6bc44b1a604585151d1b9e78fffabf17ad1e3d3d7c8d9a1b117d6",
+    "sha256:f38d36b02e99b33e4b7449619722fa383fb6eab291bed766a65cefbb9b9ea842",
+    "sha256:2f379e7b91036b5909e605d95ce95140baefc34047b277047a5a3d963d239f1b"
+  ],
+  "resume": [
+    "sha256:2f379e7b91036b5909e605d95ce95140baefc34047b277047a5a3d963d239f1b"
+  ],
+  "replay": [
+    "sha256:40843ec844c6bc44b1a604585151d1b9e78fffabf17ad1e3d3d7c8d9a1b117d6",
+    "sha256:f38d36b02e99b33e4b7449619722fa383fb6eab291bed766a65cefbb9b9ea842",
+    "sha256:2f379e7b91036b5909e605d95ce95140baefc34047b277047a5a3d963d239f1b"
+  ]
+}

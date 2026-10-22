@@ -215,7 +215,7 @@ public:
   [[nodiscard]] virtual free_space free_space_stats() const noexcept { return {}; }
 
   /// The fallback of the pmr path (nullptr: none, the default). Owner-thread, before use.
-  void set_upstream(std::pmr::memory_resource *upstream) noexcept { upstream_ = upstream; }
+  void set_upstream(std::pmr::memory_resource *fallback) noexcept { upstream_ = fallback; }
   [[nodiscard]] std::pmr::memory_resource *upstream() const noexcept { return upstream_; }
   [[nodiscard]] memory_tag default_tag() const noexcept { return default_tag_; }
   [[nodiscard]] std::string_view name() const noexcept { return name_; }

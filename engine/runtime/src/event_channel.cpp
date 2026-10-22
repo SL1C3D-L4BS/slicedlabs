@@ -2,7 +2,9 @@
 // event_capacity_default, ADR-0026): the capacity check and drop counters every channel shares,
 // the once-per-frame overflow warning (system runtime.events, at end_frame only, so steady frames
 // log nothing), the Debug payload check (every f32 and f64 field finite) and attach, which ties a
-// channel to the frame scheduler's phase end hooks and its arena_flip boundary slot.
+// channel to the frame scheduler's phase end hooks and its arena_flip boundary slot. Once the
+// frame is marked faulted (frame_scheduler::frame_faulted, ARCH3-R028) the hooks skip deliver and
+// the flip keeps the older list and drops the undelivered writes instead (WO-109).
 
 #include "sl/runtime/events.hpp"
 
@@ -20,19 +22,28 @@ namespace sl::runtime {
 
 namespace {
 
-// The phase end hook: the frame's events become readable.
+// The phase end hook: the frame's events become readable, unless the frame faulted.
 struct deliver_hook {
   event_stream *stream = nullptr;
   const frame_scheduler *fs = nullptr;
   void operator()(phase /*ph*/, time::tick /*t*/) const noexcept {
-    stream->deliver(fs->current().frame_index);
+    if (!fs->frame_faulted()) {
+      stream->deliver(fs->current().frame_index);
+    }
   }
 };
 
-// The arena_flip slot: the older frame list is dropped.
+// The arena_flip slot: the older frame list is dropped; a faulted frame keeps it.
 struct flip_hook {
   event_stream *stream = nullptr;
-  void operator()(const boundary_context & /*ctx*/) const noexcept { stream->end_frame(); }
+  const frame_scheduler *fs = nullptr;
+  void operator()(const boundary_context & /*ctx*/) const noexcept {
+    if (fs->frame_faulted()) {
+      stream->drop_pending();
+    } else {
+      stream->end_frame();
+    }
+  }
 };
 
 } // namespace
@@ -97,7 +108,7 @@ bool payload_valid(const type_info &t, const void *obj) noexcept {
 
 void attach(event_stream &stream, frame_scheduler &fs) {
   fs.add_phase_end_hook(deliver_hook{.stream = &stream, .fs = &fs});
-  fs.add_boundary_hook(boundary_slot::arena_flip, flip_hook{.stream = &stream});
+  fs.add_boundary_hook(boundary_slot::arena_flip, flip_hook{.stream = &stream, .fs = &fs});
 }
 
 } // namespace sl::runtime

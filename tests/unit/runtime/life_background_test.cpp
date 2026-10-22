@@ -209,7 +209,7 @@ TEST_CASE("RT-INV-LIFE-08: a restore with a background job in flight discards it
     const std::uint64_t submitted = g.s.submitted.load();
     g.s.fail.store(true);
     REQUIRE(g.frame().has_value());
-    REQUIRE(g.now() == 9);
+    REQUIRE(g.now() == 8); // the restore rewound the logical tick to the snapshot's (WO-109)
     CHECK(g.s.submitted.load() == submitted + 1);
     CHECK(g.r->recoveries() == 1);
     CHECK(g.r->discarded_results() == 1);

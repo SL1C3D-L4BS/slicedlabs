@@ -234,18 +234,19 @@ void system_scheduler::run_serial_phase(phase ph, task_context &ctx) noexcept {
 void system_scheduler::run_system(std::uint32_t slot, jobs::job_context &job,
                                   const time::frame_time &time, std::uint64_t tick) noexcept {
   detail::system_record &s = systems_[slot];
-#if SL_RUNTIME_FAULTS
-  if (visit(failpoint::rfp5).fire) { // RFP5 system.fail: the system fails before its body
-    job.fail(errc::job_failed);
-    note_failure(s, errc::job_failed);
-    return;
-  }
-#endif
-  const iter_args args{.since = s.last_run,
+  // ARCH3-R128: the slot is the system's own, so concurrent runs write distinct slots.
+  const std::uint32_t key = last_run_key(static_cast<std::uint8_t>(s.ph), s.index);
+  const iter_args args{.since = last_runs_.since(key),
                        .write_tick = world_->change_tick() + 1U + std::uint32_t{s.index}};
   system_context ctx(*this, s, *world_, args, job, time, tick);
   s.fn(ctx);
-  s.last_run = args.write_tick;
+  last_runs_.record(key, args.write_tick);
+#if SL_RUNTIME_FAULTS
+  if (visit(failpoint::rfp5).fire) { // RFP5 system.fail: the system fails after its body
+    job.fail(errc::job_failed);
+    note_failure(s, errc::job_failed);
+  }
+#endif
 }
 
 void system_scheduler::note_failure(detail::system_record &s, errc code) noexcept {

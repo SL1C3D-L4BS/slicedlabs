@@ -1,6 +1,6 @@
 {
   "format": "sl-runtime-contract-lock/1",
-  "sha256": "381aad1baa3b24ca817a6156e566e7dc5a77de425abf3b94a94db523ddacfa7a",
+  "sha256": "49bda4ca81fca8ee930c9b631e076f73b3b3ae8275ab960cf60cd6e0a92f5914",
   "contract": {
     "boundary_slots": [
       "fault_check",
@@ -314,7 +314,7 @@
       {
         "id": "RFP5",
         "name": "system.fail",
-        "site": "ecs::system_scheduler before a system body"
+        "site": "ecs::system_scheduler after a system body"
       },
       {
         "id": "RFP6",
@@ -329,7 +329,7 @@
       {
         "id": "RFP8",
         "name": "snapshot.io",
-        "site": "snapshot::save through file_access::atomic_write, after each storage primitive"
+        "site": "snapshot save, once before atomic_write"
       },
       {
         "id": "RFP9",

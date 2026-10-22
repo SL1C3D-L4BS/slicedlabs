@@ -29,6 +29,7 @@
 // system_context is worker-only: valid inside the body it was passed to.
 
 #include "sl/core/error.hpp"
+#include "sl/runtime/ecs/change.hpp"
 #include "sl/runtime/ecs/command_buffer.hpp"
 #include "sl/runtime/ecs/component.hpp"
 #include "sl/runtime/ecs/entity.hpp"
@@ -165,7 +166,6 @@ struct system_record {
   std::uint32_t id = 0;             // registration order, over every phase
   std::uint16_t index = 0;          // system_index (build)
   std::vector<std::uint16_t> edges; // the system indices its frame task runs after (build)
-  std::uint32_t last_run = 0;       // the write tick of its last run (0 before the first)
   errc last_error = errc::ok;       // the code of its latest failure
 };
 
@@ -428,6 +428,11 @@ public:
   /// RFP5, the code given to fail); ok when it never failed or for an unknown id. Read it between
   /// frames.
   [[nodiscard]] errc last_error(std::uint32_t id) const noexcept;
+  /// Each system's last-run change tick under last_run_key(phase, system_index) (ARCH3-R128). A
+  /// system's run writes only its own slot; read, sweep, capture and restore it on the owner
+  /// thread between frames.
+  [[nodiscard]] last_run_ticks &last_runs() noexcept { return last_runs_; }
+  [[nodiscard]] const last_run_ticks &last_runs() const noexcept { return last_runs_; }
 
 private:
   friend class system_context;
@@ -481,6 +486,7 @@ private:
   std::atomic<std::uint64_t> failures_{0};
   std::atomic<bool> frame_failed_{false};
   result<flush_report> last_flush_;
+  last_run_ticks last_runs_;
 };
 
 } // namespace sl::runtime::ecs

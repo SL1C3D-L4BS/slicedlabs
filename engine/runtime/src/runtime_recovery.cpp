@@ -24,13 +24,19 @@
 
 namespace sl::runtime {
 
-result<snapshot> runtime::take_snapshot(std::uint64_t frame, time::tick tick) {
+result<runtime::recovery_point> runtime::take_snapshot(std::uint64_t frame, time::tick tick) {
   const std::vector<const det::snapshot_contributor *> contributors = const_contributors();
   const snapshot_meta meta{.frame = frame,
                            .tick = tick,
                            .schedule_digest = schedule_digest_,
                            .runtime_abi_digest = runtime_abi_digest()};
-  return sl::runtime::take(*world_, components_, types_, contributors, meta);
+  auto taken = sl::runtime::take(*world_, components_, types_, contributors, meta);
+  if (!taken) {
+    return std::unexpected(taken.error());
+  }
+  return recovery_point{.snap = std::move(*taken),
+                        .runs = systems_->last_runs().entries(),
+                        .runs_floor = systems_->last_runs().floor()};
 }
 
 void runtime::on_snapshot(const boundary_context &bc) noexcept {
@@ -38,7 +44,9 @@ void runtime::on_snapshot(const boundary_context &bc) noexcept {
   if (every == 0 || frame_faulted_.load() || state_.load() != rt_state::running) {
     return;
   }
-  if (bc.tick / every <= last_snapshot_tick_ / every) {
+  // The first snapshot is the baseline at the end of the first unfaulted frame, after the host
+  // filled the world; later ones follow the cadence (ARCH3-R029).
+  if (!snapshots_.empty() && bc.tick / every <= last_snapshot_tick_ / every) {
     return;
   }
   auto taken = take_snapshot(bc.frame_index, bc.tick);
@@ -72,24 +80,27 @@ bool runtime::over_recovery_limit(time::tick tick) noexcept {
 }
 
 result<time::tick> runtime::restore_newest(time::tick at_or_before) noexcept {
-  for (const snapshot &s : std::views::reverse(snapshots_)) {
-    if (s.tick() <= at_or_before) {
-      if (auto restored = restore_snapshot(s); !restored) {
+  for (const recovery_point &p : std::views::reverse(snapshots_)) {
+    if (p.snap.tick() <= at_or_before) {
+      if (auto restored = restore_snapshot(p); !restored) {
         return std::unexpected(restored.error());
       }
-      return s.tick();
+      return p.snap.tick();
     }
   }
   return make_error(errc::recovery_failed, "runtime: no snapshot at or before the fault tick");
 }
 
-result<void> runtime::restore_snapshot(const snapshot &s) noexcept {
+result<void> runtime::restore_snapshot(const recovery_point &p) noexcept {
   const std::vector<det::snapshot_contributor *> contributors = contributors_;
-  if (auto restored =
-          sl::runtime::restore(*world_, components_, types_, contributors, s, runtime_abi_digest());
+  if (auto restored = sl::runtime::restore(*world_, components_, types_, contributors, p.snap,
+                                           runtime_abi_digest());
       !restored) {
     return restored;
   }
+  // ARCH3-R029, R145: logical time and every system's last run go back to the snapshot's.
+  systems_->last_runs().restore(p.runs, p.runs_floor);
+  frames_->rewind_logical(p.snap.tick());
   // ARCH3-R030: the results of background jobs from before the restore never reach the world.
   discard_background();
   return {};

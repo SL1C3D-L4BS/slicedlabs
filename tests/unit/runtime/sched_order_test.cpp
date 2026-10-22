@@ -243,3 +243,29 @@ TEST_CASE("RT-INV-SCHED-03: add refuses a used name, a 257th system and adds aft
   REQUIRE_FALSE(late.has_value());
   CHECK(late.error().code == errc::schedule_frozen);
 }
+
+TEST_CASE("RT-INV-SCHED-03: each system's last run lives in last_run_ticks under phase x 256 + "
+          "index") {
+  auto r = rig(4);
+  order_state s;
+  add_chain(*r, s);
+  REQUIRE(r->build().has_value());
+  CHECK(r->systems->last_runs().entries().empty());
+  bool ran = false;
+  for (std::uint32_t f = 0; f < 20 && !ran; ++f) {
+    auto st = r->step();
+    REQUIRE(st.has_value());
+    ran = st->ticks_run > 0;
+  }
+  REQUIRE(ran);
+  // the order is unchanged and every system recorded its own write tick, one apart by index
+  CHECK(indices(*r) == std::vector<std::uint16_t>{4, 2, 0, 1, 3});
+  const auto entries = r->systems->last_runs().entries();
+  REQUIRE(entries.size() == 5);
+  const auto base = ecs::last_run_key(static_cast<std::uint8_t>(rt::phase::tick), 0);
+  for (std::uint16_t i = 0; i < 5; ++i) {
+    INFO("system_index " << i);
+    CHECK(entries.at(i).system == base + i);
+    CHECK(entries.at(i).tick == entries.at(0).tick + i);
+  }
+}

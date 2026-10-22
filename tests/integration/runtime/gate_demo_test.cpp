@@ -3,7 +3,8 @@
 // "runtime-demo: ok" and writes every gate_evidence file the runner owns, each with its format
 // tag, under its evidence directory and nowhere else; the command line takes exactly the seven
 // flags and a usage error exits 2 with the usage text. The full pass runs without the resume and
-// replay variants and hashes every 50 steps (runtime-determinism runs the full matrix).
+// replay variants and hashes every 50 steps (runtime-determinism runs the full matrix). The
+// command-line run's final world hash equals tests/golden/runtime/demo_hash.json (WO-109).
 
 #include "../../../engine/runtime/testing/stress_harness.hpp"
 #include "../../../engine/runtime/tools/demo/scene.hpp"
@@ -28,6 +29,33 @@ namespace fs = std::filesystem;
 [[nodiscard]] std::string slurp(const fs::path &p) {
   std::ifstream in(p, std::ios::binary);
   return {std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+}
+
+/// The text between `"key": "` and the next quote at or after `from`; empty when absent.
+[[nodiscard]] std::string quoted_after(const std::string &text, std::string_view key,
+                                       std::size_t from = 0) {
+  const std::string open = "\"" + std::string(key) + "\": \"";
+  const std::size_t at = text.find(open, from);
+  if (at == std::string::npos) {
+    return {};
+  }
+  const std::size_t begin = at + open.size();
+  const std::size_t end = text.find('"', begin);
+  return end == std::string::npos ? std::string{} : text.substr(begin, end - begin);
+}
+
+/// The last hash of the "fresh" list of an sl-runtime-hashes/1 file (the final world hash).
+[[nodiscard]] std::string final_fresh_hash(const std::string &hashes) {
+  const std::size_t resume = hashes.find("\"resume\"");
+  if (resume == std::string::npos) {
+    return {};
+  }
+  const std::size_t at = hashes.rfind("\"sha256:", resume);
+  if (at == std::string::npos || at < hashes.find("\"fresh\"")) {
+    return {};
+  }
+  const std::size_t end = hashes.find('"', at + 1);
+  return hashes.substr(at + 1, end - at - 1);
 }
 
 [[nodiscard]] fs::path fresh_dir(std::string_view name) {
@@ -111,7 +139,16 @@ TEST_CASE("RT-INV-GATE-01: the command line runs the scene and ends with runtime
   CHECK(r.code == 0);
   CHECK(r.out.ends_with(std::string(demo::ok_line) + "\n"));
   CHECK(fs::exists(dir / "demo.log"));
-  CHECK(slurp(dir / "hashes.json").find(R"("mode": "serial")") != std::string::npos);
+  const std::string hashes = slurp(dir / "hashes.json");
+  CHECK(hashes.find(R"("mode": "serial")") != std::string::npos);
+  // The golden names this configuration and its final world hash (clang, gcc, Debug and Release).
+  const std::string golden =
+      slurp(fs::path(SL_RUNTIME_SOURCE_DIR) / "tests/golden/runtime/demo_hash.json");
+  CHECK(golden.find(R"("seed": 7, "ticks": 30, "entities": 200, "workers": 2, "mode": "serial")") !=
+        std::string::npos);
+  const std::string want = quoted_after(golden, "final_hash");
+  REQUIRE(want.starts_with("sha256:"));
+  CHECK(final_fresh_hash(hashes) == want);
 }
 
 TEST_CASE("RT-INV-GATE-01: a usage error exits 2 with the usage text and runs nothing") {

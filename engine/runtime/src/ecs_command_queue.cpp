@@ -55,6 +55,7 @@ struct command_player {
     }
     result<void> done;
     component_id component = c->component;
+    bool added = false;
     switch (c->kind) {
     case op_kind::destroy:
       done = w->destroy(target);
@@ -67,14 +68,15 @@ struct command_player {
       done = w->remove_raw(target, c->component);
       break;
     case op_kind::set:
+      added = w->is_alive(target) && !w->has(target, c->component);
       done = w->set_raw(target, c->component, c->value, write_source::runtime);
       break;
     case op_kind::spawn:
       break;
     }
     if (done) {
-      report->applied.push_back(
-          flush_report::op{.kind = c->kind, .target = target, .component = component});
+      report->applied.push_back(flush_report::op{
+          .kind = c->kind, .target = target, .component = component, .added = added});
       return;
     }
     const errc code = done.error().code;

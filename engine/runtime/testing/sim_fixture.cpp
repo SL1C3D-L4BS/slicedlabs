@@ -352,7 +352,19 @@ result<std::unique_ptr<sched_rig>> sched_rig::make_on(jobs::job_system &shared) 
 
 result<void> sched_rig::finish() {
   const std::uint32_t workers = js->worker_count();
-  arena = std::make_unique<mem::frame_arena>(upstream, workers, 64U << 10U);
+  arena = std::make_unique<mem::frame_arena>(upstream, workers, mem::frame_arena_block_bytes);
+  // Every arena of both sets takes its first block now, on the owner thread, as the gate stack
+  // does: a lazy first block on whichever worker first opens a command buffer would land in a
+  // steady frame and log the upstream warning (WO-109).
+  for (int set = 0; set < 2; ++set) {
+    for (std::uint32_t k = 0; k <= workers; ++k) {
+      auto p = arena->for_worker(k).try_allocate(1, 1, mem::memory_tag{});
+      if (!p) {
+        return std::unexpected(p.error());
+      }
+    }
+    arena->flip();
+  }
   frame_config fc;
   fc.rate = time::tick_rate{.num = 50, .den = 1};
   auto made = frame_scheduler::make(*js, plat.get(), *arena, fc);

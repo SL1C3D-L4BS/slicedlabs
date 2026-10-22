@@ -186,6 +186,40 @@ TEST_CASE("RT-INV-SNAP-05: a runtime_abi_digest mismatch is snapshot_abi_mismatc
   CHECK(observe(target) == before);
 }
 
+TEST_CASE("RT-INV-SNAP-05: a layout digest that differs in one field kind refuses restore") {
+  // runtime::runtime_abi_digest folds component_registry::layout_digest in (ARCH3-R032); two
+  // registries whose spot differs only in the reflected kind of `level` give two digests, so a
+  // snapshot recorded under one is snapshot_abi_mismatch under the other (WO-109).
+  const auto layout = [](rt::field_kind level) {
+    rt::type_registry types;
+    rt::type_builder<spot> b("snap.spot");
+    b.field("x", offsetof(spot, x), rt::field_kind::f32, kept);
+    b.field("level", offsetof(spot, level), level, kept);
+    auto t = types.add(b.build());
+    REQUIRE(t.has_value());
+    ecs::component_registry registry;
+    REQUIRE(registry.add<spot>("snap.spot", t.value_or(nullptr)).has_value());
+    REQUIRE(registry.freeze().has_value());
+    return registry.layout_digest();
+  };
+  const sl::fabric::digest signed_level = layout(rt::field_kind::i32);
+  const sl::fabric::digest unsigned_level = layout(rt::field_kind::u32);
+  REQUIRE(signed_level != unsigned_level);
+  fixture f;
+  rt::snapshot_meta meta;
+  meta.frame = 9;
+  meta.tick = 9;
+  meta.runtime_abi_digest = signed_level;
+  auto s = rt::take(*f.w, f.registry, f.types, {}, meta);
+  REQUIRE(s.has_value());
+  fixture target(variant::same, 3);
+  const observed before = observe(target);
+  CHECK(restore_code(target, {}, *s, unsigned_level) == sl::errc::snapshot_abi_mismatch);
+  CHECK(observe(target) == before);
+  CHECK(restore_code(target, {}, *s, signed_level) == sl::errc::ok);
+  CHECK(observe(target) == observe(f));
+}
+
 TEST_CASE("RT-INV-SNAP-05: a type digest or type count mismatch is snapshot_schema_mismatch") {
   fixture f;
   const rt::snapshot s = take(f, {});

@@ -2,7 +2,8 @@
 // p's boundary and stays readable until the end of the following frame, never after. Under the
 // frame scheduler a tick task writes one event per frame, stamped with its frame index, and every
 // task phase records what it can read; by hand, deliver and end_frame show the same two-list
-// window.
+// window. A frame marked faulted (ARCH3-R028) delivers nothing from the mark on and keeps the older
+// list at arena_flip; its undelivered writes are dropped (WO-109).
 
 #include "sl/runtime/allocators.hpp"
 #include "sl/runtime/events.hpp"
@@ -198,4 +199,68 @@ TEST_CASE("RT-INV-EVT-02: under the scheduler an event is visible from its bound
   // frame 1: apply_inputs and observe; frames 2-5: all four looking phases
   CHECK(checked == 2 + (4 * (frames - 1)));
   CHECK(std::ranges::none_of(visible(ch), [](std::uint64_t v) { return v < frames; }));
+}
+
+TEST_CASE("RT-INV-EVT-02: a faulted frame keeps the older list and delivers nothing") {
+  const registry_fixture f;
+  auto made = rt::event_channel<stamp>::make(f.reg);
+  REQUIRE(made.has_value());
+  rt::event_channel<stamp> &ch = *made;
+  rig r;
+  constexpr std::uint64_t faulted = 3;
+  // Before attach, as the runtime's own hook: frame 3 faults at its tick boundary.
+  r.fs->add_phase_end_hook([fs = r.fs.get()](rt::phase ph, rt::time::tick /*t*/) noexcept {
+    if (ph == rt::phase::tick && fs->current().frame_index == faulted) {
+      fs->set_frame_faulted(true);
+    }
+  });
+  rt::attach(ch.stream(), *r.fs);
+  journal j;
+  for (const rt::phase ph : {rt::phase::pre_tick, rt::phase::post_tick}) {
+    REQUIRE(r.fs->add_task(rt::task_desc{
+        .name = "look",
+        .ph = ph,
+        .fn = [chp = &ch, jp = &j, ph](rt::task_context &ctx) noexcept { jp->look(*chp, ctx, ph); },
+        .after = {}}));
+  }
+  REQUIRE(r.fs->add_task(rt::task_desc{
+      .name = "write",
+      .ph = rt::phase::tick,
+      .fn =
+          [chp = &ch](rt::task_context &ctx) noexcept {
+            const rt::writer_key w{
+                .tick = ctx.tick, .ph = rt::phase::tick, .system_index = 1, .chunk_index = 0};
+            const auto wrote = chp->write(w, stamp{.frame = ctx.time.frame_index});
+            static_cast<void>(wrote);
+          },
+      .after = {}}));
+  REQUIRE(r.fs->build());
+
+  std::vector<std::vector<std::uint64_t>> after_frame;
+  for (std::uint64_t i = 0; i < 5; ++i) {
+    r.plat.clock().advance(one_tick);
+    REQUIRE(r.fs->run_frame().has_value());
+    CHECK(r.fs->frame_faulted() == (r.fs->current().frame_index == faulted));
+    after_frame.push_back(visible(ch));
+  }
+  // After frame 2 the list holds stamp 2; the faulted frame 3 keeps it (no flip), frame 4 flips.
+  CHECK(after_frame[1] == std::vector<std::uint64_t>{2});
+  CHECK(after_frame[2] == std::vector<std::uint64_t>{2});
+  CHECK(after_frame[3] == std::vector<std::uint64_t>{4});
+  CHECK(after_frame[4] == std::vector<std::uint64_t>{5});
+  std::uint32_t checked = 0;
+  for (std::size_t i = 0; i < j.used; ++i) {
+    const sight &s = j.sights[i];
+    const std::vector<std::uint64_t> got(s.seen.begin(), s.seen.begin() + s.count);
+    CHECK_MESSAGE(std::ranges::find(got, faulted) == got.end(), "frame ", s.frame); // never seen
+    if (s.frame == faulted || s.frame == faulted + 1) {
+      std::vector<std::uint64_t> want{2}; // the older list the faulted frame kept
+      if (s.frame == faulted + 1 && s.ph == rt::phase::post_tick) {
+        want.push_back(faulted + 1);
+      }
+      CHECK_MESSAGE(got == want, "frame ", s.frame, " phase ", static_cast<int>(s.ph));
+      ++checked;
+    }
+  }
+  CHECK(checked == 4);
 }

@@ -309,12 +309,19 @@ private:
   [[nodiscard]] std::optional<fault_report> detect_fault(const boundary_context &bc);
   void publish_fault(const fault_report &report);
 
+  // One recovery point: the snapshot with the system scheduler's last-run ticks at its tick.
+  struct recovery_point {
+    snapshot snap;
+    std::vector<ecs::last_run_ticks::entry> runs;
+    std::uint32_t runs_floor = 0xFFFFFFFFU;
+  };
+
   // runtime_recovery.cpp
-  [[nodiscard]] result<snapshot> take_snapshot(std::uint64_t frame, time::tick tick);
+  [[nodiscard]] result<recovery_point> take_snapshot(std::uint64_t frame, time::tick tick);
   void on_snapshot(const boundary_context &bc) noexcept;
   [[nodiscard]] bool over_recovery_limit(time::tick tick) noexcept;
   [[nodiscard]] result<time::tick> restore_newest(time::tick at_or_before) noexcept;
-  [[nodiscard]] result<void> restore_snapshot(const snapshot &s) noexcept;
+  [[nodiscard]] result<void> restore_snapshot(const recovery_point &p) noexcept;
   void discard_background() noexcept;
 
   // runtime_swap.cpp
@@ -375,7 +382,7 @@ private:
   std::atomic<bool> suspend_requested_{false};
 
   // Snapshots and recovery (owner thread).
-  std::vector<snapshot> snapshots_; // the newest two, oldest first
+  std::vector<recovery_point> snapshots_; // the newest two, oldest first
   time::tick last_snapshot_tick_ = 0;
   std::atomic<std::uint64_t> discarded_{0};
   std::atomic<std::uint64_t> recoveries_{0};
@@ -384,7 +391,7 @@ private:
   std::mutex swap_mutex_;
   std::optional<swap_request> swap_pending_; // guarded by swap_mutex_
   std::optional<swap_request> swap_active_;  // owner thread: in its health window
-  std::optional<snapshot> pre_swap_;
+  std::optional<recovery_point> pre_swap_;
   time::tick swap_tick_ = 0;
   std::atomic<swap_state> swap_state_{swap_state::none};
   std::atomic<errc> swap_code_{errc::ok};

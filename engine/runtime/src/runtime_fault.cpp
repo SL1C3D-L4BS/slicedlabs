@@ -2,7 +2,9 @@
 // systems and out_of_memory during playback are collected during the frame and handled in the
 // end_frame slot fault_check: Running -> Faulted, the frame's commands cleared unplayed,
 // frame_faulted() set for the link, then the recovery policy, and one sl-runtime-fault/1 report
-// (last_fault and one runtime.fault log event).
+// (last_fault and one runtime.fault log event). The frame scheduler's frame is marked faulted from
+// the phase end that saw the failure (events neither delivered nor flipped) and unmarked after a
+// restore, whose event lists are the snapshot's and flip at arena_flip as that frame's (WO-109).
 
 #include "sl/runtime/runtime.hpp"
 
@@ -39,6 +41,10 @@ void runtime::discard_after_fatal() noexcept {
   if (fatal) {
     queue_->clear(); // ARCH3-R028: the faulted frame's command buffers are never played back
   }
+  // ARCH3-R028: from this phase end on, the frame's events are neither delivered nor flipped.
+  if (fatal || systems_->failures() != failures_seen_) {
+    frames_->set_frame_faulted(true);
+  }
 }
 
 void runtime::on_phase_end(phase ph) noexcept {
@@ -49,6 +55,7 @@ void runtime::on_phase_end(phase ph) noexcept {
   const result<ecs::flush_report> &flushed = systems_->last_flush();
   if (!flushed && flushed.error().code == errc::out_of_memory) {
     playback_oom_ = true;
+    frames_->set_frame_faulted(true);
   }
 }
 
@@ -119,6 +126,7 @@ void runtime::on_fault_check(const boundary_context &bc) noexcept {
   }
   fault_report report = std::move(*found);
   frame_faulted_.store(true);
+  frames_->set_frame_faulted(true);
   queue_->clear(); // ARCH3-R028: nothing more of the faulted frame is played back
   apply_event(rt_event::fault);
   report.action = "stop";
@@ -137,6 +145,7 @@ void runtime::on_fault_check(const boundary_context &bc) noexcept {
         fatal_.clear();
       }
       recoveries_.fetch_add(1);
+      frames_->set_frame_faulted(false); // the snapshot's event lists flip on as its frame's
       report.action = "restore";
       report.restored_tick = *restored;
       apply_event(rt_event::recover_ok);

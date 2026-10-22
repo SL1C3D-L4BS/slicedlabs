@@ -159,7 +159,7 @@ TEST_CASE("RT-INV-CMD-02: commands on a pending entity apply after its spawn") {
   CHECK((*got_vel)->v == 6);
   const std::vector<ecs::flush_report::op> expected{
       {.kind = op_kind::spawn, .target = e, .component = ecs::component_id{}},
-      {.kind = op_kind::set, .target = e, .component = r.pos_id},
+      {.kind = op_kind::set, .target = e, .component = r.pos_id, .added = true},
       {.kind = op_kind::add, .target = e, .component = r.vel_id},
       {.kind = op_kind::remove, .target = e, .component = r.vel_id},
       {.kind = op_kind::add, .target = e, .component = r.vel_id}};

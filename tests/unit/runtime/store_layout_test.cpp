@@ -3,13 +3,16 @@
 // the entity column comes first, component columns sit at 64-byte aligned offsets in (alignment
 // descending, id ascending) order followed by the u32 tick columns, and the capacity is the largest
 // n <= 1024 whose layout fits. The expected capacity below is computed independently (a linear
-// scan from 1024 down) and compared with the archetype's.
+// scan from 1024 down) and compared with the archetype's. The registry's layout digest walks the
+// reflected fields of each component (name, offset, size, kind; WO-109).
 
 #include "sl/core/error.hpp"
+#include "sl/fabric/digest.hpp"
 #include "sl/runtime/ecs/component.hpp"
 #include "sl/runtime/ecs/entity.hpp"
 #include "sl/runtime/ecs/world.hpp"
 #include "sl/runtime/memory.hpp"
+#include "sl/runtime/reflect.hpp"
 
 #include "../../../engine/runtime/testing/world_gen.hpp"
 
@@ -25,6 +28,7 @@
 #include <memory>
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace {
@@ -54,6 +58,30 @@ struct fixture {
 std::uint64_t round64(std::uint64_t v) { return (v + 63) / 64 * 64; }
 
 template <class T> std::uintptr_t address(T *p) { return std::bit_cast<std::uintptr_t>(p); }
+
+struct probe {
+  std::int32_t a = 0;
+  std::int32_t b = 0;
+};
+
+// The layout digest of a registry holding probe, reflected with one field (no reflection when
+// `field` is empty).
+sl::fabric::digest probe_digest(std::string_view field, std::uint32_t offset,
+                                sl::runtime::field_kind kind) {
+  sl::runtime::type_registry types;
+  const sl::runtime::type_info *reflect = nullptr;
+  if (!field.empty()) {
+    sl::runtime::type_builder<probe> b("store.probe");
+    b.field(field, offset, kind, sl::runtime::field_flags::snapshot);
+    auto t = types.add(b.build());
+    REQUIRE(t.has_value());
+    reflect = t.value_or(nullptr);
+  }
+  ecs::component_registry registry;
+  REQUIRE(registry.add<probe>("store.probe", reflect).has_value());
+  REQUIRE(registry.freeze().has_value());
+  return registry.layout_digest();
+}
 
 struct column_shape {
   std::uint32_t id = 0;
@@ -156,6 +184,18 @@ TEST_CASE("RT-INV-STORE-03: columns are 64-byte aligned in (alignment desc, id a
     INFO("mask " << mask);
     check_layout(archetype_of(f, mask), f.registry);
   }
+}
+
+TEST_CASE("RT-INV-STORE-03: the layout digest changes with a reflected field's kind or offset") {
+  using sl::runtime::field_kind;
+  const sl::fabric::digest base = probe_digest("a", 0, field_kind::i32);
+  CHECK(probe_digest("a", 0, field_kind::i32) == base);
+  CHECK(probe_digest("a", 0, field_kind::f32) != base); // kind (same size)
+  CHECK(probe_digest("a", 0, field_kind::u32) != base);
+  CHECK(probe_digest("a", 4, field_kind::i32) != base); // offset
+  CHECK(probe_digest("b", 0, field_kind::i32) != base); // name
+  CHECK(probe_digest("a", 0, field_kind::i16) != base); // size and kind
+  CHECK(probe_digest("", 0, field_kind::i32) != base);  // no reflection
 }
 
 TEST_CASE("RT-INV-STORE-03: known capacities") {

@@ -76,6 +76,9 @@ struct flush_report {
     entity target;
     /// The component of add, remove and set; component_id{} for spawn and destroy.
     component_id component;
+    /// set only: the entity lacked the component, so the set added it (a component_added
+    /// signal, ARCH3-R129); the kind stays set.
+    bool added = false;
 
     friend constexpr bool operator==(const op &, const op &) noexcept = default;
   };

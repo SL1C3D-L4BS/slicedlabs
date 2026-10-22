@@ -150,7 +150,7 @@ TEST_CASE("RT-INV-CMD-03: flush_report lists the applied operations in playback 
       {.kind = op_kind::add, .target = e1, .component = r.vel_id},
       {.kind = op_kind::spawn, .target = spawned, .component = ecs::component_id{}},
       {.kind = op_kind::set, .target = e1, .component = r.pos_id},
-      {.kind = op_kind::set, .target = spawned, .component = r.vel_id},
+      {.kind = op_kind::set, .target = spawned, .component = r.vel_id, .added = true},
       {.kind = op_kind::remove, .target = e2, .component = r.pos_id},
       {.kind = op_kind::set, .target = e1, .component = r.pos_id},
       {.kind = op_kind::destroy, .target = e2, .component = ecs::component_id{}}};
@@ -162,6 +162,28 @@ TEST_CASE("RT-INV-CMD-03: flush_report lists the applied operations in playback 
   auto v = r.w->get<vel>(spawned);
   REQUIRE(v.has_value());
   CHECK((*v)->v == 3);
+}
+
+TEST_CASE("RT-INV-CMD-03: a set that adds a missing component is still reported as set") {
+  rig r;
+  mem::frame_arena arena(r.arena_memory, 0);
+  ecs::command_queue q(r.registry, arena);
+  const ecs::entity e = r.make(1);
+  ecs::command_buffer &b = q.open(key(0, 0));
+  b.set(e, vel{.v = 4}); // e lacks vel: added
+  b.set(e, vel{.v = 5}); // a write
+  b.set(e, pos{.x = 6, .y = 0});
+  auto report = q.flush(*r.w);
+  REQUIRE(report.has_value());
+  CHECK(report->applied ==
+        std::vector<op>{{.kind = op_kind::set, .target = e, .component = r.vel_id, .added = true},
+                        {.kind = op_kind::set, .target = e, .component = r.vel_id},
+                        {.kind = op_kind::set, .target = e, .component = r.pos_id}});
+  CHECK(report->skipped_refused == 0);
+  auto v = r.w->get<vel>(e);
+  REQUIRE(v.has_value());
+  CHECK((*v)->v == 5);
+  CHECK(r.x_of(e) == 6);
 }
 
 TEST_CASE("RT-INV-CMD-03: a world out_of_memory stops playback after the earlier commands") {

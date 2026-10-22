@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slicedlabs.example/schemas/runtime/hashes.schema.json",
+  "title": "The gate demo's state hashes, sl-runtime-hashes/1 (SL-ARCH-003 gate evidence, episode 099, demo::hashes_json in engine/runtime/tools/demo/evidence.cpp, WO-109)",
+  "type": "object",
+  "required": [
+    "format",
+    "compiler",
+    "seed",
+    "ticks",
+    "entities",
+    "workers",
+    "mode",
+    "resume_tick",
+    "fresh",
+    "resume",
+    "replay"
+  ],
+  "properties": {
+    "format": {
+      "const": "sl-runtime-hashes/1"
+    },
+    "compiler": {
+      "enum": [
+        "clang",
+        "gcc",
+        "other"
+      ]
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ticks": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "entities": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "workers": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "mode": {
+      "enum": [
+        "parallel",
+        "serial"
+      ]
+    },
+    "resume_tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "fresh": {
+      "$ref": "#/$defs/hash_list"
+    },
+    "resume": {
+      "$ref": "#/$defs/hash_list"
+    },
+    "replay": {
+      "$ref": "#/$defs/hash_list"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash_list": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^sha256:[0-9a-f]{64}$"
+      }
+    }
+  }
+}

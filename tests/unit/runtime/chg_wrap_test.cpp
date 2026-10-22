@@ -12,8 +12,12 @@
 #include "sl/runtime/ecs/component.hpp"
 #include "sl/runtime/ecs/entity.hpp"
 #include "sl/runtime/ecs/query.hpp"
+#include "sl/runtime/ecs/system.hpp"
 #include "sl/runtime/ecs/world.hpp"
+#include "sl/runtime/frame.hpp"
 #include "sl/runtime/memory.hpp"
+
+#include "../../../engine/runtime/testing/sim_fixture.hpp"
 
 #include <doctest/doctest.h>
 
@@ -289,4 +293,43 @@ TEST_CASE("RT-INV-CHG-05: clamp bounds, sweep_due and last_run_ticks::sweep") {
   CHECK(ticks.since(2) == now - 3);
   CHECK(ticks.floor() == now - ecs::change_tick_max_age);
   CHECK(ticks.since(9) == ticks.floor());
+}
+
+TEST_CASE("RT-INV-CHG-05: the sweep clamps a scheduler last-run tick") {
+  struct noop_body {
+    void operator()(sl::runtime::ecs::system_context & /*ctx*/) const noexcept {}
+  };
+  namespace ecs = sl::runtime::ecs;
+  auto made = sl::runtime::testing::sched_rig::make(1);
+  REQUIRE(made.has_value());
+  sl::runtime::testing::sched_rig &r = **made;
+  ecs::access_set access;
+  access.components.writes.push_back(r.ids.ids.at(0));
+  REQUIRE(r.systems
+              ->add(ecs::system_desc{.name = "wrap.writer",
+                                     .ph = sl::runtime::phase::tick,
+                                     .access = access,
+                                     .before = {},
+                                     .after = {},
+                                     .fn = noop_body{},
+                                     .chunked = false,
+                                     .queries = {}})
+              .has_value());
+  REQUIRE(r.build().has_value());
+  bool ran = false;
+  for (int f = 0; f < 20 && !ran; ++f) {
+    auto st = r.step();
+    REQUIRE(st.has_value());
+    ran = st->ticks_run > 0;
+  }
+  REQUIRE(ran);
+  ecs::last_run_ticks &runs = r.systems->last_runs();
+  const std::uint32_t key =
+      ecs::last_run_key(static_cast<std::uint8_t>(sl::runtime::phase::tick), 0);
+  const std::uint32_t last = runs.since(key);
+  CHECK(last != runs.floor());
+  const std::uint32_t now = last + ecs::change_tick_sweep_every + 5U;
+  runs.sweep(now);
+  CHECK(runs.since(key) == now - ecs::change_tick_max_age);
+  CHECK(runs.floor() == now - ecs::change_tick_max_age);
 }

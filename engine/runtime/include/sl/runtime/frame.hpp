@@ -263,6 +263,14 @@ public:
   /// Suspend and resume the frame clock (time::frame_clock freeze and thaw).
   void freeze_clocks() noexcept;
   void thaw_clocks() noexcept;
+  /// Snapshot restore only (ARCH3-R029): sets the logical tick to `t` (owner thread, in an
+  /// end_frame slot or between frames); the frame clock and the stepper keep their state.
+  void rewind_logical(time::tick t) noexcept;
+  /// Marks the running frame faulted, or unmarks it once a restore replaced its state (ARCH3-R028):
+  /// while marked, attach's hooks skip deliver and, at arena_flip, keep both event lists and drop
+  /// the undelivered writes. Owner thread, inside run_frame; every frame starts unmarked.
+  void set_frame_faulted(bool faulted) noexcept;
+  [[nodiscard]] bool frame_faulted() const noexcept { return frame_faulted_; }
 
   /// The frame's time value: its now is the running tick inside simulate.
   [[nodiscard]] const time::frame_time &current() const noexcept { return current_; }
@@ -344,6 +352,7 @@ private:
 
   bool built_ = false;
   bool in_frame_ = false;
+  bool frame_faulted_ = false;
   std::vector<task_record> tasks_;
   std::vector<phase_graph> graphs_;       // phase_count graphs (build)
   std::vector<jobs::job_handle> handles_; // the handles of the running phase

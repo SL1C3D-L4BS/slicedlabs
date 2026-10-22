@@ -6,7 +6,7 @@
 // neither structural nor exclusive (its commands are discarded at the phase boundary). Declared
 // access and exclusive systems (which run on the owner thread) pass. add refuses, in every build,
 // a desc whose queries need access its access_set lacks (access_conflict). RFP5 fails a system
-// before its body.
+// after its body (WO-109: the failpoint table's site).
 
 #include "sl/core/error.hpp"
 #include "sl/runtime/ecs/command_buffer.hpp"
@@ -284,7 +284,7 @@ TEST_CASE("RT-INV-SCHED-05: add refuses queries that need more than the access_s
   CHECK(id.error().code == errc::access_conflict);
 }
 
-TEST_CASE("RT-INV-SCHED-05: RFP5 fails a system before its body") {
+TEST_CASE("RT-INV-SCHED-05: RFP5 fails a system after its body") {
   rig_with_rows g;
   probe p;
   const std::uint32_t id = g.add(p, action::write_query, writes_velocity(g));
@@ -296,7 +296,7 @@ TEST_CASE("RT-INV-SCHED-05: RFP5 fails a system before its body") {
   }
   g.tick();
   rtt::disarm(rt::failpoint::rfp5);
-  CHECK(p.runs.load() == 0);
+  CHECK(p.runs.load() == 1);
   CHECK(g.r->systems->last_error(id) == errc::job_failed);
   CHECK(g.r->systems->failures() == 1);
 }

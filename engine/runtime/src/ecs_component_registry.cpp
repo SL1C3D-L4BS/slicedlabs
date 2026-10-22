@@ -2,7 +2,8 @@
 // max_component_size, max_component_alignment, ADR-0025). Ids are registration indices; names are
 // copied into strings reserved up front so the views in component_info stay valid. The layout
 // digest hashes, per component in id order, the name (str), size (u32), alignment (u32) and the
-// field layout: a u32 field count, 0 until the reflected field walk joins it (WO-088.md).
+// field layout of its reflected type_info: a u32 field count (0 without reflection), then per field
+// in declaration order the name (str), offset, size and kind (u32 each) (WO-109).
 
 #include "sl/runtime/ecs/component.hpp"
 
@@ -10,6 +11,7 @@
 #include "sl/core/error.hpp"
 #include "sl/fabric/digest.hpp"
 #include "sl/runtime/error.hpp"
+#include "sl/runtime/reflect.hpp"
 #include "sl/runtime/replay.hpp"
 
 #include <algorithm>
@@ -105,7 +107,17 @@ fabric::digest component_registry::layout_digest() const noexcept {
     h.str(c.name);
     h.u32(c.size);
     h.u32(c.align);
-    h.u32(0); // the reflected field layout: no fields walked yet (WO-088.md)
+    if (c.reflect == nullptr) {
+      h.u32(0);
+      continue;
+    }
+    h.u32(static_cast<std::uint32_t>(c.reflect->fields.size()));
+    for (const field_info &f : c.reflect->fields) {
+      h.str(f.name);
+      h.u32(f.offset);
+      h.u32(f.size);
+      h.u32(static_cast<std::uint32_t>(f.kind));
+    }
   }
   return h.finish();
 }

@@ -199,6 +199,8 @@ public:
   virtual void deliver(std::uint64_t frame) noexcept = 0;
   /// Frame end: logs the frame's drops once, drops the older list, starts the next frame's list.
   virtual void end_frame() noexcept = 0;
+  /// A faulted frame's end (ARCH3-R028): drops the undelivered writes, keeps both lists.
+  virtual void drop_pending() noexcept = 0;
   /// Appends the events delivered in frame `frame` (either list), in delivery order.
   virtual void collect(std::uint64_t frame, std::vector<event_record> &out) const = 0;
   /// Appends both frame lists without correlation (events_contributor).
@@ -345,6 +347,13 @@ public:
     previous_frame_ = current_frame_;
     current_.clear();
     current_frame_ = previous_frame_ + 1;
+  }
+
+  void drop_pending() noexcept override {
+    const std::scoped_lock lock(mutex_);
+    for (auto &[key, b] : writers_) {
+      b.clear();
+    }
   }
 
   void collect(std::uint64_t frame, std::vector<event_record> &out) const override {

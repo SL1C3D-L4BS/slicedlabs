@@ -5,7 +5,8 @@
 // archetype again for another world or when the generation moved by more than the archetypes
 // added (restore_from). Then it maps each applied entry of the report, in report order, to one
 // signal: spawn -> entity_created, destroy -> entity_destroyed, add -> component_added,
-// remove -> component_removed; set gives none. The archetype of an entity signal is the one the
+// remove -> component_removed; a set gives component_added when it added the missing component
+// (op::added, WO-109) and none otherwise. The archetype of an entity signal is the one the
 // entity is in at the boundary (located by one pass over every live row), no_archetype when the
 // entity is dead then: flush_report does not say which archetype a row passed through.
 
@@ -24,9 +25,9 @@ namespace {
 
 using op_kind = flush_report::op_kind;
 
-/// The signal kind of an applied entry; none for set.
-[[nodiscard]] std::optional<change_signal_kind> kind_of(op_kind kind) noexcept {
-  switch (kind) {
+/// The signal kind of an applied entry; none for a set that wrote an existing component.
+[[nodiscard]] std::optional<change_signal_kind> kind_of(const flush_report::op &op) noexcept {
+  switch (op.kind) {
   case op_kind::spawn:
     return change_signal_kind::entity_created;
   case op_kind::destroy:
@@ -36,6 +37,9 @@ using op_kind = flush_report::op_kind;
   case op_kind::remove:
     return change_signal_kind::component_removed;
   case op_kind::set:
+    if (op.added) {
+      return change_signal_kind::component_added;
+    }
     break;
   }
   return std::nullopt;
@@ -63,7 +67,7 @@ void structural_log::append(const flush_report &report, const world &w) noexcept
   }
   locate(w);
   for (const flush_report::op &op : report.applied) {
-    const std::optional<change_signal_kind> kind = kind_of(op.kind);
+    const std::optional<change_signal_kind> kind = kind_of(op);
     if (!kind) {
       continue;
     }

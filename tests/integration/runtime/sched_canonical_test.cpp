@@ -7,8 +7,10 @@
 // differs from the previous one. Ticks and seeds scale with SL_RUNTIME_STRESS_SCALE.
 
 #include "sl/core/error.hpp"
+#include "sl/core/log.hpp"
 #include "sl/fabric/digest.hpp"
 #include "sl/runtime/ecs/system.hpp"
+#include "sl/runtime/frame.hpp"
 
 #include "../../../engine/runtime/testing/sim_fixture.hpp"
 
@@ -18,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -115,4 +118,29 @@ TEST_CASE("RT-INV-SCHED-06: the reference systems change the world") {
   CHECK(f.systems().failures() == 0);
   // mortals die (hp drifts down) and sources spawn new ones: the census moved
   CHECK(after != before);
+}
+
+TEST_CASE("RT-INV-SCHED-06: on 4 workers no steady frame takes an upstream block (warm arenas)") {
+  auto sink = std::make_shared<sl::log::memory_sink>(4096);
+  sl::log::default_logger().add_sink(sink);
+  rtt::sim_config c;
+  c.workers = 4;
+  c.ticks = 40;
+  auto made = rtt::sim_fixture::make(c);
+  REQUIRE(made.has_value());
+  rtt::sim_fixture &f = **made;
+  for (std::uint32_t frame = 1; frame <= c.ticks; ++frame) {
+    INFO("frame " << frame);
+    REQUIRE(f.run(1).has_value());
+    if (frame > sl::runtime::warmup_frames_default) {
+      CHECK(f.rig().frames->upstream_allocs_last_frame() == 0);
+    }
+  }
+  sl::log::default_logger().remove_sink(sink.get());
+  std::size_t warnings = 0;
+  for (const auto &rec : sink->records()) {
+    // cppcheck-suppress useStlAlgorithm ; the two-field match reads plainer as a loop
+    warnings += rec.system == "runtime.frame" && rec.level == sl::log::level::warn ? 1U : 0U;
+  }
+  CHECK(warnings == 0);
 }

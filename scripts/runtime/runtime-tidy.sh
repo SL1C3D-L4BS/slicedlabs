@@ -18,22 +18,23 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$root"
 
 # Area -> runtime sources: names relative to engine/runtime/src unless they start with testing/ or tools/ (relative to
-# engine/runtime); a name without .cpp is a prefix pattern.
+# engine/runtime); a name without .cpp is a prefix pattern. Every engine/runtime/testing .cpp is named in some area
+# (tools/runtime/test_runtime_tidy_areas.py).
 declare -A sources=(
-  [err]='error.cpp faults.cpp'
-  [flt]='faults.cpp'
-  [plat]='platform_*'
-  [mem]='memory_*'
+  [err]='error.cpp faults.cpp testing/testing_base.cpp'
+  [flt]='faults.cpp testing/faults_arm.cpp'
+  [plat]='platform_* testing/scripted_platform.cpp'
+  [mem]='memory_* testing/failing_resource.cpp'
   [sync]='sync_*'
-  [alloc]='alloc_*'
-  [job]='job_system* queue_locked policy_simple'
+  [alloc]='alloc_* testing/allocator_contract.cpp'
+  [job]='job_system* queue_locked policy_simple testing/queue_contract.cpp'
   [ent]='ecs_entity*'
   [clock]='time_*'
   [det]='rng* det_*'
   [diag]='memdiag_*'
   [steal]='queue_ws policy_steal*'
   [refl]='reflect_*'
-  [store]='ecs_world* ecs_archetype* ecs_component*'
+  [store]='ecs_world* ecs_archetype* ecs_component* testing/world_gen.cpp testing/sim_fixture.cpp'
   [frame]='frame_*'
   [query]='ecs_query*'
   [cmd]='ecs_command*'
@@ -44,7 +45,7 @@ declare -A sources=(
   [life]='runtime_*'
   [bnd]='bridge_*'
   [stress]='testing/stress_harness.cpp'
-  [gate]='tools/sl_runtime_demo.cpp tools/demo/*.cpp'
+  [gate]='tools/sl_runtime_demo.cpp tools/demo/*.cpp testing/fabric_host.cpp'
 )
 
 shopt -s nullglob

@@ -218,9 +218,9 @@ mem::memory_report runtime::memory_report() const {
 std::vector<time::tick> runtime::snapshot_ticks() const {
   std::vector<time::tick> out;
   out.reserve(snapshots_.size());
-  for (const snapshot &s : snapshots_) {
+  for (const recovery_point &p : snapshots_) {
     // cppcheck-suppress useStlAlgorithm ; a loop over at most two snapshots reads plainer
-    out.push_back(s.tick());
+    out.push_back(p.snap.tick());
   }
   return out;
 }

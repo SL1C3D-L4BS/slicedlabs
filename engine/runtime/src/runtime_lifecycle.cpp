@@ -106,15 +106,8 @@ result<void> runtime::start_steps() noexcept {
   if (auto built = start_frames(); !built) {
     return built;
   }
-  // 8. the tick-0 snapshot
-  if (config_.snapshot_every > 0) {
-    auto first = take_snapshot(0, 0);
-    if (!first) {
-      return std::unexpected(first.error());
-    }
-    snapshots_.push_back(std::move(*first));
-    last_snapshot_tick_ = 0;
-  }
+  // 8. no snapshot yet: the baseline is taken at the end of the first host frame (on_snapshot)
+  last_snapshot_tick_ = 0;
   return {};
 }
 
