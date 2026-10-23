@@ -95,6 +95,8 @@ done
 run just registry-check
 run just adr-check
 run just wo-check
+wo_lint="$HOME/.dotfiles/tools/factory/wo-lint"
+[ -x "$wo_lint" ] || [ -f "$wo_lint" ] || die "$wo_lint is missing (wo-verify runs the same lint)"
 
 mapfile -t rows < <(grep -vE '^\s*(#|$)' "$ep_map")
 missing=()
@@ -105,6 +107,7 @@ for row in "${rows[@]}"; do
   [ -f "work-orders/$wo.md" ] || die "work-orders/$wo.md does not exist (ep-map row: $row)"
   if [ -z "${seen[$wo]:-}" ]; then
     seen[$wo]=1
+    python3 -I "$wo_lint" "work-orders/$wo.md" >/dev/null 2>&1 || die "work-orders/$wo.md fails wo-lint (wo-verify would refuse it): $(python3 -I "$wo_lint" "work-orders/$wo.md" 2>&1 | tail -n 1)"
     [ -f "evidence/$wo.json" ] || missing+=("$wo")
   fi
 done

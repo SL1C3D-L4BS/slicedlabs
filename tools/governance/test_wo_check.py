@@ -80,6 +80,16 @@ class CheckTests(unittest.TestCase):
             with self.subTest((cls, tokens, usd)):
                 self.assertEqual("R-WO-BUDGET" not in rules(check(text)), ok)
 
+    def test_goal_is_one_sentence_of_at_most_240_characters(self):
+        good = read("good.md")
+        import re as _re
+        m = _re.search(r'^goal: "(.*)"$', good, _re.M)
+        self.assertIsNotNone(m)
+        long_goal = good.replace(m.group(0), 'goal: "' + "x" * 241 + '"')
+        self.assertIn("R-WO-FRONT", rules(check(long_goal)))
+        fit_goal = good.replace(m.group(0), 'goal: "' + "x" * 240 + '"')
+        self.assertNotIn("R-WO-FRONT", rules(check(fit_goal)))
+
     def test_rounds_at_most_two(self):
         self.assertIn("R-WO-BUDGET", rules(check(read("good.md").replace("rounds: 2", "rounds: 3"))))
         self.assertNotIn("R-WO-BUDGET", rules(check(read("good.md").replace("rounds: 2", "rounds: 0"))))

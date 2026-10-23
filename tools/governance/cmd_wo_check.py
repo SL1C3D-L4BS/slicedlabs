@@ -163,6 +163,8 @@ def check_front(meta, filename):
         errors.append(("R-WO-FRONT", "repo must be %s" % REPO))
     if "goal" in meta and not (isinstance(meta["goal"], str) and meta["goal"].strip()):
         errors.append(("R-WO-FRONT", "goal must be a non-empty string"))
+    elif "goal" in meta and ("\n" in meta["goal"] or len(meta["goal"]) > 240):
+        errors.append(("R-WO-FRONT", "goal must be one sentence of 240 characters or fewer (wo-lint rule)"))
     risk = meta.get("risk")
     if "risk" in meta:
         if not isinstance(risk, list) or not risk or any(r not in RISKS for r in risk):
