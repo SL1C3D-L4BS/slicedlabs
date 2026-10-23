@@ -2,7 +2,7 @@
 
 Architecture references `SL-ARCH-001` to `SL-ARCH-030` (master plan, Required documents and registries). Three are
 written: SL-ARCH-001 and SL-ARCH-002 (WO-035; InReview 0.3.0 by WO-063, 0.3.1 by WO-064) and SL-ARCH-003
-(WO-075, Draft 0.1.0), registered in SL-REG-001 (`registry/SL-REG-001-documents.json`) with their paths in this
+(WO-075; InReview 0.3.0 by WO-101), registered in SL-REG-001 (`registry/SL-REG-001-documents.json`) with their paths in this
 directory; `just doc-check` and
 `just registry-docs-check` scan `docs/arch`. The other twenty-seven are Planned and have no file yet. The
 authoring-order waiver in [ADR-0003](../adr/ADR-0003-authoring-order-waivers.md) lets the Volume 03 code of
@@ -17,7 +17,7 @@ volumes are read from SL-REG-001 and SL-REG-002; the registry stays authoritativ
 | :---- | :---- | :---- | :---- |
 | SL-ARCH-001 | [Canonical Project Model (Fabric)](SL-ARCH-001-canonical-project-model.md) | 04 | InReview |
 | SL-ARCH-002 | [Transaction, Undo and Recovery Protocol](SL-ARCH-002-transaction-undo-recovery.md) | 04 | InReview |
-| SL-ARCH-003 | [Runtime and Execution Architecture](SL-ARCH-003-runtime-execution.md) | 05 | Draft |
+| SL-ARCH-003 | [Runtime and Execution Architecture](SL-ARCH-003-runtime-execution.md) | 05 | InReview |
 | SL-ARCH-004 | Editor Shell and UI Framework | 06 | Planned |
 | SL-ARCH-005 | Graphics Backend Contract (Vulkan, Metal, WebGPU, consoles) | 07, 26 | Planned |
 | SL-ARCH-006 | Render Graph and Renderer | 08 | Planned |

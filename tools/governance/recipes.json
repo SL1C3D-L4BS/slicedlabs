@@ -680,7 +680,7 @@
     },
     "acceptance-081-100": {
       "owner": "WO-101",
-      "status": "stub"
+      "status": "implemented"
     }
   }
 }

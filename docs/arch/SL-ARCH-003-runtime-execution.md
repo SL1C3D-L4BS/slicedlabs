@@ -2,8 +2,8 @@
 id: SL-ARCH-003
 kind: ARCH
 title: "Runtime and Execution Architecture"
-status: Draft
-version: 0.2.1
+status: InReview
+version: 0.3.0
 owner: founder
 episodes: [81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 depends_on: [SL-ARCH-001, SL-ARCH-002]
@@ -28,7 +28,7 @@ is hashed. The document side of the boundary stays in SL-ARCH-001 (ARCH1-R60 to 
 
 ## Status and decisions
 
-Draft 0.2.1: written by WO-075 before any Volume 05 code (master plan, Authoring order), reconciled with the code by WO-100 (the builders' decisions are under "Code reconciliation (WO-100)") and its open code issues fixed by WO-109. Binding decisions:
+InReview 0.3.0 (Draft 0.2.1 until WO-101): written by WO-075 before any Volume 05 code (master plan, Authoring order), reconciled with the code by WO-100 (the builders' decisions are under "Code reconciliation (WO-100)") and its open code issues fixed by WO-109. Binding decisions:
 ADR-0001 (layout), ADR-0002 (dependencies: none added; no SDL3 or windowing, the volume is headless), ADR-0009
 (errors are values), ADR-0015 (failpoint pattern), ADR-0017 (authority), ADR-0021 (Volume 05 before Volume 02, the
 mathematics allowed meanwhile, the Demonstrated cap), and the Volume 05 records ADR-0022 (error domain and fault
@@ -965,3 +965,4 @@ failpoints, stress matrix, gate) and the verdict build/design/vol05-judges.json.
 | 0.1.0 | 2026-10-20 | First draft before any Volume 05 code (WO-075), from the panel verdict build/design/vol05-judges.json. |
 | 0.2.0 | 2026-10-22 | Reconciled with the Volume 05 code (WO-100): "Code reconciliation (WO-100)" records the 312 entries of the WO-076 to WO-099 deviation files; `limits` gains 20 rows and marks 14 `"bound": false`; `gate_evidence` gains hashes.json; error_codes, failpoints and thread_safety prose corrected; every contract table bound by `just runtime-contract-lock` and schemas/runtime/contract.lock.json; code still to change listed as open issues; nothing retired, rules unchanged except the R053 schema path. |
 | 0.2.1 | 2026-10-22 | Volume 05 follow-ups (WO-109): the WO-100 open issues are fixed in code (layout digest fields, faulted-frame events, the baseline after the first host frame, a restore rewinds the logical tick and last runs, set-that-adds signals, last_run_ticks in the system scheduler, RFP5 and RFP8 site strings, sim_fixture warm-up, the runtime-tidy map, two cppcheck notes, the hashes.json schema and demo-hash golden) and removed from Open issues; the reconciliation lines they made stale are corrected; ARCH3-R025 records the start-unwind test limit; status unchanged. |
+| 0.3.0 | 2026-10-22 | Release (WO-101): status InReview; `just runtime-gate` composes every check and negative test of this document, `check` and `check-ratchet` run it after fabric-gate, `fast` gains runtime-lint and runtime-contracts-strict, and `check-full` adds runtime-san asan, ubsan and tsan and runtime-determinism; no table changed, no rule changed. |

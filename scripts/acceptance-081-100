@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+# acceptance-081-100 (WO-101): the release checks of episodes 081-100 (the runtime foundation), with evidence logs.
+# Usage: scripts/acceptance-081-100 [--only N]      (run via `just acceptance-081-100`)
+#   13 runtime-gate         just runtime-gate     every runtime check and every neg-runtime-* test, runtime-demo included
+#   14 runtime-san          just runtime-san asan, ubsan and tsan over every runtime area
+#   15 runtime-determinism  just runtime-determinism, then just runtime-scorecard over the full evidence
+#   16 check-full           just check-full       the release gate (about 90 minutes; it runs runtime-gate, runtime-san
+#                                                 and runtime-determinism again through check and its own list)
+# Each item writes build/acceptance/<n>-<name>.log: the command, its exit code, `git rev-parse HEAD`, a tree hash of the
+# working tree (sha256 of the sorted per-file sha256 list of `git ls-files` tracked + untracked, not ignored), the tool
+# versions, then the command output. After items 13, 14 and 15 the gate evidence is copied: build/runtime/gate/* and
+# build/runtime/scorecard.json into build/acceptance/runtime/ and the sanitizer logs into build/acceptance/runtime/san/
+# (item 15 runs last, so the copy that stays holds the hash matrix, the sanitizer logs and the full scorecard). Items 1-12
+# belong to acceptance-041-048, acceptance-049-060 and acceptance-061-080 and are not touched. The summary, with the wall
+# time of every item, is also written to build/acceptance/081-100-summary.txt.
+# Exit 1 when any item fails. No network.
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+
+only=""
+case "${1:-}" in
+  "") ;;
+  --only)
+    only="${2:-}"
+    case "$only" in 13 | 14 | 15 | 16) ;; *)
+      echo "usage: scripts/acceptance-081-100 [--only 13|14|15|16]" >&2
+      exit 2
+      ;;
+    esac
+    ;;
+  *)
+    echo "usage: scripts/acceptance-081-100 [--only 13|14|15|16]" >&2
+    exit 2
+    ;;
+esac
+
+outdir="$root/build/acceptance"
+mkdir -p "$outdir"
+
+head_rev="$(git rev-parse HEAD 2>/dev/null || echo none)"
+tree_hash="$(
+  git ls-files -z --cached --others --exclude-standard | LC_ALL=C sort -z |
+    while IFS= read -r -d '' f; do
+      if [ -f "$f" ]; then sha256sum -- "$f"; fi
+    done | sha256sum | cut -d' ' -f1
+)"
+
+tool_versions() {
+  local t
+  for t in clang++ g++ cmake ninja just clang-format python3 git; do
+    if command -v "$t" >/dev/null 2>&1; then
+      printf '%-13s %s\n' "$t" "$("$t" --version 2>&1 | head -n 1)"
+    else
+      printf '%-13s absent\n' "$t"
+    fi
+  done
+}
+versions="$(tool_versions)"
+
+summary=()
+failed=0
+
+# write_log <n-name> <command text> <exit code> <status> <output file>
+write_log() {
+  {
+    echo "item:      $1"
+    echo "command:   $2"
+    echo "exit code: $3"
+    echo "status:    $4"
+    echo "HEAD:      $head_rev"
+    echo "tree hash: $tree_hash (sha256 over sorted per-file sha256 of tracked + untracked files)"
+    echo "date:      $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "tools:"
+    printf '%s\n' "$versions" | sed 's/^/  /'
+    echo "--- output ---"
+    cat "$5"
+  } >"$outdir/$1.log"
+}
+
+# copy_evidence: the gate evidence of the last run into build/acceptance/runtime/ (a later call overwrites an earlier one)
+copy_evidence() {
+  mkdir -p "$outdir/runtime"
+  if [ -d build/runtime/gate ]; then
+    cp -R build/runtime/gate/. "$outdir/runtime/"
+  fi
+  if [ -f build/runtime/scorecard.json ]; then
+    cp build/runtime/scorecard.json "$outdir/runtime/scorecard.json"
+  fi
+  if [ -d build/runtime/san ]; then
+    mkdir -p "$outdir/runtime/san"
+    cp -R build/runtime/san/. "$outdir/runtime/san/"
+  fi
+}
+
+# run_item <n> <name> <command text> <copy 0|1>: runs it under bash -e, writes the evidence log, records the result
+run_item() {
+  local n="$1" name="$2" cmdtext="$3" copy="$4" start rc=0 tmp
+  start=$SECONDS
+  tmp="$(mktemp)"
+  echo "acceptance: [$n $name] $cmdtext"
+  bash -euo pipefail -c "$cmdtext" >"$tmp" 2>&1 || rc=$?
+  tail -n 3 "$tmp"
+  local status=ok
+  if [ "$rc" -ne 0 ]; then
+    status=FAIL
+    failed=1
+  fi
+  write_log "$n-$name" "$cmdtext" "$rc" "$status" "$tmp"
+  rm -f "$tmp"
+  if [ "$copy" = 1 ]; then
+    copy_evidence
+  fi
+  summary+=("$(printf '%-3s %-20s %-8s exit %-3s %s s' "$n" "$name" "$status" "$rc" "$((SECONDS - start))")")
+}
+
+wanted() { [ -z "$only" ] || [ "$only" = "$1" ]; }
+
+wanted 13 && run_item 13 runtime-gate "just runtime-gate" 1
+wanted 14 && run_item 14 runtime-san "just runtime-san asan && just runtime-san ubsan && just runtime-san tsan" 1
+wanted 15 && run_item 15 runtime-determinism "just runtime-determinism && just runtime-scorecard" 1
+wanted 16 && run_item 16 check-full "just check-full" 0
+
+{
+  echo "acceptance-081-100 summary (HEAD $head_rev, tree ${tree_hash:0:16}); logs in build/acceptance/"
+  printf '  %s\n' "${summary[@]}"
+} | tee "$outdir/081-100-summary.txt"
+if [ "$failed" -ne 0 ]; then
+  echo "acceptance-081-100: FAIL"
+  exit 1
+fi
+echo "acceptance-081-100: ok"

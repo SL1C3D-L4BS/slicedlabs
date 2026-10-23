@@ -7,11 +7,11 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 default:
     @just --list
 
-# gate.fast (FACTORY.md): under 60 s. WO-001 ratchet: layout, gates, tool tests, format, ADRs, work orders. WO-063 ratchet: the seven Python-only Fabric checks (each well under 1 s).
-fast: layout-check gates-check tools-test fmt-check adr-check wo-check fabric-contracts-strict fabric-nothrow-check fabric-schema-check fabric-gen-check fabric-surface-check fabric-golden-check fabric-vectors-check
+# gate.fast (FACTORY.md): under 60 s. WO-001 ratchet: layout, gates, tool tests, format, ADRs, work orders. WO-063 ratchet: the seven Python-only Fabric checks (each well under 1 s). WO-101 ratchet: runtime-lint and runtime-contracts-strict (together under 2 s; fast measured 46.4 s before them and 47.7 s after, limit 60 s). Not in fast: runtime-demo (about 500 s in Debug) and runtime-determinism (about 820 s) are far over its budget.
+fast: layout-check gates-check tools-test fmt-check adr-check wo-check fabric-contracts-strict fabric-nothrow-check fabric-schema-check fabric-gen-check fabric-surface-check fabric-golden-check fabric-vectors-check runtime-lint runtime-contracts-strict
 
-# gate.full (FACTORY.md). WO-020 ratchet: fast + C++ build gates + dependency/feature/Vulkan checks + tests + every negative test + the local CI (`check-full` adds the sanitizer and release workflows). WO-063 ratchet: fabric-gate after test.
-check: fast gate-build deps-check features-check vk-check test fabric-gate negatives ci-local
+# gate.full (FACTORY.md). WO-020 ratchet: fast + C++ build gates + dependency/feature/Vulkan checks + tests + every negative test + the local CI (`check-full` adds the sanitizer and release workflows). WO-063 ratchet: fabric-gate after test. WO-101 ratchet: runtime-gate after fabric-gate; it runs runtime-demo once (about 500 s in Debug), so a full `check` takes a quarter hour longer; runtime-determinism (about 820 s) and the sanitizer runs stay in check-full only.
+check: fast gate-build deps-check features-check vk-check test fabric-gate runtime-gate negatives ci-local
     @echo "check: ok"
 
 # every work order: front matter, class caps, `just <recipe>` acceptance, `Traces:` ids (in SL-REG-002 once it exists) (WO-012)
@@ -320,16 +320,16 @@ acceptance-041-048:
 acceptance-049-060:
     @bash scripts/acceptance-049-060
 
-# every negative test and selftest (WO-020); WO-063 adds every neg-fabric-* recipe
-negatives: neg-format neg-doc neg-registry neg-rtm neg-deps neg-deps-missing neg-deps-unpinned-provider neg-vcpkg-absent neg-feature-removed neg-feature-unlisted neg-probe-never-fails neg-vk-layer-missing neg-ci-local-red doctor-selftest neg-plan neg-fabric-contracts neg-fabric-nothrow neg-fabric-golden neg-fabric-determinism neg-fabric-schema neg-fabric-gen neg-fabric-f2 neg-fabric-event-schema neg-fabric-f5 neg-fabric-crash-sweep neg-fabric-fsck neg-fabric-conformance neg-fabric-contract-lock neg-fabric-scorecard
+# every negative test and selftest (WO-020); WO-063 adds every neg-fabric-* recipe; WO-101 adds every neg-runtime-* recipe
+negatives: neg-format neg-doc neg-registry neg-rtm neg-deps neg-deps-missing neg-deps-unpinned-provider neg-vcpkg-absent neg-feature-removed neg-feature-unlisted neg-probe-never-fails neg-vk-layer-missing neg-ci-local-red doctor-selftest neg-plan neg-fabric-contracts neg-fabric-nothrow neg-fabric-golden neg-fabric-determinism neg-fabric-schema neg-fabric-gen neg-fabric-f2 neg-fabric-event-schema neg-fabric-f5 neg-fabric-crash-sweep neg-fabric-fsck neg-fabric-conformance neg-fabric-contract-lock neg-fabric-scorecard neg-runtime-lint neg-runtime-contracts neg-runtime-poison neg-runtime-race neg-runtime-leak neg-runtime-stress neg-runtime-determinism neg-runtime-contract-lock neg-runtime-scorecard
     @echo "negatives: ok"
 
 # the final `check` ratchet as a recipe (same dependency list); `check` itself is the protected gate line (WO-020, WO-063)
-check-ratchet: fast gate-build deps-check features-check vk-check test fabric-gate negatives ci-local
+check-ratchet: fast gate-build deps-check features-check vk-check test fabric-gate runtime-gate negatives ci-local
     @echo "check-ratchet: ok"
 
-# release gate: check-ratchet plus the ubsan, tsan, hardened release (clang and gcc) and gcc workflows (WO-020), then the static-analysis and hardening gates tidy analyze sanitize-proof hardening neg-tidy (WO-025)
-check-full: check-ratchet (workflow "ci-ubsan") (workflow "ci-tsan") (workflow "ci-release") (workflow "ci-gcc") (workflow "ci-gcc-release") tidy analyze sanitize-proof hardening neg-tidy
+# release gate: check-ratchet plus the ubsan, tsan, hardened release (clang and gcc) and gcc workflows (WO-020), then the static-analysis and hardening gates tidy analyze sanitize-proof hardening neg-tidy (WO-025). WO-101 adds runtime-san asan, ubsan and tsan over every runtime area, then runtime-determinism (workers {1, 2, 4, 8, 16} x serial and parallel, about 820 s): check-full only, never in fast or check.
+check-full: check-ratchet (workflow "ci-ubsan") (workflow "ci-tsan") (workflow "ci-release") (workflow "ci-gcc") (workflow "ci-gcc-release") tidy analyze sanitize-proof hardening neg-tidy (runtime-san "asan") (runtime-san "ubsan") (runtime-san "tsan") runtime-determinism
     @echo "check-full: ok"
 
 # episodes-doc-check <range>: docs/episodes/<range>.md has a section per episode (registry title, five sub-headings, a just recipe, an ADR or none); e.g. 041-048 (WO-021)
@@ -803,10 +803,10 @@ runtime-scorecard *args:
 neg-runtime-scorecard *args:
     @bash scripts/runtime/neg-runtime-scorecard.sh {{args}}
 
-# dispatch (SL-ARCH-003, WO-075): runtime-gate ; implemented by WO-101 in scripts/runtime/runtime-gate.sh
+# dispatch (SL-ARCH-003, WO-075): runtime-gate ; implemented by WO-101 in scripts/runtime/runtime-gate.sh: the release gate of the runtime foundation (episode 100): runtime-lint, runtime-contracts-strict, runtime-contract-lock, runtime-test per area, runtime-stress, runtime-demo (about 500 s in Debug), runtime-memreport-check, runtime-scorecard, fabric-surface-check and every neg-runtime-*; check and check-ratchet run it after fabric-gate; runtime-determinism and runtime-san are check-full only
 runtime-gate *args:
     @bash scripts/runtime/runtime-gate.sh {{args}}
 
-# the release check of episodes 081-100 (stub until WO-101: runtime-gate, runtime-san x3, runtime-determinism, check-full; logs 13-16 in build/acceptance/)
+# the release checks of episodes 081-100 (runtime-gate, runtime-san asan ubsan tsan, runtime-determinism, check-full), logs 13-16 in build/acceptance/ and the gate evidence in build/acceptance/runtime/ (WO-101); about two hours
 acceptance-081-100:
-    @just stub acceptance-081-100
+    @bash scripts/acceptance-081-100
