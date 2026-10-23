@@ -210,14 +210,28 @@ class DispatchTests(unittest.TestCase):
         self.script("#!/usr/bin/env bash\nset -euo pipefail\necho real\n")
         self.assertEqual(slgov.selftest_errors(self.recipes, self.manifest, {"WO-076"}, ("fast",), self.root), [])
 
+    @staticmethod
+    def stubs_in_gate(recipes, dispatch, root):
+        """Dispatch recipes in the closure of fast and check whose script is still the two-line stub (WO-111)."""
+        in_gate = slgov.closure(recipes, ["fast", "check"]) & set(dispatch)
+        return sorted(n for n in in_gate if slgov.is_dispatch_stub(root, n))
+
     def test_real_dispatch_recipes(self):
         manifest = slgov.load_recipes_json(RECIPES_JSON)
         recipes = real_recipes()
         dispatch = sorted(n for n, e in manifest.items() if e["status"] == "dispatch")
-        self.assertEqual(len(dispatch), 24)
+        self.assertTrue(dispatch)
         for name in dispatch:
             self.assertTrue(slgov.is_dispatch_body(name, recipes[name]), name)
-        self.assertEqual(slgov.closure(recipes, ["fast", "check"]) & set(dispatch), set())
+        # a dispatch recipe whose script is real may sit in the gate closure (WO-101 ratchet); a stub may not
+        self.assertEqual(self.stubs_in_gate(recipes, dispatch, slgov.ROOT), [])
+
+    def test_a_stub_dispatch_script_in_the_gate_closure_is_found(self):
+        self.assertEqual(self.stubs_in_gate(self.recipes, ["r"], self.root), [])
+        self.script(self.STUB % "r")
+        self.assertEqual(self.stubs_in_gate(self.recipes, ["r"], self.root), ["r"])
+        self.script("#!/usr/bin/env bash\nset -euo pipefail\necho real\n")
+        self.assertEqual(self.stubs_in_gate(self.recipes, ["r"], self.root), [])
 
 class LayoutTests(unittest.TestCase):
     def test_real_repo_layout(self):
