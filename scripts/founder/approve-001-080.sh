@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# approve-001-080 (WO-069): the founder's one-shot close-out for episodes 001-080. FOUNDER-RUN ONLY; agents never run it.
+# approve-001-080 (WO-069, WO-074, WO-112): the founder's one-shot close-out for every episode in the map (001-100 today). FOUNDER-RUN ONLY; agents never run it.
 #
 # Usage: scripts/founder/approve-001-080.sh [--jobs-dir DIR] [--no-verify] [--date YYYY-MM-DD] [--yes] [--no-sign]
 #
@@ -75,7 +75,7 @@ run() {
 ep_map="build/closeout/ep-map.txt"
 wo_verify="$HOME/.dotfiles/tools/factory/wo-verify"
 adrs=()
-for n in $(seq -f '%04g' 1 21); do adrs+=("ADR-$n"); done
+for f in docs/adr/ADR-[0-9][0-9][0-9][0-9]-*.md; do adrs+=("$(basename "$f" | cut -c1-8)"); done # every ADR on disk, in id order
 
 # ---- 0 preflight -------------------------------------------------------------------------------------------------
 step "0 preflight"
@@ -166,8 +166,14 @@ for wo in "${missing[@]}"; do
   fi
   [ "$no_verify" -eq 0 ] || die "no passing jobs evidence at $jobs_dir/$wo/evidence.json and --no-verify was given"
   rm -rf "${jobs_dir:?}/$wo"
+  vt=14400
+  at=10800
+  if grep -qE 'just (acceptance-[0-9]{3}-[0-9]{3}|check-full)' "work-orders/$wo.md"; then
+    vt=36000 # a release-gate order runs check-full inside its acceptance (about 4 h on this machine)
+    at=32400
+  fi
   run python3 -I "$wo_verify" --wo "work-orders/$wo.md" --worktree . --base main --gate fast \
-    --jobs-dir "$jobs_dir" --timeout 14400 --ac-timeout 10800
+    --jobs-dir "$jobs_dir" --timeout "$vt" --ac-timeout "$at"
   job_passed "$wo" || die "$wo did not pass wo-verify; see $jobs_dir/$wo/evidence.json (reasons) and gate-tail.log; nothing recorded"
 done
 # 1c: record, 1d: verify
@@ -267,7 +273,7 @@ step "5 commit"
 run git add -- evidence registry docs/adr docs/gov/SL-GOV-001-constitution.md docs/gov/SL-GOV-004-adr-log.md
 sign=(-S)
 [ "$no_sign" -eq 1 ] && sign=(-c commit.gpgsign=false)
-msg="Founder close-out 001-080: ADR-0001..ADR-0021 Accepted, SL-GOV-001 Approved and frozen, evidence recorded, episodes 001-020 Accepted and 041-080 Demonstrated."
+msg="Founder close-out: ${adrs[0]}..${adrs[-1]} Accepted, SL-GOV-001 Approved and frozen, evidence recorded, mapped episodes advanced ($to_accept to Accepted, $to_demo to Demonstrated)."
 if [ "$no_sign" -eq 1 ]; then
   run git -c commit.gpgsign=false commit -q -m "$msg"
 else
