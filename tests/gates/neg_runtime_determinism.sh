@@ -2,8 +2,11 @@
 # neg-runtime-determinism (WO-099, SL-ARCH-003 ARCH3-R085 and R170, ADR-0026): the D1 check must catch command
 # buffers played back in completion order.
 #   copies engine/runtime/src/ecs_command_queue.cpp to build/runtime/neg/det/ and replaces its merge_ordered playback
-#   (the line WO-091 marks `// neg-completion-order`) with a loop over the buffers in the order they were opened,
-#   which follows job completion; compiles the copy with the debug preset's flags and links sl_runtime_demo with the
+#   (the line WO-091 marks `// neg-completion-order`) with a playback that ignores the merge keys: the buffers in
+#   reverse open order, rotated by a hash of a process-wide flush serial (WO-114, D-099-15). It differs from the merge
+#   order by construction, not by thread timing, and a resumed or replayed pass meets other rotations at the same tick
+#   than the fresh pass, so the workers=1 row diverges on one CPU as well; compiles the copy with the debug preset's
+#   flags and links sl_runtime_demo with the
 #   patched object ahead of libsl_runtime.a; runs the demo with workers 1 and 8 (parallel, 5000 lanterns, 120 ticks)
 #   and requires tools/runtime/determinism_check.py to exit 1 naming the divergence.
 #   A missing marker, a failed compile or link, a run without hashes.json or a checker exit other than 1 fails.
@@ -17,7 +20,10 @@ debug="$build/debug"
 work="$build/runtime/neg/det"
 source="$root/engine/runtime/src/ecs_command_queue.cpp"
 marker="// neg-completion-order"
-playback='for (auto *b : in) { for (auto &e : b->entries()) { player(std::as_const(e.key), e.value); } }'
+playback='{ static std::uint64_t neg_flush = 0; std::uint64_t h = ++neg_flush * 0x9E3779B97F4A7C15ULL;'
+playback+=' h ^= h >> 29U; const std::size_t n = in.size(); const std::size_t r = n == 0 ? 0 : h % n;'
+playback+=' for (std::size_t j = 0; j < n; ++j) { auto *b = in[n - 1 - ((j + r) % n)];'
+playback+=' for (auto &e : b->entries()) { player(std::as_const(e.key), e.value); } } }'
 
 fail() {
   echo "neg-runtime-determinism: FAIL: $1"
@@ -40,11 +46,11 @@ src, dst, marker, playback = sys.argv[1:5]
 lines = open(src, encoding="utf-8").read().split("\n")
 hits = [i for i, l in enumerate(lines) if marker in l]
 indent = lines[hits[0]][: len(lines[hits[0]]) - len(lines[hits[0]].lstrip())]
-lines[hits[0]] = indent + playback + " // neg: completion order"
+lines[hits[0]] = indent + playback + " // neg: keyless playback"
 open(dst, "w", encoding="utf-8").write("\n".join(lines))
 EOF
 grep -qF "merge_ordered(in, player)" "$patched" && fail "the copy still plays back through merge_ordered"
-grep -qF "$playback" "$patched" || fail "the copy lacks the completion-order playback"
+grep -qF "$playback" "$patched" || fail "the copy lacks the keyless playback"
 echo "neg-runtime-determinism: replaced the '$marker' playback in the copy"
 
 # The compile and link commands of the debug build, pointed at the copy and at build/runtime/neg/det.
@@ -100,6 +106,8 @@ python3 -I tools/runtime/determinism_check.py --runs "$work/runs" --primary neg 
   --out "$work/hash-matrix.json" | tee "$work/check.log"
 code=${PIPESTATUS[0]}
 set -e
-[ "$code" -eq 1 ] || fail "determinism_check exit $code with completion-order playback, expected 1"
+[ "$code" -eq 1 ] || fail "determinism_check exit $code with keyless playback, expected 1"
 grep -q "divergence at workers=" "$work/check.log" || fail "determinism_check did not name a divergence"
-echo "neg-runtime-determinism: ok (completion-order playback diverges)"
+# The workers=1 rows come first in matrix order: naming workers=1 shows the divergence needs no second thread.
+grep -q "divergence at workers=1 " "$work/check.log" || fail "the workers=1 row did not diverge"
+echo "neg-runtime-determinism: ok (keyless playback diverges)"
