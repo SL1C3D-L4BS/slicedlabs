@@ -23,6 +23,19 @@ on every platform (master plan, Release gates).
 - `.github/**` is a governed path, so changes to it need the founder (master plan section 6.3 rule 4; plan of record, FACTORY.md governed list).
 - Until that job has run, the 041-048 episode notes MUST list Windows as unverified (master plan section 6.1, completion record).
 
+### Amendment 1 (Proposed by WO-131; in force when the founder accepts it)
+
+- Windows-only change: the `windows` job installs one pinned LunarG Vulkan SDK (version and sha256 in `windows.yml`, sha256 checked before the installer runs, cached by version and sha256, no third-party action) and exports `VULKAN_SDK`. windows-latest has no SDK: run 40063791699 failed `find_package(Vulkan REQUIRED)` (`cmake/SlVulkan.cmake:78`) on both presets. The pin is unverified until the founder resolves it (`docs/ops/ci.md`). The job still configures only; the Linux gate is unchanged.
+- Known Windows gaps. Seen in the configure logs of run 40063791699: windows-latest, Visual Studio 18.11.1, MSVC toolset 14.51.36231 (cl 19.51.36260.0), clang-cl 20.1.8, both on the MSVC STL. Upstream status was not checked (no network access when written); trackers: [MSVC STL changelog](https://github.com/microsoft/STL/wiki/Changelog), [cppreference compiler support](https://en.cppreference.com/w/cpp/compiler_support).
+
+| Feature | Toolset seen | Result | Effect |
+| :---- | :---- | :---- | :---- |
+| Required C++23 battery (flat_map, flat_set, mdspan, ranges::to, all 21) | cl 19.51, clang-cl 20.1.8 | 21/21 ok on both | no gap, presets unchanged |
+| `std::stdfloat` (deferred list) | both | `__cpp_lib_stdfloat` missing; no `std::float32_t` | never fatal (`deferred-cxx23.txt`) |
+| C++26 probes (report only) | cl 19.51, clang-cl 20.1.8 | 1/13 and 5/13 ok; both lack reflection, contracts, inplace_vector, simd, saturating, function_ref, ranges_concat | never fatal |
+| Validation layer manifest | SDK `Bin` | `SL_VK_LAYER_DIRS` has no Windows default (`SlVulkan.cmake:17`), so validation is 0 with a warning | needs a `cmake/` change, outside WO-131 |
+| Configure after `sl_vulkan_detect` (deps, build info, targets) | both | never reached on Windows | unknown until the next hosted run |
+
 ## Consequences
 
 - WO-014 builds the structural checks; WO-020 adds the CI scripts; WO-021 records the open issue.
