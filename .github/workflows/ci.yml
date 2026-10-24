@@ -1,11 +1,12 @@
-# CI (WO-028): mirrors `scripts/ci-local.sh` on a clean hosted Linux runner (master plan episodes 053/054, SL-OPS-001
-# in docs/ops/ci.md). The job runs the same default path as a local `just ci-local`: doctor, fmt-check, gov-check, then
-# the workflows ci-clang, ci-gcc and ci-asan. `just ci-yaml-check` (tools/ci/check_workflows.py) guards this file.
+# CI (WO-028, WO-130): mirrors `scripts/ci-local.sh` on a clean hosted Linux runner (master plan episodes 053/054,
+# SL-OPS-001 in docs/ops/ci.md). The job runs the same default path as a local `just ci-local`: doctor, fmt-check,
+# gov-check, then the workflows ci-clang, ci-gcc and ci-asan. `just ci-yaml-check` (tools/ci/check_workflows.py)
+# guards this file.
 #
-# PINS TO RESOLVE BEFORE THE FIRST RUN (founder): the action shas and the tarball sha256 values below are placeholders
-# (all zeros, marked UNVERIFIED) because they could not be looked up offline. A placeholder fails closed: the action
-# does not resolve and `sha256sum --check` fails. `just ci-yaml-check` reports each one as R-CI-UNVERIFIED-SHA
-# (a warning; `--strict` makes it an error). See docs/ops/ci.md, "Resolving the pins".
+# Toolchain (WO-130): the job runs in a digest-pinned Arch Linux container, pacman is pointed at one Arch Linux Archive
+# snapshot, and the installed package versions must equal toolchain/ci-linux.json, so CI uses the primary toolchain
+# (clang 23, gcc 16 and its libstdc++; toolchain/environments.json). The image digest and ARCHIVE_DATE below must equal
+# toolchain/ci-linux.json (ci-yaml-check R-CI-TOOLCHAIN). To bump them: docs/ops/ci.md, "Bumping the snapshot".
 name: ci
 
 on:
@@ -13,8 +14,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -24,57 +24,38 @@ jobs:
   linux:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    permissions:
+      contents: read
+    container:
+      image: ghcr.io/archlinux/archlinux:base-devel@sha256:34c489c3172d107273f6e286a9670f66a1fe643710d38bf96736fc32f6f5501f
     env:
-      # Tool pins. apt supplies ninja 1.11, gcc-14 (below the gcc 16 floor of toolchain/environments.json: the
-      # doctor reports drift, which only warns), mold, ccache and shellcheck. cmake, clang/LLVM (clang, clang-format,
-      # clang-tidy, lld at the 23 floor) and just come from the official release tarballs, verified by sha256.
-      CMAKE_VERSION: "4.4.4"
-      CMAKE_SHA256: "e5bb807f7728cb60cd8b27ebc97a2edb469b68655f21e844a600c3575b76f5bb"  # cmake-4.4.4-SHA-256.txt (Kitware release)
-      LLVM_VERSION: "23.1.3"
-      LLVM_SHA256: "ca9fe385a5d9e2d88132dc0e23a00e9f87f38fa75f67207b5e457d208e71d013"  # sha256 of LLVM-23.1.3-Linux-X64.tar.xz streamed from the GitHub release on 2026-10-17 (2016524848 bytes)
-      JUST_VERSION: "1.59.0"
-      JUST_SHA256: "409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e"  # SHA256SUMS (casey/just 1.59.0 release)
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      ARCHIVE_DATE: "2026/10/23"
       CCACHE_MAXSIZE: 1G
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
+      - name: Pin the Arch Linux Archive snapshot and bootstrap
+        run: |
+          set -euo pipefail
+          printf 'Server = https://archive.archlinux.org/repos/%s/$repo/os/$arch\n' "$ARCHIVE_DATE" > /etc/pacman.d/mirrorlist
+          pacman --disable-sandbox --noconfirm -Syyuu
+          pacman --disable-sandbox --noconfirm --needed -S git python zstd
+
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2 (tag commit resolved via api.github.com, 2026-10-17)
         with:
           persist-credentials: false
 
-      - name: Install apt packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build gcc-14 g++-14 mold ccache shellcheck
-
-      - name: Install cmake, LLVM and just (release tarballs, sha256 verified)
+      - name: Install the pinned toolchain (toolchain/ci-linux.json)
         run: |
           set -euo pipefail
-          tools="$HOME/tools"
-          dl="$RUNNER_TEMP/dl"
-          mkdir -p "$tools/bin" "$dl"
-          fetch() {
-            curl --fail --location --silent --show-error --retry 3 --output "$dl/$3" "$1"
-            echo "$2  $dl/$3" | sha256sum --check --strict -
-          }
-          fetch "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz" \
-            "$CMAKE_SHA256" cmake.tar.gz
-          fetch "https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz" \
-            "$LLVM_SHA256" llvm.tar.xz
-          fetch "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-            "$JUST_SHA256" just.tar.gz
-          mkdir -p "$tools/cmake" "$tools/llvm"
-          tar -xzf "$dl/cmake.tar.gz" -C "$tools/cmake" --strip-components=1
-          tar -xJf "$dl/llvm.tar.xz" -C "$tools/llvm" --strip-components=1
-          tar -xzf "$dl/just.tar.gz" -C "$tools/bin" just
-          ln -sf /usr/bin/gcc-14 "$tools/bin/gcc"
-          ln -sf /usr/bin/g++-14 "$tools/bin/g++"
-          {
-            echo "$tools/bin"
-            echo "$tools/cmake/bin"
-            echo "$tools/llvm/bin"
-          } >> "$GITHUB_PATH"
+          python3 -I tools/ci/check_toolchain.py packages toolchain/ci-linux.json > "$RUNNER_TEMP/packages.txt"
+          xargs -a "$RUNNER_TEMP/packages.txt" pacman --disable-sandbox --noconfirm --needed -S
+
+      - name: Verify the pinned versions
+        run: |
+          set -euo pipefail
+          pacman -Q > "$RUNNER_TEMP/pacman-q.txt"
+          python3 -I tools/ci/check_toolchain.py verify toolchain/ci-linux.json "$RUNNER_TEMP/pacman-q.txt"
 
       - name: Tool versions
         run: |
@@ -84,14 +65,17 @@ jobs:
           g++ --version
           just --version
 
+      - name: ccache directory
+        run: echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache" >> "$GITHUB_ENV"
+
       - name: ccache
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57  # v4.2.0 (tag commit resolved via api.github.com, 2026-10-17)
         with:
           path: .ccache
-          key: ccache-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
+          key: ccache-${{ runner.os }}-${{ hashFiles('toolchain/ci-linux.json') }}-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ runner.os }}-${{ github.ref_name }}-
-            ccache-${{ runner.os }}-
+            ccache-${{ runner.os }}-${{ hashFiles('toolchain/ci-linux.json') }}-${{ github.ref_name }}-
+            ccache-${{ runner.os }}-${{ hashFiles('toolchain/ci-linux.json') }}-
 
       - name: shellcheck
         run: shellcheck scripts/ci-local.sh scripts/doctor
