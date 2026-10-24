@@ -50,6 +50,8 @@ actions_url() {
   printf 'https://github.com/%s/commit/%s/checks\n' "$path" "$sha"
 }
 
+# every read of the commit graph (rev-parse, ancestry, count, listing) sees the real objects, never replace refs
+export GIT_NO_REPLACE_OBJECTS=1
 command -v just >/dev/null 2>&1 || refuse "just is not installed or not on PATH"
 git rev-parse --git-dir >/dev/null || refuse "not a usable git repository (see git's message above)"
 top="$(git rev-parse --show-toplevel)" || refuse "cannot find the repository top level (see git's message above)"
@@ -99,8 +101,10 @@ fi
 # 6. push access, proven by a dry run before the long fast gate
 refspec="$local_main:refs/heads/main"
 push_args=(push --no-follow-tags)
-git "${push_args[@]}" --dry-run "$target" "$refspec" >/dev/null 2>&1 ||
+dry_out="$(git "${push_args[@]}" --dry-run "$target" "$refspec" 2>&1)" || {
+  echo "$dry_out" >&2
   refuse "no push access: a dry-run push to the remote failed"
+}
 
 # 7. the fast gate is green (stdin closed so it cannot swallow the answer)
 just fast </dev/null || refuse "just fast is red"
@@ -111,7 +115,7 @@ if [ -n "$remote_main" ]; then
 else
   range="$local_main"
 fi
-GIT_NO_REPLACE_OBJECTS=1 git --no-pager -c core.abbrev=40 log --no-decorate --format='%H %G? %s' "$range"
+git --no-pager -c core.abbrev=40 log --no-decorate --format='%H %G? %s' "$range"
 count="$(git rev-list --count "$range")"
 echo "push.sh: $count commit(s) up to $local_main to push to $display_url (main only, no tags, no force)"
 printf 'Type yes to push: '

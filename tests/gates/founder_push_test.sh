@@ -24,6 +24,11 @@ mkdir "$stubbin"
 cat >"$stubbin/just" <<'STUB'
 #!/bin/bash
 echo "$*" >>"$STUB_JUST_LOG"
+# stdin must be closed for just: any byte here would swallow the typed answer
+if [ -n "$(cat)" ]; then
+  echo "stub just: got bytes on stdin" >&2
+  exit 97
+fi
 if [ "${STUB_JUST_COMMIT:-0}" = 1 ]; then
   git commit -q --allow-empty -m moved-during-fast
 fi
@@ -262,9 +267,13 @@ pass "origin mode pushes and sets the upstream"
 # 10. local main moves during fast: refused after yes, remote untouched
 new_case "$fake_https"
 extra_env=(STUB_JUST_COMMIT=1)
+orig_main="$(local_main)"
 run_push $'yes\n' --remote "$fake_https"
 expect_refused "moved"
 expect_one_fast
+! grep -q 'moved-during-fast' "$out" || fail "moved main: the listing includes the commit made during fast"
+grep -q "commit(s) up to $orig_main " "$out" || fail "moved main: the listing is not built from the checked sha $orig_main"
+grep -q ': 2 commit(s) up to ' "$out" || fail "moved main: the count is not that of the checked sha"
 [ -z "$(bare_main)" ] || fail "moved main: something was pushed"
 expect_no_actions
 pass "local main moving during fast refused after yes, remote unchanged"
@@ -296,5 +305,40 @@ expect_refused "no push access"
 expect_no_fast
 [ -z "$(bare_main)" ] || fail "push denied: something was pushed"
 pass "push-denied remote refused by the dry run before fast"
+
+# 14. replace refs never change what is listed, counted or checked for ancestry
+fake_commit() { # makes a parentless commit and prints its sha
+  git -C "$repo" commit-tree -m REPLACED "$(git -C "$repo" mktree </dev/null)"
+}
+new_case "$fake_https"
+git -C "$repo" commit -q --allow-empty -m three
+git -C "$repo" replace "$(git -C "$repo" rev-parse main~1)" "$(fake_commit)"
+run_push $'yes\n' --remote "$fake_https"
+[ "$rc" -eq 0 ] || fail "replace listing: exit $rc"
+grep -q ': 3 commit(s) up to ' "$out" || fail "replace listing: count follows the replace ref"
+! grep -q 'REPLACED' "$out" || fail "replace listing: the listing shows the replacement"
+grep -qE '^[0-9a-f]{40} [A-Za-z?] two$' "$out" || fail "replace listing: the real commit 'two' is not listed"
+new_case "$fake_https"
+git -C "$repo" push -q "file://$bare" "$(git -C "$repo" rev-parse main~1):refs/heads/main"
+git -C "$repo" replace "$(local_main)" "$(fake_commit)"
+run_push $'yes\n' --remote "$fake_https"
+[ "$rc" -eq 0 ] || fail "replace ancestry: exit $rc, ancestry follows the replace ref"
+[ "$(bare_main)" = "$(local_main)" ] || fail "replace ancestry: remote main differs"
+pass "replace refs change neither the listing, the count nor the ancestry check"
+
+# 15. the listing never starts a pager, even on a terminal (needs script(1) and a pty)
+new_case "$fake_https"
+marker="$c/pager-ran"
+if script -qec true /dev/null >/dev/null 2>&1; then
+  cmd="$(printf '%q ' "$bashbin" "$push" --remote "$fake_https")"
+  rc=0
+  (cd "$repo" && printf 'yes\n' | env PATH="$push_path" "GIT_PAGER=touch '$marker'; cat" script -qec "$cmd" /dev/null) >"$out" 2>&1 || rc=$?
+  [ "$rc" -eq 0 ] || fail "pager: exit $rc"
+  [ ! -e "$marker" ] || fail "pager: the listing started the pager"
+  [ "$(bare_main)" = "$(local_main)" ] || fail "pager: remote main differs"
+  pass "no pager under a pty"
+else
+  echo "founder-push-test: skipped: pager case (script(1) missing or no pty available)"
+fi
 
 echo "founder-push-test: ok ($passed groups)"
