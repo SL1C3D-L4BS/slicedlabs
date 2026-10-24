@@ -221,16 +221,16 @@ TEST_CASE("RT-INV-SYNC-05: spin_wait spins exactly its limit, spin_limit by defa
 TEST_CASE("RT-INV-SYNC-05: a spin-then-park wait parks after at most spin_limit spins") {
   rt::event_count events;
   std::atomic<bool> ready{false};
-  std::uint32_t spun_before_park = 0;
-  bool parked = false;
+  std::atomic<std::uint32_t> spun_before_park{0};
+  std::atomic<bool> parked{false};
   bounded_thread waiter([&] {
     rt::spin_wait spinner;
     while (!ready.load()) {
       if (spinner.spin()) {
         continue;
       }
-      spun_before_park = spinner.count();
-      parked = true;
+      spun_before_park.store(spinner.count());
+      parked.store(true);
       const rt::event_count::key k = events.prepare_wait();
       if (ready.load()) {
         events.cancel_wait();
@@ -239,12 +239,17 @@ TEST_CASE("RT-INV-SYNC-05: a spin-then-park wait parks after at most spin_limit 
       events.wait(k);
     }
   });
-  std::this_thread::sleep_for(50ms);
+  // Release the waiter only once it has spun spin_limit times and recorded that it parks; a fixed
+  // sleep races thread start-up on a loaded or single-CPU machine.
+  const auto deadline = std::chrono::steady_clock::now() + wait_bound;
+  while (!parked.load() && std::chrono::steady_clock::now() < deadline) {
+    std::this_thread::sleep_for(1ms);
+  }
   ready.store(true);
   events.notify_all();
   REQUIRE(waiter.finished_within(wait_bound));
-  CHECK(parked);
-  CHECK(spun_before_park == rt::spin_limit);
+  CHECK(parked.load());
+  CHECK(spun_before_park.load() == rt::spin_limit);
 }
 
 TEST_CASE("RT-INV-SYNC-05: a blocked wait parks instead of spinning on every primitive") {
