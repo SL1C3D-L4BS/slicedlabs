@@ -11,6 +11,10 @@ Rules (errors unless marked warning):
   R-CI-PERMISSIONS      no top-level `permissions`, or any permissions value other than read / none
   R-CI-TRIGGER          no `on`, `pull_request_target` used, or `workflow_dispatch` missing
   R-CI-JOB              a job id or `runs-on` outside the allowed list
+  R-CI-CONTAINER        a job `container:` image is not pinned by tag and @sha256:<64 hex> (a placeholder digest is
+                        R-CI-UNVERIFIED-SHA); ghcr.io and Docker Hub style names both pass (WO-130)
+  R-CI-TOOLCHAIN        a containerised job disagrees with toolchain/ci-linux.json: the pin file is missing or
+                        malformed, the image name:tag@digest differs, or the job's env ARCHIVE_DATE differs (WO-130)
   R-CI-BUILD-ENTRY      a run line builds or tests other than via scripts/ci-local.sh, `cmake --preset <configure
                         preset>` or `cmake --workflow --preset <workflow preset>` (presets read from CMakePresets.json)
   R-CI-INJECT           `${{ github.event.* }}` or `github.head_ref` expanded inside a run script
@@ -24,13 +28,16 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import check_toolchain  # noqa: E402
 import miniyaml  # noqa: E402
 
 ALLOWED_JOBS = {"linux": "ubuntu-24.04", "windows": "windows-latest"}
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*(\S+)(.*)$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 DOCKER_RE = re.compile(r"^docker://\S+@sha256:[0-9a-f]{64}$")
-VERSION_COMMENT = re.compile(r"#\s*v\d+(\.\d+)*")
+IMAGE_RE = re.compile(r"^[a-z0-9][a-z0-9._:/-]*:[A-Za-z0-9._-]+@sha256:[0-9a-f]{64}$")
+PIN_FILE = os.path.join("toolchain", "ci-linux.json")
+VERSION_COMMENT =re.compile(r"#\s*v\d+(\.\d+)*")
 SHA256_ASSIGN = re.compile(r"_SHA256\s*[:=]\s*[\"']?([0-9A-Za-z-]+)")
 BUILD_WORDS = ("ninja", "make", "ctest", "msbuild", "gradle", "bazel")
 INJECT_RE = re.compile(r"\$\{\{[^}]*(github\.event\.|github\.head_ref)")
@@ -112,6 +119,30 @@ def check_triggers(doc, rel, findings):
         findings.append(("R-CI-TRIGGER", rel, "workflow_dispatch is missing"))
 
 
+def check_container(job, where, root, findings):
+    container = job.get("container")
+    if container is None:
+        return
+    image = str(container.get("image", "") if isinstance(container, dict) else container)
+    if not IMAGE_RE.match(image):
+        findings.append(("R-CI-CONTAINER", where, f"container image {image!r} is not pinned by tag and @sha256:<64 hex>"))
+        return
+    if is_placeholder(image.rpartition("@sha256:")[2]):
+        findings.append(("R-CI-UNVERIFIED-SHA", where, "the container image digest is a placeholder"))
+    pin, problems = check_toolchain.load_pin(os.path.join(root, PIN_FILE))
+    if pin is None:
+        for problem in problems:
+            findings.append(("R-CI-TOOLCHAIN", where, f"{PIN_FILE}: {problem}"))
+        return
+    want = "{name}:{tag}@{digest}".format(**pin["image"])
+    if image != want:
+        findings.append(("R-CI-TOOLCHAIN", where, f"container image {image} differs from {PIN_FILE} ({want})"))
+    env = job.get("env")
+    date = str(env.get("ARCHIVE_DATE", "")) if isinstance(env, dict) else ""
+    if date != pin["archive"]["date"]:
+        findings.append(("R-CI-TOOLCHAIN", where, f"env ARCHIVE_DATE {date!r} differs from {PIN_FILE} ({pin['archive']['date']})"))
+
+
 def build_violation(command, configure, workflow):
     """Return a message when one shell line builds or tests outside the allowed entry points, else None."""
     words = command.split()
@@ -160,7 +191,7 @@ def load_yaml(path, rel, findings):
         return text, None
 
 
-def check_workflow(path, rel, configure, workflow, findings):
+def check_workflow(path, rel, root, configure, workflow, findings):
     text, doc = load_yaml(path, rel, findings)
     if doc is None:
         return
@@ -188,6 +219,7 @@ def check_workflow(path, rel, configure, workflow, findings):
         if runner not in ALLOWED_JOBS.values():
             findings.append(("R-CI-JOB", where, f"runs-on {runner!r} is not one of {sorted(ALLOWED_JOBS.values())}"))
         check_permissions(job.get("permissions"), where, findings, False)
+        check_container(job, where, root, findings)
         for step in job.get("steps") or []:
             if isinstance(step, dict) and "run" in step:
                 check_run(step["run"], rel, configure, workflow, findings)
@@ -217,7 +249,7 @@ def run(root, strict):
     if not names:
         findings.append(("R-CI-JOB", ".github/workflows", "no workflow files"))
     for name in names:
-        check_workflow(os.path.join(wf_dir, name), f".github/workflows/{name}", configure, workflow, findings)
+        check_workflow(os.path.join(wf_dir, name), f".github/workflows/{name}", root, configure, workflow, findings)
     dep = os.path.join(root, ".github", "dependabot.yml")
     if os.path.isfile(dep):
         check_dependabot(dep, ".github/dependabot.yml", findings)
