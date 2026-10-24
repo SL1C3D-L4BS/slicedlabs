@@ -11,7 +11,7 @@ Rules (errors unless marked warning):
   R-CI-PERMISSIONS      no top-level `permissions`, or any permissions value other than read / none
   R-CI-TRIGGER          no `on`, `pull_request_target` used, or `workflow_dispatch` missing
   R-CI-JOB              a job id or `runs-on` outside the allowed list
-  R-CI-CONTAINER        a job `container:` image is not pinned by tag and @sha256:<64 hex> (a placeholder digest is
+  R-CI-CONTAINER        job `linux` has no `container:`, or a job `container:` image is not pinned by tag and @sha256:<64 hex> (a placeholder digest is
                         R-CI-UNVERIFIED-SHA); ghcr.io and Docker Hub style names both pass (WO-130)
   R-CI-TOOLCHAIN        a containerised job disagrees with toolchain/ci-linux.json: the pin file is missing or
                         malformed, the image name:tag@digest differs, or the job's env ARCHIVE_DATE differs (WO-130)
@@ -119,9 +119,11 @@ def check_triggers(doc, rel, findings):
         findings.append(("R-CI-TRIGGER", rel, "workflow_dispatch is missing"))
 
 
-def check_container(job, where, root, findings):
+def check_container(job_id, job, where, root, findings):
     container = job.get("container")
     if container is None:
+        if job_id == "linux":
+            findings.append(("R-CI-CONTAINER", where, "job linux has no `container:` (the pinned Arch Linux image, WO-130)"))
         return
     image = str(container.get("image", "") if isinstance(container, dict) else container)
     if not IMAGE_RE.match(image):
@@ -219,7 +221,7 @@ def check_workflow(path, rel, root, configure, workflow, findings):
         if runner not in ALLOWED_JOBS.values():
             findings.append(("R-CI-JOB", where, f"runs-on {runner!r} is not one of {sorted(ALLOWED_JOBS.values())}"))
         check_permissions(job.get("permissions"), where, findings, False)
-        check_container(job, where, root, findings)
+        check_container(job_id, job, where, root, findings)
         for step in job.get("steps") or []:
             if isinstance(step, dict) and "run" in step:
                 check_run(step["run"], rel, configure, workflow, findings)

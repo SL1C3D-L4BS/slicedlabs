@@ -40,6 +40,10 @@ clang 23, gcc 16 with its libstdc++):
   just, mold, ccache, shellcheck, python and the Vulkan headers, loader and validation layers, which the configure of the
   `ci-*` presets requires).
 - `pacman --disable-sandbox` is used because the download sandbox (Landlock) is not reliably available inside a container.
+- The container runs as root while the checkout belongs to the runner user, so a step after checkout runs
+  `git config --global --add safe.directory "$GITHUB_WORKSPACE"` (git otherwise stops with "dubious ownership", which
+  failed `fmt-check` in the second hosted run, WO-132); the tree is not chowned. `ci-yaml-check` fails when job `linux`
+  has no pinned `container:`.
 - The ccache key includes the hash of `toolchain/ci-linux.json`, so a new snapshot starts a new cache.
 - Permissions stay least-privilege: top-level `permissions: {}` and `contents: read` on the job; checkout keeps
   `persist-credentials: false`; every action is pinned by commit sha.

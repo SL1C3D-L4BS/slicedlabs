@@ -14,6 +14,14 @@ import check_workflows  # noqa: E402
 import miniyaml  # noqa: E402
 
 SHA = "a" * 39 + "b"
+DIGEST = "sha256:" + "ab" * 32
+IMAGE = f"ghcr.io/archlinux/archlinux:base-devel@{DIGEST}"
+PIN = {
+    "schema": "sl-ci-linux/1",
+    "image": {"name": "ghcr.io/archlinux/archlinux", "tag": "base-devel", "digest": DIGEST},
+    "archive": {"date": "2026/10/23", "server": "https://archive.archlinux.org/repos/2026/10/23/$repo/os/$arch"},
+    "packages": {"clang": "23.1.3-4", "vulkan-headers": "1:1.4.363.0-1"},
+}
 GOOD = f"""name: t
 on:
   push:
@@ -23,6 +31,10 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-24.04
+    container:
+      image: {IMAGE}
+    env:
+      ARCHIVE_DATE: "2026/10/23"
     steps:
       - uses: actions/checkout@{SHA}  # v4.2.2
       - name: build
@@ -37,14 +49,6 @@ updates:
     schedule:
       interval: "monthly"
 """
-DIGEST = "sha256:" + "ab" * 32
-IMAGE = f"ghcr.io/archlinux/archlinux:base-devel@{DIGEST}"
-PIN = {
-    "schema": "sl-ci-linux/1",
-    "image": {"name": "ghcr.io/archlinux/archlinux", "tag": "base-devel", "digest": DIGEST},
-    "archive": {"date": "2026/10/23", "server": "https://archive.archlinux.org/repos/2026/10/23/$repo/os/$arch"},
-    "packages": {"clang": "23.1.3-4", "vulkan-headers": "1:1.4.363.0-1"},
-}
 PRESETS = {
     "configurePresets": [{"name": "debug"}, {"name": "hid", "hidden": True}],
     "workflowPresets": [{"name": "ci-clang"}],
@@ -110,6 +114,8 @@ class CheckToolchainTest(unittest.TestCase):
             lambda p: p["archive"].update(server="https://archive.archlinux.org/repos/2026/10/22/$repo/os/$arch"),
             lambda p: p.update(packages={}),
             lambda p: p.update(schema="x"),
+            lambda p: p["packages"].update({"-S": "1"}),
+            lambda p: p["packages"].update({"--noconfirm": "1"}),
         ):
             pin = json.loads(json.dumps(PIN))
             mutate(pin)
@@ -123,6 +129,13 @@ class CheckToolchainTest(unittest.TestCase):
         with contextlib.redirect_stdout(out):
             self.assertEqual(check_toolchain.main(["packages", self.pin_path]), 0)
         self.assertEqual(out.getvalue().split(), ["clang", "vulkan-headers"])
+
+    def test_repository_workflow_ends_the_pacman_options_before_the_package_list(self):
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        with open(os.path.join(root, ".github", "workflows", "ci.yml"), encoding="utf-8") as handle:
+            lines = [line.strip() for line in handle if line.strip().startswith("xargs ")]
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].endswith(" -S --"), lines[0])
 
     def test_repository_pin_file_is_well_formed(self):
         root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -140,10 +153,16 @@ class CheckWorkflowsTest(unittest.TestCase):
         with open(os.path.join(self.root, "CMakePresets.json"), "w", encoding="utf-8") as handle:
             json.dump(PRESETS, handle)
         self.write("dependabot.yml", DEPENDABOT, workflow=False)
+        self.write_pin(PIN)
         self.write("ci.yml", GOOD)
 
     def tearDown(self):
         self._tmp.cleanup()
+
+    def write_pin(self, pin):
+        os.makedirs(os.path.join(self.root, "toolchain"), exist_ok=True)
+        with open(os.path.join(self.root, "toolchain", "ci-linux.json"), "w", encoding="utf-8") as handle:
+            json.dump(pin, handle)
 
     def write(self, name, text, workflow=True):
         sub = os.path.join(".github", "workflows") if workflow else ".github"
@@ -217,20 +236,19 @@ class CheckWorkflowsTest(unittest.TestCase):
                 self.assertEqual(self.rules(), (1, ["R-CI-BUILD-ENTRY"]) if bad else (0, []))
 
     def container_job(self, image=IMAGE, date="2026/10/23", pin=PIN):
-        os.makedirs(os.path.join(self.root, "toolchain"), exist_ok=True)
         if pin is not None:
-            with open(os.path.join(self.root, "toolchain", "ci-linux.json"), "w", encoding="utf-8") as handle:
-                json.dump(pin, handle)
-        self.mutate(
-            "    runs-on: ubuntu-24.04\n",
-            f'    runs-on: ubuntu-24.04\n    container:\n      image: {image}\n    env:\n      ARCHIVE_DATE: "{date}"\n',
-        )
+            self.write_pin(pin)
+        self.write("ci.yml", GOOD.replace(f"image: {IMAGE}", f"image: {image}").replace('"2026/10/23"', f'"{date}"'))
 
     def test_container_pinned_by_digest_passes(self):
         self.container_job()
         self.assertEqual(self.rules(strict=True), (0, []))
-        self.mutate("    runs-on: ubuntu-24.04\n", f"    runs-on: ubuntu-24.04\n    container: {IMAGE}\n    env:\n      ARCHIVE_DATE: x\n")
-        self.assertEqual(self.rules()[1], ["R-CI-TOOLCHAIN"])
+        self.mutate(f"container:\n      image: {IMAGE}\n", f"container: {IMAGE}\n")
+        self.assertEqual(self.rules(strict=True), (0, []))
+
+    def test_linux_job_requires_the_container(self):
+        self.mutate(f"    container:\n      image: {IMAGE}\n", "")
+        self.assertEqual(self.rules(), (1, ["R-CI-CONTAINER"]))
 
     def test_container_must_be_pinned(self):
         for image in ("archlinux:base-devel", "archlinux@" + DIGEST, "archlinux:base-devel@sha256:abc", "archlinux"):
@@ -248,7 +266,7 @@ class CheckWorkflowsTest(unittest.TestCase):
         self.assertEqual(self.rules(), (1, ["R-CI-TOOLCHAIN"]))
         self.container_job(date="2026/10/22")
         self.assertEqual(self.rules(), (1, ["R-CI-TOOLCHAIN"]))
-        self.container_job(pin=None)
+        self.container_job()
         os.remove(os.path.join(self.root, "toolchain", "ci-linux.json"))
         self.assertEqual(self.rules(), (1, ["R-CI-TOOLCHAIN"]))
 
