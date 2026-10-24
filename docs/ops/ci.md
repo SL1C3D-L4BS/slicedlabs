@@ -13,7 +13,7 @@ written (no GitHub here): they are validated structurally and by mirroring the l
 | Local | `just ci-local-full` | the same plus `ci-ubsan`, `ci-tsan`, `ci-release`, `ci-gcc-release` |
 | Local | `just ci-yaml-check` | [`tools/ci/check_workflows.py`](../../tools/ci/check_workflows.py) on `.github/` |
 | Hosted | [`ci.yml`](../../.github/workflows/ci.yml), job `linux` (ubuntu-24.04 host, Arch Linux container) | `bash scripts/ci-local.sh`, on push, pull_request and workflow_dispatch |
-| Hosted | [`windows.yml`](../../.github/workflows/windows.yml), job `windows` (windows-latest) | configure only: `cmake --preset win-msvc-debug`, `cmake --preset win-clangcl-debug` |
+| Hosted | [`windows.yml`](../../.github/workflows/windows.yml), job `windows` (windows-latest) | installs the pinned Vulkan SDK, then configure only: `cmake --preset win-msvc-debug`, `cmake --preset win-clangcl-debug` |
 
 The hosted Linux job is the local runner on a clean machine with the primary toolchain (see the next section), so a red hosted run reproduces with `just ci-local`.
 Missing workflow presets are skipped with a visible `skipped: no workflow preset <name>` line; today the presets
@@ -81,7 +81,7 @@ reader is `tools/ci/miniyaml.py`, a stdlib subset (no anchors or multi-line plai
 | `acceptance` | acceptance logs, when a run produced them | `build/acceptance` |
 | `test-report` | ctest JUnit report, when `just test-report` ran | `build/debug/test-report.xml` |
 | `ci-logs` | one log per ci-local step, ctest `LastTest.log` | `build/ci-local/*.log`, `build/*/Testing/Temporary/LastTest.log` |
-| `windows-cmake-logs` | `CMakeConfigureLog.yaml`, `CMakeOutput.log`, `CMakeError.log`, `CMakeCache.txt` per Windows preset | `build/win-*/` |
+| `windows-cmake-logs` | `CMakeConfigureLog.yaml`, `CMakeOutput.log`, `CMakeError.log`, `CMakeCache.txt`, `vulkan-info.json` per Windows preset | `build/win-*/` |
 
 On failure the `Failure summary` step appends the tail of the last step log to the run summary. Locally the same logs
 are in `build/ci-local/`.
@@ -98,7 +98,8 @@ The structural checks on Linux (presets check, flag-table tests, clang-cl probe,
 configure and are never reported as one (ADR-0006). The only route to real evidence is the `windows` job on a
 windows-latest runner, started by the founder after the first push. Until it has passed, the 041-048 episode notes list
 Windows as unverified and no Windows support claim is made. The job configures with Ninja inside the Visual Studio
-developer shell and does not build.
+developer shell and does not build. A run summary table lists the pin check, both configure outcomes and the Vulkan facts
+(WO-131). The Windows-only changes and the known Windows gaps are in the Proposed amendment to ADR-0006.
 
 ## Resolving the pins
 
@@ -113,6 +114,23 @@ placeholder or bump a pin, keep the `# vX.Y.Z` comment:
   published with the release, then confirm the version against `toolchain/environments.json`.
 
 `just ci-yaml-check --strict` must then pass with zero warnings. `.github/dependabot.yml` keeps the shas current monthly.
+
+## Resolving the Vulkan SDK pin
+
+`windows.yml` installs the LunarG Windows Vulkan SDK from `sdk.lunarg.com` (WO-131). `VULKAN_SDK_VERSION` and
+`VULKAN_SDK_SHA256` in its top-level `env` are placeholders (an unconfirmed version, an all-zero sha256) because the
+LunarG host could not be reached when they were written. Until both are resolved the `Vulkan SDK pin check` step fails
+with an error naming this section, and nothing is downloaded or run. To resolve:
+
+- pick a SDK version whose headers are at least `SL_VK_MIN_HEADER` (350); the Linux headers measured 363;
+- fetch `https://vulkan.lunarg.com/sdk/sha/<version>/windows/vulkansdk-windows-X64-<version>.exe.json` and copy its
+  sha256 (or download the installer and run `sha256sum`), and confirm the download URL
+  `https://sdk.lunarg.com/sdk/download/<version>/windows/vulkansdk-windows-X64-<version>.exe` returns that file;
+- write both into `windows.yml`, drop the `UNVERIFIED` words, and run `just ci-yaml-check --strict` (zero warnings).
+
+The installer command line (`--root`, `--accept-licenses`, `--default-answer`, `--confirm-command install
+com.lunarg.vulkan.core`) is the Qt installer framework form and has not run on a runner yet; the first hosted run
+confirms it. The install directory is cached under a key made of the version and sha256.
 
 ## Known gaps
 

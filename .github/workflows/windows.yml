@@ -6,6 +6,11 @@
 # It configures only (no build): `cmake --preset win-msvc-debug` and `cmake --preset win-clangcl-debug`, both Ninja,
 # inside the Visual Studio developer shell (x64). The CMake logs are uploaded so a failure can be read offline.
 #
+# Vulkan (WO-131, ADR-0006): the runner has no Vulkan SDK, so SlVulkan's find_package(Vulkan REQUIRED) failed in run
+# 40063791699. The `Vulkan SDK` steps install ONE pinned LunarG Windows SDK from sdk.lunarg.com, check its sha256
+# against VULKAN_SDK_SHA256 before running it, and export VULKAN_SDK and PATH. No third-party action. The pin is the two
+# env values below; it fails closed until both are resolved (docs/ops/ci.md, "Resolving the Vulkan SDK pin").
+#
 # Action shas are tag commits resolved via api.github.com on 2026-10-17 (docs/ops/ci.md, "Resolving the pins").
 name: windows
 
@@ -19,6 +24,15 @@ permissions:
 concurrency:
   group: windows-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  # UNVERIFIED pin (WO-131): the LunarG host was not reachable when this was written, so neither value is confirmed.
+  # VULKAN_SDK_VERSION must be a LunarG release whose headers are VK_HEADER_VERSION >= 350 (SL_VK_MIN_HEADER);
+  # 1.4.363.0 matches the Linux headers measured in docs/episodes/041-048.md. VULKAN_SDK_SHA256 is the sha256 that
+  # https://vulkan.lunarg.com/sdk/sha/<version>/windows/vulkansdk-windows-X64-<version>.exe.json publishes for that
+  # installer. While it is all zeros the pin step stops with a message and nothing is downloaded or run.
+  VULKAN_SDK_VERSION: "1.4.363.0"
+  VULKAN_SDK_SHA256: "0000000000000000000000000000000000000000000000000000000000000000"  # UNVERIFIED placeholder, fails closed
 
 jobs:
   windows:
@@ -35,6 +49,59 @@ jobs:
         with:
           arch: x64
 
+      - name: Vulkan SDK pin check
+        id: vk-sdk
+        run: |
+          if (($env:VULKAN_SDK_SHA256 -match '^0+$') -or ($env:VULKAN_SDK_SHA256 -notmatch '^[0-9a-f]{64}$')) {
+            Write-Output "::error title=Vulkan SDK pin unresolved::VULKAN_SDK_SHA256 is a placeholder; resolve it per docs/ops/ci.md before the install can run"
+            exit 1
+          }
+          if ($env:VULKAN_SDK_VERSION -notmatch '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$') {
+            Write-Output "::error title=Vulkan SDK pin invalid::VULKAN_SDK_VERSION must look like 1.4.363.0"
+            exit 1
+          }
+          "root=C:\VulkanSDK\$($env:VULKAN_SDK_VERSION)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Vulkan SDK cache
+        id: vk-cache
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57  # v4.2.0 (tag commit resolved via api.github.com, 2026-10-17)
+        with:
+          path: ${{ steps.vk-sdk.outputs.root }}
+          key: vulkan-sdk-windows-x64-${{ env.VULKAN_SDK_VERSION }}-${{ env.VULKAN_SDK_SHA256 }}
+
+      - name: Vulkan SDK install (pinned, sha256 verified)
+        if: steps.vk-cache.outputs.cache-hit != 'true'
+        env:
+          VK_ROOT: ${{ steps.vk-sdk.outputs.root }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $name = "vulkansdk-windows-X64-$($env:VULKAN_SDK_VERSION).exe"
+          $url = "https://sdk.lunarg.com/sdk/download/$($env:VULKAN_SDK_VERSION)/windows/$name"
+          $installer = Join-Path $env:RUNNER_TEMP $name
+          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3 -RetryIntervalSec 5
+          $have = (Get-FileHash -Algorithm SHA256 -Path $installer).Hash.ToLowerInvariant()
+          if ($have -ne $env:VULKAN_SDK_SHA256) {
+            Remove-Item -Force $installer
+            throw "sha256 mismatch for $name : have $have, pinned $($env:VULKAN_SDK_SHA256)"
+          }
+          # Qt installer framework command line; the core component only (headers, loader import library, tools, layers).
+          $installArgs = @('--root', $env:VK_ROOT, '--accept-licenses', '--default-answer', '--confirm-command', 'install', 'com.lunarg.vulkan.core')
+          $install = Start-Process -FilePath $installer -ArgumentList $installArgs -Wait -PassThru
+          Remove-Item -Force $installer
+          if ($install.ExitCode -ne 0) { throw "Vulkan SDK installer exited with $($install.ExitCode)" }
+
+      - name: Vulkan SDK environment
+        env:
+          VK_ROOT: ${{ steps.vk-sdk.outputs.root }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $core = Join-Path $env:VK_ROOT 'Include\vulkan\vulkan_core.h'
+          if (-not (Test-Path $core)) { throw "no vulkan_core.h under $($env:VK_ROOT): the install or the cache restore is incomplete" }
+          "VULKAN_SDK=$($env:VK_ROOT)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          (Join-Path $env:VK_ROOT 'Bin') | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          $line = Select-String -Path $core -Pattern '#define\s+VK_HEADER_VERSION\s+(\d+)' | Select-Object -First 1
+          Write-Output "Vulkan SDK $($env:VULKAN_SDK_VERSION) at $($env:VK_ROOT): $($line.Matches[0].Value)"
+
       - name: Tool versions
         run: |
           cmake --version
@@ -43,11 +110,37 @@ jobs:
           clang-cl --version
 
       - name: Configure win-msvc-debug
+        id: cfg-msvc
         run: cmake --preset win-msvc-debug
 
       - name: Configure win-clangcl-debug
+        id: cfg-clangcl
         if: always()
         run: cmake --preset win-clangcl-debug
+
+      - name: Windows configure summary
+        if: always()
+        env:
+          MSVC_OUTCOME: ${{ steps.cfg-msvc.outcome }}
+          CLANGCL_OUTCOME: ${{ steps.cfg-clangcl.outcome }}
+          PIN_OUTCOME: ${{ steps.vk-sdk.outcome }}
+        run: |
+          $out = @('### Windows configure (ADR-0006: configure only, no build, no test)', '', '| Item | Result |', '| :---- | :---- |')
+          $out += "| Vulkan SDK pin $($env:VULKAN_SDK_VERSION) | pin check $($env:PIN_OUTCOME) |"
+          $out += "| win-msvc-debug configure | $($env:MSVC_OUTCOME) |"
+          $out += "| win-clangcl-debug configure | $($env:CLANGCL_OUTCOME) |"
+          foreach ($preset in 'win-msvc-debug', 'win-clangcl-debug') {
+            $info = Join-Path 'build' "$preset\vulkan-info.json"
+            if (Test-Path $info) {
+              $j = Get-Content -Raw $info | ConvertFrom-Json
+              $out += "| $preset vulkan | headers $($j.headers_version) (min $($j.min_header)), loader found $($j.loader_found), validation layer $($j.validation) |"
+            } else {
+              $out += "| $preset vulkan | no vulkan-info.json: the configure stopped before the Vulkan check finished |"
+            }
+          }
+          $out += ''
+          $out += 'Known Windows gaps are listed in docs/adr/ADR-0006-windows-parity.md. A configure step marked failure is red in this run; this summary does not change that.'
+          $out | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
       - name: Upload CMake logs
         if: always()
@@ -59,8 +152,10 @@ jobs:
             build/win-msvc-debug/CMakeFiles/CMakeOutput.log
             build/win-msvc-debug/CMakeFiles/CMakeError.log
             build/win-msvc-debug/CMakeCache.txt
+            build/win-msvc-debug/vulkan-info.json
             build/win-clangcl-debug/CMakeFiles/CMakeConfigureLog.yaml
             build/win-clangcl-debug/CMakeFiles/CMakeOutput.log
             build/win-clangcl-debug/CMakeFiles/CMakeError.log
             build/win-clangcl-debug/CMakeCache.txt
+            build/win-clangcl-debug/vulkan-info.json
           if-no-files-found: warn
