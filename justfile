@@ -153,6 +153,10 @@ ep-advance id state wo *flags:
 doctor-selftest:
     @bash tests/gates/doctor_selftest.sh
 
+# negative test: the founder approval script's preflight refuses a loaded machine, a live builder or a foreign build, and names the cause and --ignore-load (WO-127)
+founder-approve-preflight-test:
+    @bash tests/gates/founder_approve_preflight_test.sh
+
 # configure <preset>: cmake --preset (build/<preset>) (WO-014)
 configure preset:
     @cmake --preset {{preset}}

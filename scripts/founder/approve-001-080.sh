@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# approve-001-080 (WO-069, WO-074, WO-112): the founder's one-shot close-out for every episode in the map (001-100 today). FOUNDER-RUN ONLY; agents never run it.
+# approve-001-080 (WO-069, WO-074, WO-112, WO-127): the founder's one-shot close-out for every episode in the map (001-100 today). FOUNDER-RUN ONLY; agents never run it.
 #
 # Usage: scripts/founder/approve-001-080.sh [--jobs-dir DIR] [--no-verify] [--date YYYY-MM-DD] [--yes] [--no-sign]
+#                                      [--max-load N] [--ignore-load] [--quiet-wait MIN] [--preflight-only]
 #
 # In order, stopping at the first failure (set -e):
-#   0 preflight   main branch, clean tree (evidence/ may be untracked), registry-check, adr-check, wo-check; a summary;
-#                 one "yes" from the terminal (or --yes)
+#   0 preflight   quiet machine (1-min load <= --max-load, default 2.0; no live factory builder; no foreign cmake, ninja,
+#                 ctest, compiler or linker; --ignore-load overrides, --quiet-wait waits, default 30 min, before each wo-verify),
+#                 main branch, clean tree (evidence/ may be untracked), registry-check, adr-check, wo-check; a summary;
+#                 one "yes" from the terminal (or --yes); --preflight-only stops after the summary, before the prompt
 #   1 evidence    1a untracked evidence/*.json is committed first (wo-verify refuses a tree with untracked files);
 #                 1b for every work order in build/closeout/ep-map.txt without evidence/WO-NNN.json: wo-verify in the
 #                 jail (fast gate + the order's acceptance; --jobs-dir, default build/jobs), unless the jobs evidence
@@ -32,6 +35,12 @@ jobs_dir="$root/build/jobs"
 no_verify=0
 no_sign=0
 auto_yes=0
+max_load=2.0
+ignore_load=0
+quiet_wait=30
+preflight_only=0
+loadavg_file="${SL_LOADAVG_FILE:-/proc/loadavg}"
+factory_live_json="${SL_FACTORY_LIVE_JSON:-$HOME/.local/state/factory/budget/live.json}"
 date_val="$(date +%F)"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -42,6 +51,16 @@ while [ $# -gt 0 ]; do
     --no-verify) no_verify=1 ;;
     --no-sign) no_sign=1 ;;
     --yes) auto_yes=1 ;;
+    --ignore-load) ignore_load=1 ;;
+    --preflight-only) preflight_only=1 ;;
+    --max-load)
+      max_load="$2"
+      shift
+      ;;
+    --quiet-wait)
+      quiet_wait="$2"
+      shift
+      ;;
     --date)
       date_val="$2"
       shift
@@ -62,6 +81,15 @@ done
   exit 2
 }
 
+[[ "$max_load" =~ ^[0-9]+([.][0-9]+)?$ ]] || {
+  echo "approve-001-080: --max-load must be a number" >&2
+  exit 2
+}
+[[ "$quiet_wait" =~ ^[0-9]+$ ]] || {
+  echo "approve-001-080: --quiet-wait must be whole minutes" >&2
+  exit 2
+}
+
 die() {
   echo "approve-001-080: FAIL: $*" >&2
   exit 1
@@ -77,8 +105,68 @@ wo_verify="$HOME/.dotfiles/tools/factory/wo-verify"
 adrs=()
 for f in docs/adr/ADR-[0-9][0-9][0-9][0-9]-*.md; do adrs+=("$(basename "$f" | cut -c1-8)"); done # every ADR on disk, in id order
 
+# quiet_cause: prints why the machine is busy and returns 1, or returns 0 when it is quiet (WO-127). Timing-capped gates
+# (test caps, determinism matrices) must never run beside builders or builds.
+quiet_cause() {
+  local load own live procs
+  read -r load _ <"$loadavg_file" || load=""
+  [[ "$load" =~ ^[0-9]+([.][0-9]+)?$ ]] || {
+    echo "cannot read the 1-minute load average from $loadavg_file"
+    return 1
+  }
+  if awk -v l="$load" -v m="$max_load" 'BEGIN { exit !(l > m) }'; then
+    echo "the 1-minute load average is $load, above --max-load $max_load"
+    return 1
+  fi
+  live="$(python3 -I - "$factory_live_json" <<'PY'
+import json, sys
+try:
+    entries = json.load(open(sys.argv[1])).get("entries", [])
+except (OSError, ValueError, AttributeError):
+    entries = []
+names = ["%s %s" % (e.get("type"), str(e.get("aid") or e.get("tid") or "?")[:12]) for e in entries
+         if isinstance(e, dict) and str(e.get("type", "")).startswith("builder")]
+print(", ".join(names))
+PY
+)"
+  if [ -n "$live" ]; then
+    echo "live factory builder(s) in $factory_live_json: $live"
+    return 1
+  fi
+  own="$(ps -o pgid= -p $$ | tr -d ' ')"
+  procs="$(ps -eo pgid=,comm= | awk -v own="$own" '$1 != own && $2 ~ /^(cmake|ninja|ctest|clang|clang\+\+|gcc|g\+\+|cc1plus|ld\.mold)$/ { print $2 }' | sort -u | paste -sd, -)"
+  if [ -n "$procs" ]; then
+    echo "foreign build process(es) running: $procs"
+    return 1
+  fi
+  return 0
+}
+quiet_or_die() {
+  local cause
+  cause="$(quiet_cause)" && return 0
+  if [ "$ignore_load" -eq 1 ]; then
+    echo "   WARNING: $cause; continuing (--ignore-load)"
+    return 0
+  fi
+  die "the machine is not quiet: $cause (wait, or override with --ignore-load)"
+}
+quiet_wait_or_die() { # waits (polls every 60 s, up to --quiet-wait minutes) for a quiet machine, then dies naming the cause
+  local cause waited=0
+  until cause="$(quiet_cause)"; do
+    if [ "$ignore_load" -eq 1 ]; then
+      echo "   WARNING: $cause; continuing (--ignore-load)"
+      return 0
+    fi
+    [ "$waited" -lt "$quiet_wait" ] || die "the machine stayed busy for $quiet_wait minute(s): $cause (override with --ignore-load)"
+    echo "   waiting for a quiet machine ($waited/$quiet_wait min): $cause"
+    sleep 60
+    waited=$((waited + 1))
+  done
+}
+
 # ---- 0 preflight -------------------------------------------------------------------------------------------------
 step "0 preflight"
+quiet_or_die
 [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || die "not on main"
 dirty="$(git status --porcelain | grep -v '^?? evidence/' || true)"
 [ -z "$dirty" ] || die "the tree is not clean (only untracked evidence/ is allowed):"$'\n'"$dirty"
@@ -130,6 +218,10 @@ approve-001-080 will, at HEAD $(git rev-parse --short HEAD) on $date_val:
   5 commit evidence/, registry/, docs/adr/, SL-GOV-001 and the ADR log $([ "$no_sign" -eq 1 ] && echo "UNSIGNED (--no-sign, test only)" || echo "signed (git commit -S)")
 It never pushes. Every step stops the script on its first failure; re-running resumes.
 SUMMARY
+if [ "$preflight_only" -eq 1 ]; then
+  echo "preflight ok (--preflight-only); nothing was changed"
+  exit 0
+fi
 if [ "$auto_yes" -eq 1 ]; then
   echo "proceeding (--yes)"
 else
@@ -168,6 +260,7 @@ for wo in "${missing[@]}"; do
     continue
   fi
   [ "$no_verify" -eq 0 ] || die "no passing jobs evidence at $jobs_dir/$wo/evidence.json and --no-verify was given"
+  quiet_wait_or_die
   rm -rf "${jobs_dir:?}/$wo"
   vt=14400
   at=10800
