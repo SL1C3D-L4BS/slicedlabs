@@ -117,16 +117,19 @@ placeholder or bump a pin, keep the `# vX.Y.Z` comment:
 
 ## Resolving the Vulkan SDK pin
 
-`windows.yml` installs the LunarG Windows Vulkan SDK from `sdk.lunarg.com` (WO-131). `VULKAN_SDK_VERSION` and
-`VULKAN_SDK_SHA256` in its top-level `env` are placeholders (an unconfirmed version, an all-zero sha256) because the
-LunarG host could not be reached when they were written. Until both are resolved the `Vulkan SDK pin check` step fails
-with an error naming this section, and nothing is downloaded or run. To resolve:
+`windows.yml` installs the LunarG Windows Vulkan SDK (WO-131). The pin is three top-level `env` values:
+`VULKAN_SDK_VERSION` 1.4.363.0, `VULKAN_SDK_URL` (exactly
+`https://sdk.lunarg.com/sdk/download/1.4.363.0/windows/vulkansdk-windows-X64-1.4.363.0.exe`) and `VULKAN_SDK_SHA256`
+94a82d37...2d141. The founder fetched them on 2026-10-24 (latest windows version from
+`https://vulkan.lunarg.com/sdk/latest/windows.json`, installer 289.0 MiB). The install step runs the installer only when
+the downloaded file's sha256 equals the pin; a placeholder (all zeros) sha256 makes the `Vulkan SDK pin check` step fail
+and nothing is downloaded. To bump the SDK:
 
-- pick a SDK version whose headers are at least `SL_VK_MIN_HEADER` (350); the Linux headers measured 363;
-- fetch `https://vulkan.lunarg.com/sdk/sha/<version>/windows/vulkansdk-windows-X64-<version>.exe.json` and copy its
-  sha256 (or download the installer and run `sha256sum`), and confirm the download URL
-  `https://sdk.lunarg.com/sdk/download/<version>/windows/vulkansdk-windows-X64-<version>.exe` returns that file;
-- write both into `windows.yml`, drop the `UNVERIFIED` words, and run `just ci-yaml-check --strict` (zero warnings).
+- pick a version whose headers are at least `SL_VK_MIN_HEADER` (350);
+- fetch `https://vulkan.lunarg.com/sdk/sha/<version>/windows/vulkansdk-windows-X64-<version>.exe.json` for its sha256 (or
+  download the installer and run `sha256sum`), and confirm the download URL returns that file;
+- write version, URL and sha256 into `windows.yml`, note who fetched them and when, and run `just ci-yaml-check --strict`
+  (zero warnings).
 
 The installer command line (`--root`, `--accept-licenses`, `--default-answer`, `--confirm-command install
 com.lunarg.vulkan.core`) is the Qt installer framework form and has not run on a runner yet; the first hosted run

@@ -8,8 +8,8 @@
 #
 # Vulkan (WO-131, ADR-0006): the runner has no Vulkan SDK, so SlVulkan's find_package(Vulkan REQUIRED) failed in run
 # 40063791699. The `Vulkan SDK` steps install ONE pinned LunarG Windows SDK from sdk.lunarg.com, check its sha256
-# against VULKAN_SDK_SHA256 before running it, and export VULKAN_SDK and PATH. No third-party action. The pin is the two
-# env values below; it fails closed until both are resolved (docs/ops/ci.md, "Resolving the Vulkan SDK pin").
+# against VULKAN_SDK_SHA256 before running it, and export VULKAN_SDK and PATH. No third-party action. The pin is the env
+# values below (docs/ops/ci.md, "Resolving the Vulkan SDK pin"); a placeholder sha256 still fails closed.
 #
 # Action shas are tag commits resolved via api.github.com on 2026-10-17 (docs/ops/ci.md, "Resolving the pins").
 name: windows
@@ -26,13 +26,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # UNVERIFIED pin (WO-131): the LunarG host was not reachable when this was written, so neither value is confirmed.
-  # VULKAN_SDK_VERSION must be a LunarG release whose headers are VK_HEADER_VERSION >= 350 (SL_VK_MIN_HEADER);
-  # 1.4.363.0 matches the Linux headers measured in docs/episodes/041-048.md. VULKAN_SDK_SHA256 is the sha256 that
-  # https://vulkan.lunarg.com/sdk/sha/<version>/windows/vulkansdk-windows-X64-<version>.exe.json publishes for that
-  # installer. While it is all zeros the pin step stops with a message and nothing is downloaded or run.
+  # Vulkan SDK pin (WO-131), founder-fetched 2026-10-24: latest windows version per
+  # https://vulkan.lunarg.com/sdk/latest/windows.json is 1.4.363.0 (headers >= 350 = SL_VK_MIN_HEADER); the installer is
+  # 289.0 MiB. The install step downloads exactly VULKAN_SDK_URL and runs it only if its sha256 equals VULKAN_SDK_SHA256.
   VULKAN_SDK_VERSION: "1.4.363.0"
-  VULKAN_SDK_SHA256: "0000000000000000000000000000000000000000000000000000000000000000"  # UNVERIFIED placeholder, fails closed
+  VULKAN_SDK_URL: "https://sdk.lunarg.com/sdk/download/1.4.363.0/windows/vulkansdk-windows-X64-1.4.363.0.exe"
+  VULKAN_SDK_SHA256: "94a82d378f7a5e3e54c9db7d2fb7016af136e14ac0a18dbf0f2f67a36352d141"  # founder-fetched 2026-10-24
 
 jobs:
   windows:
@@ -70,15 +69,15 @@ jobs:
           key: vulkan-sdk-windows-x64-${{ env.VULKAN_SDK_VERSION }}-${{ env.VULKAN_SDK_SHA256 }}
 
       - name: Vulkan SDK install (pinned, sha256 verified)
+        id: vk-install
         if: steps.vk-cache.outputs.cache-hit != 'true'
         env:
           VK_ROOT: ${{ steps.vk-sdk.outputs.root }}
         run: |
           $ErrorActionPreference = 'Stop'
           $name = "vulkansdk-windows-X64-$($env:VULKAN_SDK_VERSION).exe"
-          $url = "https://sdk.lunarg.com/sdk/download/$($env:VULKAN_SDK_VERSION)/windows/$name"
           $installer = Join-Path $env:RUNNER_TEMP $name
-          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3 -RetryIntervalSec 5
+          Invoke-WebRequest -Uri $env:VULKAN_SDK_URL -OutFile $installer -MaximumRetryCount 3 -RetryIntervalSec 5
           $have = (Get-FileHash -Algorithm SHA256 -Path $installer).Hash.ToLowerInvariant()
           if ($have -ne $env:VULKAN_SDK_SHA256) {
             Remove-Item -Force $installer
@@ -91,6 +90,7 @@ jobs:
           if ($install.ExitCode -ne 0) { throw "Vulkan SDK installer exited with $($install.ExitCode)" }
 
       - name: Vulkan SDK environment
+        id: vk-env
         env:
           VK_ROOT: ${{ steps.vk-sdk.outputs.root }}
         run: |
@@ -124,9 +124,16 @@ jobs:
           MSVC_OUTCOME: ${{ steps.cfg-msvc.outcome }}
           CLANGCL_OUTCOME: ${{ steps.cfg-clangcl.outcome }}
           PIN_OUTCOME: ${{ steps.vk-sdk.outcome }}
+          CACHE_OUTCOME: ${{ steps.vk-cache.outcome }}
+          CACHE_HIT: ${{ steps.vk-cache.outputs.cache-hit }}
+          INSTALL_OUTCOME: ${{ steps.vk-install.outcome }}
+          ENV_OUTCOME: ${{ steps.vk-env.outcome }}
         run: |
           $out = @('### Windows configure (ADR-0006: configure only, no build, no test)', '', '| Item | Result |', '| :---- | :---- |')
-          $out += "| Vulkan SDK pin $($env:VULKAN_SDK_VERSION) | pin check $($env:PIN_OUTCOME) |"
+          $out += "| Vulkan SDK $($env:VULKAN_SDK_VERSION): pin check | $($env:PIN_OUTCOME) |"
+          $out += "| Vulkan SDK cache (hit: $($env:CACHE_HIT)) | $($env:CACHE_OUTCOME) |"
+          $out += "| Vulkan SDK download, sha256 check and install | $($env:INSTALL_OUTCOME) (skipped on a cache hit) |"
+          $out += "| Vulkan SDK environment (VULKAN_SDK, PATH) | $($env:ENV_OUTCOME) |"
           $out += "| win-msvc-debug configure | $($env:MSVC_OUTCOME) |"
           $out += "| win-clangcl-debug configure | $($env:CLANGCL_OUTCOME) |"
           foreach ($preset in 'win-msvc-debug', 'win-clangcl-debug') {

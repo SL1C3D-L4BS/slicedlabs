@@ -25,7 +25,7 @@ on every platform (master plan, Release gates).
 
 ### Amendment 1 (Proposed by WO-131; in force when the founder accepts it)
 
-- Windows-only change: the `windows` job installs one pinned LunarG Vulkan SDK (version and sha256 in `windows.yml`, sha256 checked before the installer runs, cached by version and sha256, no third-party action) and exports `VULKAN_SDK`. windows-latest has no SDK: run 40063791699 failed `find_package(Vulkan REQUIRED)` (`cmake/SlVulkan.cmake:78`) on both presets. The pin is unverified until the founder resolves it (`docs/ops/ci.md`). The job still configures only; the Linux gate is unchanged.
+- Windows-only change: the `windows` job installs one pinned LunarG Vulkan SDK (version and sha256 in `windows.yml`, sha256 checked before the installer runs, cached by version and sha256, no third-party action) and exports `VULKAN_SDK`. windows-latest has no SDK: run 40063791699 failed `find_package(Vulkan REQUIRED)` (`cmake/SlVulkan.cmake:78`) on both presets. The pin (1.4.363.0, URL and sha256) was founder-fetched on 2026-10-24 (`docs/ops/ci.md`); the installer command line has not yet run on a runner. The job still configures only; the Linux gate is unchanged.
 - Known Windows gaps. Seen in the configure logs of run 40063791699: windows-latest, Visual Studio 18.11.1, MSVC toolset 14.51.36231 (cl 19.51.36260.0), clang-cl 20.1.8, both on the MSVC STL. Upstream status was not checked (no network access when written); trackers: [MSVC STL changelog](https://github.com/microsoft/STL/wiki/Changelog), [cppreference compiler support](https://en.cppreference.com/w/cpp/compiler_support).
 
 | Feature | Toolset seen | Result | Effect |
