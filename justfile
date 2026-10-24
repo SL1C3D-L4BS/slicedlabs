@@ -814,3 +814,7 @@ runtime-gate *args:
 # the release checks of episodes 081-100 (runtime-gate, runtime-san asan ubsan tsan, runtime-determinism, check-full), logs 13-16 in build/acceptance/ and the gate evidence in build/acceptance/runtime/ (WO-101); about two hours
 acceptance-081-100:
     @bash scripts/acceptance-081-100
+
+# drives scripts/founder/push.sh against throwaway bare repositories under build/; never origin, never the network (WO-115)
+founder-push-test:
+    @bash tests/gates/founder_push_test.sh
